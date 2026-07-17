@@ -20,32 +20,32 @@ const submitSchema = z.object({
     .optional()
     .or(z.literal("")),
   papel: z.enum([
-    "proprietario_socio",
-    "participa_decisao",
-    "precisa_conversar",
-    "nao_decisor",
+    "owner_partner",
+    "decision_participant",
+    "needs_other_decision_maker",
+    "no_decision_authority",
   ]),
   faturamento: z.enum([
-    "ate_30k",
-    "30k_50k",
-    "50k_100k",
-    "100k_300k",
-    "acima_300k",
-    "prefere_nao_dizer",
+    "up_to_30k",
+    "from_30k_to_50k",
+    "from_50k_to_100k",
+    "from_100k_to_300k",
+    "above_300k",
+    "discuss_later",
   ]),
   problema_principal: z.enum([
-    "demora",
-    "orcamento_sem_retorno",
-    "sem_retomar_conversa",
-    "fora_do_horario",
-    "vendedores_sobrecarregados",
-    "falta_organizacao",
+    "slow_response",
+    "price_shoppers_disappear",
+    "no_recontact_after_no_purchase",
+    "after_hours_messages",
+    "overloaded_sellers",
+    "disorganized_service",
   ]),
   investimento: z.enum([
-    "consegue_investir",
-    "avaliar_depois",
-    "precisa_conversar",
-    "acima_orcamento",
+    "ready_if_value_is_clear",
+    "open_to_evaluate",
+    "needs_other_decision_maker",
+    "above_current_budget",
   ]),
   consentimento: z.literal(true, {
     errorMap: () => ({ message: "É necessário autorizar o contato." }),
@@ -72,20 +72,20 @@ function calcularPontuacao(input: SubmitInput): number {
   let s = 0;
 
   const papelScore: Record<SubmitInput["papel"], number> = {
-    proprietario_socio: 3,
-    participa_decisao: 2,
-    precisa_conversar: 1,
-    nao_decisor: 0,
+    owner_partner: 3,
+    decision_participant: 2,
+    needs_other_decision_maker: 1,
+    no_decision_authority: 0,
   };
   s += papelScore[input.papel];
 
   const faturamentoScore: Record<SubmitInput["faturamento"], number> = {
-    ate_30k: 0,
-    "30k_50k": 1,
-    "50k_100k": 3,
-    "100k_300k": 4,
-    acima_300k: 5,
-    prefere_nao_dizer: 1,
+    up_to_30k: 0,
+    from_30k_to_50k: 1,
+    from_50k_to_100k: 3,
+    from_100k_to_300k: 4,
+    above_300k: 5,
+    discuss_later: 1,
   };
   s += faturamentoScore[input.faturamento];
 
@@ -93,10 +93,10 @@ function calcularPontuacao(input: SubmitInput): number {
   s += 2;
 
   const investimentoScore: Record<SubmitInput["investimento"], number> = {
-    consegue_investir: 4,
-    avaliar_depois: 3,
-    precisa_conversar: 1,
-    acima_orcamento: 0,
+    ready_if_value_is_clear: 4,
+    open_to_evaluate: 3,
+    needs_other_decision_maker: 1,
+    above_current_budget: 0,
   };
   s += investimentoScore[input.investimento];
 
@@ -144,7 +144,6 @@ export const submitLeadForm = createServerFn({ method: "POST" })
         papel: data.papel,
         faturamento: data.faturamento,
         problema_principal: data.problema_principal,
-        // Nova coluna adicionada por migração; campo texto livre com slug estável.
         investimento: data.investimento,
         consentimento: data.consentimento,
         pontuacao,
