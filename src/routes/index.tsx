@@ -32,12 +32,6 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-function scrollToForm() {
-  if (typeof window === "undefined") return;
-  document
-    .getElementById("formulario")
-    ?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
 
 function LandingPage() {
   useEffect(() => {
