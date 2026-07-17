@@ -34,14 +34,23 @@ export const leadSchema = z.object({
     "more_than_60",
     "unknown",
   ]),
-  problema_principal: z.enum([
-    "delayed_response_busy_store",
-    "price_request_then_disappears",
-    "messages_outside_business_hours",
-    "no_customer_recontact",
-    "repetitive_questions",
-    "wants_to_scale_without_overload",
-  ]),
+  problema_principal: z
+    .preprocess(
+      (v) => (Array.isArray(v) ? v : typeof v === "string" && v.length > 0 ? v.split(",") : v),
+      z
+        .array(
+          z.enum([
+            "delayed_response_busy_store",
+            "price_request_then_disappears",
+            "messages_outside_business_hours",
+            "no_customer_recontact",
+            "repetitive_questions",
+            "wants_to_scale_without_overload",
+          ])
+        )
+        .min(1, "Escolha ao menos uma opção.")
+        .max(6)
+    ),
   faturamento: z.enum([
     "up_to_30k",
     "from_30k_to_50k",
