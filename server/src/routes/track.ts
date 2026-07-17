@@ -8,6 +8,7 @@ import { lookupGeo } from "../lib/geo";
 export async function trackHandler(req: Request, res: Response) {
   const parsed = trackEventSchema.safeParse(req.body);
   if (!parsed.success) {
+    logger.warn({ error: parsed.error, body: req.body }, "track_parse_failed");
     return res.status(204).end();
   }
   const d = parsed.data;

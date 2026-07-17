@@ -27,8 +27,8 @@ app.use(
   })
 );
 
-// JSON body parsing só para /api/*
-app.use("/api", express.json({ limit: "64kb" }));
+// JSON body parsing só para /api/* (aceita text/plain para sendBeacon)
+app.use("/api", express.json({ limit: "64kb", type: ["application/json", "text/plain"] }));
 
 // Health check
 app.get("/healthz", healthHandler);
