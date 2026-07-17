@@ -80,9 +80,9 @@ type Step2Question = {
 type Errors = Partial<Record<string, string>>;
 
 const fieldBase =
-  "block w-full rounded-lg bg-white px-3.5 py-3 text-[16px] leading-6 text-[#101828] placeholder:text-[#667085] border border-[#D0D5DD] outline-none transition-shadow focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20 disabled:opacity-60 min-h-[48px]";
+  "block w-full rounded-[10px] bg-white px-4 py-3 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[52px]";
 const fieldError =
-  "border-[#B42318] bg-[#FEF3F2] focus:border-[#B42318] focus:ring-[#B42318]/20";
+  "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
 function Label({
   htmlFor,
@@ -94,7 +94,7 @@ function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-1.5 block text-[15px] font-semibold text-[#101828]"
+      className="mb-2 block text-[14px] font-[600] text-[#191A18]"
     >
       {children}
     </label>
@@ -104,16 +104,16 @@ function Label({
 function ErrorText({ id, msg }: { id: string; msg?: string }) {
   if (!msg) return null;
   return (
-    <p id={id} className="mt-1.5 text-sm text-[#B42318]">
+    <p id={id} role="alert" className="mt-2 text-[13px] text-[#B42318]">
       {msg}
     </p>
   );
 }
 
 const cardOptionBase =
-  "w-full text-left rounded-lg border border-[#D0D5DD] bg-white px-4 py-3 text-[16px] leading-6 text-[#101828] min-h-[52px] transition-colors hover:border-[#22C55E] focus:outline-none focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20";
+  "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-3.5 text-[16px] leading-[1.4] text-[#2B2D29] min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] flex items-center gap-3";
 const cardOptionActive =
-  "border-[#22C55E] bg-[#F0FDF4] ring-2 ring-[#22C55E]";
+  "border-[#207A50] bg-[#EDF6F0] hover:border-[#207A50] hover:bg-[#EDF6F0]";
 
 const STEP2_QUESTIONS: Step2Question[] = [
   {
