@@ -323,7 +323,10 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
 
   function validateStep1(): boolean {
     const e: Errors = {};
-    if (step1.nome.trim().length < 2) e.nome = "Digite seu nome.";
+    {
+      const parts = step1.nome.trim().split(/\s+/).filter((p) => p.length >= 2);
+      if (parts.length < 2) e.nome = "Digite seu nome completo (nome e sobrenome).";
+    }
     if (!step1.whatsapp.trim()) e.whatsapp = "Digite seu número de WhatsApp.";
     else if (!isValidBRPhone(step1.whatsapp))
       e.whatsapp = "Confira o número e inclua o DDD.";
@@ -559,13 +562,13 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           {step === 1 ? (
             <div className="space-y-5">
               <div>
-                <Label htmlFor="f-nome">Seu nome</Label>
+                <Label htmlFor="f-nome">Seu nome completo</Label>
                 <input
                   id="f-nome"
                   name="nome"
                   type="text"
                   autoComplete="name"
-                  placeholder="Como podemos chamar você?"
+                  placeholder="Nome e sobrenome"
                   value={step1.nome}
                   onFocus={markStarted}
                   onChange={(e) => {
