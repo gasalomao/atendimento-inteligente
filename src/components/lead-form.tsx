@@ -260,7 +260,7 @@ function OptionCard({
 }
 
 export function LeadForm({ id = "formulario" }: { id?: string }) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<0 | 1 | 2>(0);
   const [q, setQ] = useState(0);
   const [started, setStarted] = useState(false);
   const startedAtRef = useRef<number>(0);
