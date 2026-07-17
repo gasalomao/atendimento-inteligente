@@ -2,8 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 
-// Schema alinhado com os cards da etapa 2. Valores estáveis para não quebrar
-// integrações/pontuação futuras.
+// Schema atualizado: 5 perguntas na etapa 2 (papel, conversas_dia, situação,
+// faturamento, investimento). Valores estáveis em inglês para CRM/n8n.
 const submitSchema = z.object({
   nome: z.string().trim().min(2, "Digite seu nome.").max(120),
   whatsapp: z
@@ -21,9 +21,24 @@ const submitSchema = z.object({
     .or(z.literal("")),
   papel: z.enum([
     "owner_partner",
-    "decision_participant",
-    "needs_other_decision_maker",
-    "no_decision_authority",
+    "manager_decision_maker",
+    "team_member_no_final_decision",
+    "other",
+  ]),
+  conversas_dia: z.enum([
+    "up_to_10",
+    "from_11_to_30",
+    "from_31_to_60",
+    "more_than_60",
+    "unknown",
+  ]),
+  problema_principal: z.enum([
+    "delayed_response_busy_store",
+    "price_request_then_disappears",
+    "messages_outside_business_hours",
+    "no_customer_recontact",
+    "repetitive_questions",
+    "wants_to_scale_without_overload",
   ]),
   faturamento: z.enum([
     "up_to_30k",
@@ -31,19 +46,11 @@ const submitSchema = z.object({
     "from_50k_to_100k",
     "from_100k_to_300k",
     "above_300k",
-    "discuss_later",
-  ]),
-  problema_principal: z.enum([
-    "slow_response",
-    "price_shoppers_disappear",
-    "no_recontact_after_no_purchase",
-    "after_hours_messages",
-    "overloaded_sellers",
-    "disorganized_service",
+    "prefer_not_to_say",
   ]),
   investimento: z.enum([
     "ready_if_value_is_clear",
-    "open_to_evaluate",
+    "wants_to_see_first",
     "needs_other_decision_maker",
     "above_current_budget",
   ]),
@@ -61,23 +68,41 @@ const submitSchema = z.object({
   referrer: z.string().max(500).optional().nullable(),
   landing_path: z.string().max(300).optional().nullable(),
   // Anti-spam
-  hp_field: z.string().max(200).optional().nullable(), // honeypot: precisa ficar vazio
-  started_at: z.number().optional(), // timestamp ms de quando o form_start foi disparado
+  hp_field: z.string().max(200).optional().nullable(),
+  started_at: z.number().optional(),
 });
 
 type SubmitInput = z.infer<typeof submitSchema>;
 
-// Regras conforme especificação do produto.
 function calcularPontuacao(input: SubmitInput): number {
   let s = 0;
 
   const papelScore: Record<SubmitInput["papel"], number> = {
     owner_partner: 3,
-    decision_participant: 2,
-    needs_other_decision_maker: 1,
-    no_decision_authority: 0,
+    manager_decision_maker: 2,
+    team_member_no_final_decision: 0,
+    other: 0,
   };
   s += papelScore[input.papel];
+
+  const conversasScore: Record<SubmitInput["conversas_dia"], number> = {
+    up_to_10: 0,
+    from_11_to_30: 1,
+    from_31_to_60: 2,
+    more_than_60: 3,
+    unknown: 0,
+  };
+  s += conversasScore[input.conversas_dia];
+
+  const problemaScore: Record<SubmitInput["problema_principal"], number> = {
+    delayed_response_busy_store: 2,
+    price_request_then_disappears: 2,
+    messages_outside_business_hours: 2,
+    no_customer_recontact: 3,
+    repetitive_questions: 2,
+    wants_to_scale_without_overload: 2,
+  };
+  s += problemaScore[input.problema_principal];
 
   const faturamentoScore: Record<SubmitInput["faturamento"], number> = {
     up_to_30k: 0,
@@ -85,16 +110,13 @@ function calcularPontuacao(input: SubmitInput): number {
     from_50k_to_100k: 3,
     from_100k_to_300k: 4,
     above_300k: 5,
-    discuss_later: 1,
+    prefer_not_to_say: 1,
   };
   s += faturamentoScore[input.faturamento];
 
-  // Todas as dificuldades pontuam igual: +2.
-  s += 2;
-
   const investimentoScore: Record<SubmitInput["investimento"], number> = {
     ready_if_value_is_clear: 4,
-    open_to_evaluate: 3,
+    wants_to_see_first: 3,
     needs_other_decision_maker: 1,
     above_current_budget: 0,
   };
@@ -104,19 +126,17 @@ function calcularPontuacao(input: SubmitInput): number {
 }
 
 function classificar(score: number): string {
-  if (score >= 10) return "contato_prioritario";
-  if (score >= 6) return "contato_potencial";
+  if (score >= 12) return "contato_prioritario";
+  if (score >= 7) return "contato_potencial";
   return "contato_acompanhamento";
 }
 
 export const submitLeadForm = createServerFn({ method: "POST" })
   .inputValidator((data) => submitSchema.parse(data))
   .handler(async ({ data }) => {
-    // Honeypot: se o campo escondido foi preenchido, é bot.
     if (data.hp_field && data.hp_field.trim() !== "") {
       return { ok: true as const, id: "hp" };
     }
-    // Tempo mínimo entre abrir o form e enviar (bots respondem instantâneo).
     if (data.started_at && Date.now() - data.started_at < 1500) {
       return { ok: true as const, id: "fast" };
     }
@@ -142,6 +162,7 @@ export const submitLeadForm = createServerFn({ method: "POST" })
         loja: data.loja,
         email: data.email && data.email !== "" ? data.email : null,
         papel: data.papel,
+        conversas_dia: data.conversas_dia,
         faturamento: data.faturamento,
         problema_principal: data.problema_principal,
         investimento: data.investimento,
@@ -168,9 +189,6 @@ export const submitLeadForm = createServerFn({ method: "POST" })
       throw new Error("Não foi possível salvar. Tente novamente.");
     }
 
-    // Webhook opcional para n8n / CRM. Configurar variável WEBHOOK_URL como
-    // secret para ativar. Falha silenciosa: não bloqueia o retorno ao usuário
-    // — o contato já está salvo no banco.
     const webhookUrl = process.env.WEBHOOK_URL;
     if (webhookUrl) {
       try {
@@ -182,10 +200,10 @@ export const submitLeadForm = createServerFn({ method: "POST" })
             pontuacao,
             lead_score: pontuacao,
             lead_classification: classificacao,
-            // Aliases em inglês (slugs estáveis para o CRM/n8n).
             decision_authority: data.papel,
+            daily_conversations_range: data.conversas_dia,
+            current_situation: data.problema_principal,
             monthly_revenue_range: data.faturamento,
-            main_service_problem: data.problema_principal,
             investment_readiness: data.investimento,
             ...data,
             ip,
