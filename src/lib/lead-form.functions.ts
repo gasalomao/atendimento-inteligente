@@ -5,7 +5,7 @@ import { z } from "zod";
 // Schema atualizado: 5 perguntas na etapa 2 (papel, conversas_dia, situação,
 // faturamento, investimento). Valores estáveis em inglês para CRM/n8n.
 const submitSchema = z.object({
-  nome: z.string().trim().min(2, "Digite seu nome.").max(120),
+  nome: z.string().trim().min(2).max(120).refine((v) => v.split(/\s+/).filter((p) => p.length >= 2).length >= 2, "Digite seu nome completo (nome e sobrenome)."),
   whatsapp: z
     .string()
     .trim()
