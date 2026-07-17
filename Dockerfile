@@ -17,20 +17,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build do frontend (TanStack/Vite). Nitro emite output/public para SPA.
+# Build do frontend (TanStack/Vite) com preset node-server para rodar no Docker.
 RUN NITRO_PRESET=node-server npm run build
 
-# Backend Express roda direto via tsx em produção (evita problemas de
-# resolução ESM de imports sem extensão no output do tsc).
-
-# Descobre onde o build do frontend caiu e normaliza para /app/dist/client e /app/dist/server.
-RUN set -eux; \
-    if   [ -d "output/public" ];  then mkdir -p dist && cp -r output/public dist/client && cp -r output/server dist/server; \
-    elif [ -d ".output/public" ]; then mkdir -p dist && cp -r .output/public dist/client && cp -r .output/server dist/server; \
-    elif [ -d "dist/client" ];    then :; \
-    elif [ -d "dist" ];           then mv dist dist-tmp && mkdir dist && mv dist-tmp dist/client; \
-    else echo "Frontend build output not found" && ls -la && exit 1; fi; \
-    ls -la dist/client | head -20
+# Verifica se o build gerou a pasta .output
+RUN ls -la .output/server/ && ls -la .output/public/ | head -20
 
 # Remove devDependencies para o runtime.
 RUN npm prune --omit=dev
@@ -41,16 +32,18 @@ RUN npm prune --omit=dev
 FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3000
 ENV TZ=America/Sao_Paulo
 
 RUN apk add --no-cache curl tini && \
     addgroup -S app && adduser -S app -G app
 
+# Copia .output intacto (Nitro precisa dos paths relativos para servir CSS/JS)
+COPY --from=build --chown=app:app /app/.output ./.output
+
+# Express API server + notification worker
 COPY --from=build --chown=app:app /app/node_modules ./node_modules
 COPY --from=build --chown=app:app /app/server ./server
 COPY --from=build --chown=app:app /app/shared ./shared
-COPY --from=build --chown=app:app /app/dist ./dist
 COPY --from=build --chown=app:app /app/package.json ./package.json
 COPY --from=build --chown=app:app /app/tsconfig.json ./tsconfig.json
 
@@ -60,4 +53,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/healthz || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "PORT=3001 node dist/server/index.mjs & PORT=3000 ./node_modules/.bin/tsx server/src/index.ts"]
+# Nitro SSR na porta 3000 (principal) | Express API na porta 3001 (interno)
+CMD ["sh", "-c", "NITRO_PORT=3000 PORT=3000 HOST=0.0.0.0 node .output/server/index.mjs & PORT=3001 ./node_modules/.bin/tsx server/src/index.ts & wait"]

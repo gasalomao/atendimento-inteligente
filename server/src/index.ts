@@ -14,7 +14,7 @@ app.disable("x-powered-by");
 
 app.use(
   helmet({
-    contentSecurityPolicy: false, // SPA carrega fontes/scripts próprios
+    contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
   })
 );
@@ -36,53 +36,6 @@ app.get("/api/metrics", (req, res, next) => {
   void Promise.resolve(metricsHandler(req, res)).catch(next);
 });
 
-import http from "node:http";
-import path from "node:path";
-import fs from "node:fs";
-import { fileURLToPath } from "node:url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const clientDir = path.resolve(__dirname, "../../dist/client");
-
-if (fs.existsSync(clientDir)) {
-  app.use(
-    express.static(clientDir, {
-      maxAge: "1h"
-    })
-  );
-} else {
-  logger.warn({ clientDir }, "spa_dir_missing");
-}
-
-const nitroPort = 3001;
-app.use((req, res) => {
-  const proxyReq = http.request(
-    {
-      hostname: "127.0.0.1",
-      port: nitroPort,
-      path: req.originalUrl,
-      method: req.method,
-      headers: req.headers,
-    },
-    (proxyRes) => {
-      if (proxyRes.statusCode) {
-        res.writeHead(proxyRes.statusCode, proxyRes.headers);
-      }
-      proxyRes.pipe(res, { end: true });
-    }
-  );
-  
-  req.pipe(proxyReq, { end: true });
-  
-  proxyReq.on("error", (err) => {
-    logger.error({ err }, "proxy_error");
-    if (!res.headersSent) {
-      res.status(502).json({ success: false, code: "BAD_GATEWAY", message: "Frontend server indisponível." });
-    }
-  });
-});
-
 // Global error handler (nunca vaza stack)
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error({ err }, "unhandled_error");
@@ -91,6 +44,6 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 });
 
 app.listen(env.PORT, "0.0.0.0", () => {
-  logger.info({ port: env.PORT, node_env: env.NODE_ENV }, "server_listening");
+  logger.info({ port: env.PORT, node_env: env.NODE_ENV }, "express_api_listening");
   startWorker();
 });
