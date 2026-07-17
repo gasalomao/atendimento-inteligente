@@ -99,28 +99,25 @@ function Header() {
 function Hero() {
   return (
     <section className="border-b border-[#E3E0D9] bg-[#F7F5F1]">
-      <div className="mx-auto w-full max-w-[1180px] px-[18px] pb-14 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:px-8 lg:pb-20 lg:pt-14">
+      <div className="mx-auto w-full max-w-[1180px] px-[18px] pb-10 pt-4 sm:px-6 sm:pb-16 sm:pt-8 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:px-8 lg:pb-20 lg:pt-14">
         <div className="lg:self-center">
-          <p className="text-[12px] font-[600] uppercase tracking-[0.12em] text-[#207A50] sm:text-[13px]">
-            Para lojas de iPhone
+          <p className="text-[11px] font-[600] uppercase tracking-[0.14em] text-[#207A50] sm:text-[13px]">
+            Atendimento 24h para lojas de iPhone
           </p>
-          <h1 className="mt-3 max-w-[620px] text-[clamp(28px,7.8vw,34px)] font-[650] leading-[1.12] tracking-[-0.028em] text-[#191A18] sm:mt-4 sm:text-[clamp(34px,4.2vw,52px)] sm:leading-[1.08]">
-            Quando a loja enche, o WhatsApp para. O cliente não espera.
+          <h1 className="mt-2 max-w-[620px] text-[clamp(26px,7.4vw,32px)] font-[650] leading-[1.1] tracking-[-0.028em] text-[#191A18] sm:mt-4 sm:text-[clamp(34px,4.2vw,52px)] sm:leading-[1.08]">
+            Seu WhatsApp respondendo 24 horas. Sem perder cliente para outra loja.
           </h1>
-          <p className="mt-4 max-w-[560px] text-[16px] leading-[1.55] text-[#5F625E] sm:mt-5 sm:text-[17px]">
-            Enquanto seus vendedores atendem no balcão, novas mensagens continuam chegando. Alguns clientes pedem preço, ficam sem resposta e acabam procurando outra loja.
+          <p className="mt-3 max-w-[560px] text-[15px] leading-[1.5] text-[#5F625E] sm:mt-5 sm:text-[17px] sm:leading-[1.55]">
+            A IA responde na hora, de dia, de noite e nos fins de semana. O vendedor entra na conversa já sabendo o que o cliente quer.
           </p>
-          <p className="mt-3 max-w-[560px] text-[16px] leading-[1.55] text-[#191A18] sm:text-[17px]">
-            O atendimento com IA responde as primeiras perguntas, entende o aparelho procurado e deixa a conversa organizada para o vendedor continuar.
-          </p>
-          <ul className="mt-5 space-y-2.5 text-[15px] leading-[1.45] text-[#191A18] sm:mt-6 sm:text-[16px]">
-            <HeroPoint>Responde mesmo quando a loja está cheia</HeroPoint>
+          <ul className="mt-4 hidden space-y-2.5 text-[15px] leading-[1.45] text-[#191A18] sm:mt-6 sm:block sm:text-[16px]">
+            <HeroPoint>Responde na hora, mesmo com a loja cheia</HeroPoint>
+            <HeroPoint>Atende de madrugada e nos fins de semana</HeroPoint>
             <HeroPoint>Retoma conversas que ficaram paradas</HeroPoint>
-            <HeroPoint>Atende também fora do horário</HeroPoint>
           </ul>
         </div>
 
-        <div className="mt-7 lg:mt-0 lg:self-center">
+        <div className="mt-5 lg:mt-0 lg:self-center">
           <LeadForm />
         </div>
       </div>
