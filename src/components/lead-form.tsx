@@ -546,7 +546,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
             </h2>
             <p className="mt-3 text-[15px] leading-[1.6] text-[#5F625E]">
               {step === 0
-                ? "Quando sua equipe está ocupada, o atendimento responde as primeiras perguntas, entende qual aparelho a pessoa procura e deixa a conversa organizada para o vendedor continuar."
+                ? "Quando sua equipe está ocupada, o atendimento responde as primeiras perguntas, entende o que o cliente procura e deixa a conversa organizada para o vendedor continuar."
                 : "Responda algumas perguntas rápidas. Leva cerca de um minuto."}
             </p>
           </div>

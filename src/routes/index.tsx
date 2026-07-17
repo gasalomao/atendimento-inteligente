@@ -7,22 +7,21 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "IA que responde e organiza o WhatsApp da sua loja de iPhone",
+        title: "IA que responde e organiza o WhatsApp do seu negócio",
       },
       {
         name: "description",
         content:
-          "A inteligência artificial responde as primeiras perguntas, entende qual aparelho a pessoa procura e deixa a conversa organizada para o vendedor continuar.",
+          "A inteligência artificial responde as primeiras perguntas, entende o que o cliente procura e deixa a conversa organizada para o vendedor continuar.",
       },
       {
         property: "og:title",
-        content:
-          "IA que responde e organiza o WhatsApp da sua loja de iPhone",
+        content: "IA que responde e organiza o WhatsApp do seu negócio",
       },
       {
         property: "og:description",
         content:
-          "Atendimento automático para lojas de iPhone: responde na hora, retoma conversas paradas e organiza informações para o vendedor.",
+          "Atendimento automático no WhatsApp: responde na hora, retoma conversas paradas e organiza as informações para o vendedor.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -98,11 +97,21 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="border-b border-[#E3E0D9] bg-[#F7F5F1]">
-      <div className="mx-auto w-full max-w-[720px] px-5 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:pb-24 lg:pt-16">
-        <p className="mb-6 text-center text-[13px] font-semibold uppercase tracking-[0.14em] text-[#207A50]">
-          Atendimento para lojas de iPhone
-        </p>
+    <section className="relative overflow-hidden border-b border-[#E3E0D9] bg-[#F7F5F1]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-24 h-[420px] bg-[radial-gradient(60%_60%_at_50%_0%,rgba(32,122,80,0.14),transparent_70%)]"
+      />
+      <div className="relative mx-auto w-full max-w-[720px] px-5 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:pb-24 lg:pt-16">
+        <div className="mb-6 flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#207A50]/20 bg-white/70 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#207A50] shadow-[0_2px_10px_rgba(32,122,80,0.08)] backdrop-blur">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#207A50] opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#207A50]" />
+            </span>
+            Atendimento no WhatsApp com IA
+          </span>
+        </div>
         <LeadForm />
       </div>
     </section>
@@ -180,15 +189,15 @@ function DemoSection() {
 
 function ChatDemo() {
   const messages: { from: "cliente" | "loja"; text: string }[] = [
-    { from: "cliente", text: "Tem iPhone 15 Pro 256 GB?" },
-    { from: "loja", text: "Você procura novo ou seminovo?" },
+    { from: "cliente", text: "Oi, vocês têm aquele modelo em estoque?" },
+    { from: "loja", text: "Temos sim. Você prefere novo ou seminovo?" },
     {
       from: "cliente",
-      text: "Seminovo. Tenho um iPhone 13 para dar na troca.",
+      text: "Seminovo. Tenho um usado para dar na troca.",
     },
     {
       from: "loja",
-      text: "Como está o aparelho e você pretende pagar à vista ou parcelado?",
+      text: "Como está o produto e você pretende pagar à vista ou parcelado?",
     },
     { from: "cliente", text: "Está bem conservado e quero parcelar." },
   ];
@@ -234,10 +243,10 @@ function ChatDemo() {
 
 function SummaryCard() {
   const rows: [string, string][] = [
-    ["Aparelho procurado", "iPhone 15 Pro"],
-    ["Capacidade", "256 GB"],
-    ["Condição", "Seminovo"],
-    ["Possui aparelho para troca", "Sim"],
+    ["Produto de interesse", "Modelo em destaque"],
+    ["Preferência", "Seminovo"],
+    ["Forma de contato", "WhatsApp"],
+    ["Possui item para troca", "Sim"],
     ["Forma de pagamento", "Parcelado"],
   ];
   return (
@@ -346,9 +355,6 @@ function Footer() {
             ga.pancione@gmail.com
           </a>
         </div>
-      </div>
-      <div className="mx-auto w-full max-w-[1180px] px-5 pb-8 text-[12px] text-[#F5F3EE]/45 sm:px-6 lg:px-8">
-        Esta empresa não possui vínculo oficial com a Apple.
       </div>
     </footer>
   );
