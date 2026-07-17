@@ -286,6 +286,19 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   });
   const [errors, setErrors] = useState<Errors>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const nomeRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (step === 1 && nomeRef.current) {
+      const prefersReducedMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      const t = window.setTimeout(() => {
+        nomeRef.current?.focus({ preventScroll: prefersReducedMotion });
+      }, 20);
+      return () => window.clearTimeout(t);
+    }
+  }, [step]);
 
   useEffect(() => {
     if (!containerRef.current) return;
