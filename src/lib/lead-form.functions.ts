@@ -11,7 +11,7 @@ const submitSchema = z.object({
     .trim()
     .min(10, "Confira o número e inclua o DDD.")
     .max(20),
-  loja: z.string().trim().min(2, "Digite o nome ou Instagram da loja.").max(120),
+  loja: z.string().trim().max(120).optional().or(z.literal("")),
   email: z
     .string()
     .trim()
