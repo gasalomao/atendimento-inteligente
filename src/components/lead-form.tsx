@@ -227,10 +227,12 @@ const HONEYPOT_STYLE: React.CSSProperties = {
 
 function OptionCard({
   active,
+  multi = false,
   onClick,
   children,
 }: {
   active: boolean;
+  multi?: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
@@ -241,22 +243,46 @@ function OptionCard({
       aria-pressed={active}
       className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
     >
-      <span
-        aria-hidden
-        className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border transition-colors ${
-          active ? "border-[#207A50]" : "border-[#C8C4BB]"
-        }`}
-      >
+      {multi ? (
         <span
-          className={`h-[8px] w-[8px] rounded-full transition-opacity ${
-            active ? "bg-[#207A50] opacity-100" : "opacity-0"
+          aria-hidden
+          className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] border transition-colors ${
+            active ? "border-[#207A50] bg-[#207A50]" : "border-[#C8C4BB] bg-white"
           }`}
-        />
-      </span>
+        >
+          <svg
+            viewBox="0 0 16 16"
+            className={`h-[12px] w-[12px] text-white transition-opacity ${
+              active ? "opacity-100" : "opacity-0"
+            }`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 8.5l3.2 3.2L13 4.8" />
+          </svg>
+        </span>
+      ) : (
+        <span
+          aria-hidden
+          className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border transition-colors ${
+            active ? "border-[#207A50]" : "border-[#C8C4BB]"
+          }`}
+        >
+          <span
+            className={`h-[8px] w-[8px] rounded-full transition-opacity ${
+              active ? "bg-[#207A50] opacity-100" : "opacity-0"
+            }`}
+          />
+        </span>
+      )}
       <span className="flex-1">{children}</span>
     </button>
   );
 }
+
 
 export function LeadForm({ id = "formulario" }: { id?: string }) {
   const [step, setStep] = useState<0 | 1 | 2>(0);
