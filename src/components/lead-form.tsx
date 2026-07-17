@@ -18,32 +18,47 @@ type Step1 = {
   email: string;
 };
 
+type Papel =
+  | ""
+  | "proprietario_socio"
+  | "participa_decisao"
+  | "precisa_conversar"
+  | "nao_decisor";
+type Faturamento =
+  | ""
+  | "ate_30k"
+  | "30k_50k"
+  | "50k_100k"
+  | "100k_300k"
+  | "acima_300k"
+  | "prefere_nao_dizer";
+type Problema =
+  | ""
+  | "demora"
+  | "orcamento_sem_retorno"
+  | "sem_retomar_conversa"
+  | "fora_do_horario"
+  | "vendedores_sobrecarregados"
+  | "falta_organizacao";
+type Investimento =
+  | ""
+  | "consegue_investir"
+  | "avaliar_depois"
+  | "precisa_conversar"
+  | "acima_orcamento";
+
 type Step2 = {
-  papel: "" | "proprietario_socio" | "participa_decisao" | "nao_decisor";
-  faturamento:
-    | ""
-    | "ate_30k"
-    | "30k_50k"
-    | "50k_100k"
-    | "100k_300k"
-    | "acima_300k"
-    | "prefere_nao_dizer";
-  conversas_dia: "" | "ate_10" | "11_30" | "31_60" | "mais_60" | "nao_sabe";
-  problema_principal:
-    | ""
-    | "demora"
-    | "orcamento_sem_retorno"
-    | "sem_retomar_conversa"
-    | "fora_do_horario"
-    | "vendedores_sobrecarregados"
-    | "falta_organizacao";
+  papel: Papel;
+  faturamento: Faturamento;
+  problema_principal: Problema;
+  investimento: Investimento;
   consentimento: boolean;
 };
 
 type Errors = Partial<Record<string, string>>;
 
 const fieldBase =
-  "block w-full rounded-lg bg-white px-3.5 py-3 text-[15px] leading-6 text-[#101828] placeholder:text-[#667085] border border-[#D0D5DD] outline-none transition-shadow focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20 disabled:opacity-60";
+  "block w-full rounded-lg bg-white px-3.5 py-3 text-[15px] leading-6 text-[#101828] placeholder:text-[#667085] border border-[#D0D5DD] outline-none transition-shadow focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20 disabled:opacity-60 min-h-[48px]";
 const fieldError =
   "border-[#B42318] bg-[#FEF3F2] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
@@ -74,7 +89,7 @@ function ErrorText({ id, msg }: { id: string; msg?: string }) {
 }
 
 const cardOptionBase =
-  "w-full text-left rounded-lg border border-[#D0D5DD] bg-white px-4 py-3 text-[15px] text-[#101828] transition-colors hover:border-[#22C55E] focus:outline-none focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20";
+  "w-full text-left rounded-lg border border-[#D0D5DD] bg-white px-4 py-3 text-[15px] text-[#101828] min-h-[48px] transition-colors hover:border-[#22C55E] focus:outline-none focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20";
 const cardOptionActive =
   "border-[#22C55E] bg-[#F0FDF4] ring-2 ring-[#22C55E]";
 
@@ -102,6 +117,24 @@ function OptionCard({
   );
 }
 
+// Estilo inline garante que o honeypot fique realmente fora do fluxo visual,
+// independente de purge/reset de Tailwind — evita o bug do texto "Não preencha"
+// aparecendo na tela.
+const HONEYPOT_STYLE: React.CSSProperties = {
+  position: "absolute",
+  left: "-10000px",
+  top: "auto",
+  width: "1px",
+  height: "1px",
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  whiteSpace: "nowrap",
+  border: 0,
+  padding: 0,
+  margin: -1,
+};
+
 export function LeadForm({ id = "formulario" }: { id?: string }) {
   const submit = useServerFn(submitLeadForm);
   const [step, setStep] = useState<1 | 2>(1);
@@ -110,6 +143,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const hpRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const successFiredRef = useRef(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [step1, setStep1] = useState<Step1>({
@@ -121,8 +155,8 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const [step2, setStep2] = useState<Step2>({
     papel: "",
     faturamento: "",
-    conversas_dia: "",
     problema_principal: "",
+    investimento: "",
     consentimento: false,
   });
   const [errors, setErrors] = useState<Errors>({});
@@ -182,10 +216,10 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     const e: Errors = {};
     if (!step2.papel) e.papel = "Escolha uma opção para continuar.";
     if (!step2.faturamento) e.faturamento = "Escolha uma opção para continuar.";
-    if (!step2.conversas_dia)
-      e.conversas_dia = "Escolha uma opção para continuar.";
     if (!step2.problema_principal)
       e.problema_principal = "Escolha uma opção para continuar.";
+    if (!step2.investimento)
+      e.investimento = "Escolha uma opção para continuar.";
     if (!step2.consentimento)
       e.consentimento = "É necessário autorizar o contato.";
     setErrors(e);
@@ -203,7 +237,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     if (!validateStep1()) return;
     track("form_step_1_complete");
     setStep(2);
-    // Sobe até o topo do card para o usuário ver a etapa 2.
     setTimeout(() => {
       containerRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -227,16 +260,13 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           whatsapp: onlyDigits(step1.whatsapp),
           loja: step1.loja.trim(),
           email: step1.email.trim(),
-          papel: step2.papel as Exclude<Step2["papel"], "">,
-          faturamento: step2.faturamento as Exclude<Step2["faturamento"], "">,
-          conversas_dia: step2.conversas_dia as Exclude<
-            Step2["conversas_dia"],
-            ""
-          >,
+          papel: step2.papel as Exclude<Papel, "">,
+          faturamento: step2.faturamento as Exclude<Faturamento, "">,
           problema_principal: step2.problema_principal as Exclude<
-            Step2["problema_principal"],
+            Problema,
             ""
           >,
+          investimento: step2.investimento as Exclude<Investimento, "">,
           consentimento: true as const,
           utm_source: utms.utm_source,
           utm_medium: utms.utm_medium,
@@ -252,9 +282,12 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         },
       });
       if (res?.ok) {
-        track("generate_lead");
+        // Proteção contra double-fire do evento de conversão.
+        if (!successFiredRef.current) {
+          successFiredRef.current = true;
+          track("generate_lead");
+        }
         setSuccess(true);
-        // Foco no card de sucesso.
         setTimeout(() => {
           containerRef.current?.scrollIntoView({
             behavior: "smooth",
@@ -275,12 +308,10 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     }
   }
 
-  // Sempre garanta UTMs persistidas.
   useEffect(() => {
     captureAndPersistTracking();
   }, []);
 
-  // WhatsApp click no sucesso — evento voluntário
   function onWhatsappClick() {
     track("whatsapp_click");
   }
@@ -305,8 +336,21 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     <div
       id={id}
       ref={containerRef}
-      className="rounded-2xl bg-white p-5 shadow-[0_10px_40px_-15px_rgba(16,24,40,0.25)] ring-1 ring-black/5 sm:p-7"
+      className="relative rounded-2xl bg-white p-5 shadow-[0_10px_40px_-15px_rgba(16,24,40,0.25)] ring-1 ring-black/5 sm:p-7"
     >
+      {/* Honeypot invisível para bots — fora do fluxo visual e da navegação. */}
+      <div aria-hidden="true" style={HONEYPOT_STYLE}>
+        <input
+          ref={hpRef}
+          id="hp_field"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+        />
+      </div>
+
       {success ? (
         <SuccessState
           whatsapp={step1.whatsapp}
@@ -320,21 +364,8 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               Veja como isso funcionaria na sua loja
             </h2>
             <p className="mt-1.5 text-sm text-[#667085]">
-              Responda algumas perguntas rápidas. Leva menos de um minuto.
+              Responda algumas perguntas rápidas. Leva cerca de um minuto.
             </p>
-          </div>
-
-          {/* Honeypot invisível para bots */}
-          <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
-            <label htmlFor="hp_field">Não preencha</label>
-            <input
-              ref={hpRef}
-              id="hp_field"
-              name="hp_field"
-              type="text"
-              tabIndex={-1}
-              autoComplete="off"
-            />
           </div>
 
           {step === 1 ? (
@@ -477,13 +508,19 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
             </div>
           ) : (
             <div className="mt-5 space-y-6">
-              <p className="text-[15px] font-medium text-[#101828]">
-                Agora, sobre o atendimento da sua loja
-              </p>
+              <div>
+                <p className="text-[15px] font-medium text-[#101828]">
+                  Agora, sobre sua loja
+                </p>
+                <p className="mt-1 text-sm text-[#667085]">
+                  Escolha as opções que mais combinam com sua realidade.
+                </p>
+              </div>
 
               <fieldset id="q-papel">
                 <legend className="mb-2 block text-sm font-semibold text-[#101828]">
-                  Você participa da decisão sobre esse tipo de ferramenta?
+                  Você participa da decisão sobre novas ferramentas para a
+                  loja?
                 </legend>
                 <div className="grid gap-2">
                   {[
@@ -492,7 +529,11 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                       t: "Sim, sou proprietário ou sócio",
                     },
                     { v: "participa_decisao", t: "Sim, participo da decisão" },
-                    { v: "nao_decisor", t: "Não sou responsável pela decisão" },
+                    {
+                      v: "precisa_conversar",
+                      t: "Preciso conversar com outro responsável",
+                    },
+                    { v: "nao_decisor", t: "Não participo da decisão" },
                   ].map((opt) => (
                     <OptionCard
                       key={opt.v}
@@ -500,7 +541,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                       onClick={() =>
                         setStep2((s) => ({
                           ...s,
-                          papel: opt.v as Step2["papel"],
+                          papel: opt.v as Papel,
                         }))
                       }
                     >
@@ -512,9 +553,12 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               </fieldset>
 
               <fieldset id="q-faturamento">
-                <legend className="mb-2 block text-sm font-semibold text-[#101828]">
-                  Qual é o faturamento mensal aproximado da loja?
+                <legend className="mb-1 block text-sm font-semibold text-[#101828]">
+                  Qual faixa representa melhor o faturamento mensal da loja?
                 </legend>
+                <p className="mb-2 text-xs text-[#667085]">
+                  Não precisa informar o valor exato.
+                </p>
                 <div className="grid gap-2">
                   {[
                     { v: "ate_30k", t: "Até R$ 30 mil" },
@@ -524,7 +568,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                     { v: "acima_300k", t: "Acima de R$ 300 mil" },
                     {
                       v: "prefere_nao_dizer",
-                      t: "Prefiro falar sobre isso depois",
+                      t: "Prefiro conversar sobre isso depois",
                     },
                   ].map((opt) => (
                     <OptionCard
@@ -533,7 +577,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                       onClick={() =>
                         setStep2((s) => ({
                           ...s,
-                          faturamento: opt.v as Step2["faturamento"],
+                          faturamento: opt.v as Faturamento,
                         }))
                       }
                     >
@@ -542,35 +586,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                   ))}
                 </div>
                 <ErrorText id="err-faturamento" msg={errors.faturamento} />
-              </fieldset>
-
-              <fieldset id="q-conversas_dia">
-                <legend className="mb-2 block text-sm font-semibold text-[#101828]">
-                  Quantas novas conversas chegam por dia?
-                </legend>
-                <div className="grid gap-2">
-                  {[
-                    { v: "ate_10", t: "Até 10" },
-                    { v: "11_30", t: "De 11 a 30" },
-                    { v: "31_60", t: "De 31 a 60" },
-                    { v: "mais_60", t: "Mais de 60" },
-                    { v: "nao_sabe", t: "Não sabemos ao certo" },
-                  ].map((opt) => (
-                    <OptionCard
-                      key={opt.v}
-                      active={step2.conversas_dia === opt.v}
-                      onClick={() =>
-                        setStep2((s) => ({
-                          ...s,
-                          conversas_dia: opt.v as Step2["conversas_dia"],
-                        }))
-                      }
-                    >
-                      {opt.t}
-                    </OptionCard>
-                  ))}
-                </div>
-                <ErrorText id="err-conversas_dia" msg={errors.conversas_dia} />
               </fieldset>
 
               <fieldset id="q-problema_principal">
@@ -607,8 +622,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                       onClick={() =>
                         setStep2((s) => ({
                           ...s,
-                          problema_principal:
-                            opt.v as Step2["problema_principal"],
+                          problema_principal: opt.v as Problema,
                         }))
                       }
                     >
@@ -620,6 +634,47 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                   id="err-problema_principal"
                   msg={errors.problema_principal}
                 />
+              </fieldset>
+
+              <fieldset id="q-investimento">
+                <legend className="mb-2 block text-sm font-semibold text-[#101828]">
+                  Se a ferramenta fizer sentido para sua loja, como você
+                  avalia um investimento de R$ 1.500 por mês?
+                </legend>
+                <div className="grid gap-2">
+                  {[
+                    {
+                      v: "consegue_investir",
+                      t: "Consigo investir esse valor se enxergar resultado",
+                    },
+                    {
+                      v: "avaliar_depois",
+                      t: "Posso avaliar esse valor depois de entender como funciona",
+                    },
+                    {
+                      v: "precisa_conversar",
+                      t: "Preciso conversar com outro responsável",
+                    },
+                    {
+                      v: "acima_orcamento",
+                      t: "Hoje esse valor está acima do meu orçamento",
+                    },
+                  ].map((opt) => (
+                    <OptionCard
+                      key={opt.v}
+                      active={step2.investimento === opt.v}
+                      onClick={() =>
+                        setStep2((s) => ({
+                          ...s,
+                          investimento: opt.v as Investimento,
+                        }))
+                      }
+                    >
+                      {opt.t}
+                    </OptionCard>
+                  ))}
+                </div>
+                <ErrorText id="err-investimento" msg={errors.investimento} />
               </fieldset>
 
               <div id="q-consentimento" className="rounded-lg bg-[#F6F7F9] p-4">
@@ -636,8 +691,8 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                     }
                   />
                   <span>
-                    Autorizo o contato pelo WhatsApp sobre esta solicitação e li
-                    a <PrivacyDialog />.
+                    Autorizo o contato pelo WhatsApp sobre esta solicitação e
+                    li a <PrivacyDialog />.
                   </span>
                 </label>
                 <ErrorText id="err-consentimento" msg={errors.consentimento} />
@@ -697,8 +752,8 @@ function SuccessState({
         Recebemos suas respostas.
       </h2>
       <p className="mt-2 text-[15px] leading-6 text-[#475467]">
-        Agora vamos preparar um exemplo com base no atendimento da sua loja.
-        Nossa equipe entrará em contato pelo WhatsApp informado.
+        Vamos analisar as informações da sua loja e entrar em contato pelo
+        WhatsApp informado.
       </p>
       <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
         <a
@@ -711,16 +766,6 @@ function SuccessState({
           <MessageCircle className="h-5 w-5" /> Falar pelo WhatsApp agora
         </a>
       </div>
-      <button
-        type="button"
-        onClick={() => {
-          if (typeof window !== "undefined")
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
-        className="mt-4 text-sm font-medium text-[#667085] underline underline-offset-2 hover:text-[#101828]"
-      >
-        Voltar ao início
-      </button>
     </div>
   );
 }
