@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite dev",
     "dev:server": "tsx watch server/src/index.ts",
-    "build": "vite build && tsc -p server/tsconfig.json",
+    "build": "vite build",
     "build:dev": "vite build --mode development",
-    "start": "node server/dist/server/src/index.js",
+    "start": "tsx server/src/index.ts",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit && tsc -p server/tsconfig.json --noEmit",
@@ -76,7 +76,8 @@
     "tw-animate-css": "^1.3.4",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.0.2",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
@@ -95,7 +96,6 @@
     "globals": "^15.15.0",
     "nitro": "3.0.260603-beta",
     "prettier": "^3.7.3",
-    "tsx": "^4.21.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.16"
