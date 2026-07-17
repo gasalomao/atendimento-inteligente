@@ -70,7 +70,7 @@ export const Route = createFileRoute("/api/leads")({
             email: data.email && data.email !== "" ? data.email : null,
             papel: data.papel,
             conversas_dia: data.conversas_dia,
-            problema_principal: data.problema_principal,
+            problema_principal: (data.problema_principal ?? []).join(","),
             faturamento: data.faturamento,
             investimento: data.investimento,
             consentimento: true,
