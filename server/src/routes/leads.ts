@@ -8,6 +8,7 @@ import { supabaseAdmin } from "../db/supabase";
 import { enqueue } from "../notifications/queue";
 import { env } from "../env";
 import { logger } from "../logger";
+import { lookupGeo } from "../lib/geo";
 
 export async function leadsHandler(req: Request, res: Response) {
   const parsed = leadSchema.safeParse(req.body);
