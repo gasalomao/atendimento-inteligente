@@ -30,7 +30,6 @@ type Conversas =
   | "more_than_60"
   | "unknown";
 type Problema =
-  | ""
   | "delayed_response_busy_store"
   | "price_request_then_disappears"
   | "messages_outside_business_hours"
