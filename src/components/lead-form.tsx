@@ -471,9 +471,11 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     setErrors({});
     if (q > 0) {
       setQ((n) => n - 1);
+      questionStartRef.current = Date.now();
       return;
     }
     setStep(1);
+    questionStartRef.current = Date.now();
   }
 
   async function onFinalSubmit() {
