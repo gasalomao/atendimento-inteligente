@@ -158,9 +158,14 @@ function Footer() {
           <span className="text-[14px] font-[600] text-[#F5F3EE]">
             Salomão AI
           </span>
-          <span className="text-[13px] text-[#F5F3EE]/60">
+          <a
+            href="/metricas"
+            className="text-[13px] text-[#F5F3EE]/60 transition-colors hover:text-[#F5F3EE]/80"
+            title=""
+            aria-label="Informações"
+          >
             · © {new Date().getFullYear()}
-          </span>
+          </a>
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px]">
           <a

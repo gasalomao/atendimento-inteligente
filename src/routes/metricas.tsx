@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
 export const Route = createFileRoute("/metricas")({
   head: () => ({
@@ -11,28 +11,119 @@ export const Route = createFileRoute("/metricas")({
   component: MetricasPage,
 });
 
+/* ─── Types ──────────────────────────────────────────────────────────── */
 type Metrics = {
   period_days: number;
   generated_at: string;
   totals: Record<string, number>;
   conversion: Record<string, number>;
+  timing: {
+    avg_time_per_question_ms: Record<string, number>;
+    avg_total_form_ms: number;
+    median_total_form_ms: number;
+  };
   daily: { day: string; unique_visitors: number; page_views: number; leads: number }[];
   utm_breakdown: { key: string; unique_visitors: number; leads: number }[];
+  geo_country: { key: string; unique_visitors: number }[];
+  geo_city: { key: string; unique_visitors: number }[];
+  device_type: Record<string, number>;
   lead_classification: Record<string, number>;
 };
 
+const PASS = "30741852";
+const TOKEN_KEY = "sai_metrics_token";
+const AUTH_KEY = "sai_metrics_auth";
+
+/* ─── Main ───────────────────────────────────────────────────────────── */
 function MetricasPage() {
-  const [token, setToken] = useState<string>(() => {
+  const [auth, setAuth] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.sessionStorage.getItem(AUTH_KEY) === "1";
+  });
+  const [pw, setPw] = useState("");
+  const [pwError, setPwError] = useState(false);
+
+  function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    if (pw === PASS) {
+      setAuth(true);
+      setPwError(false);
+      try { window.sessionStorage.setItem(AUTH_KEY, "1"); } catch {}
+    } else {
+      setPwError(true);
+    }
+  }
+
+  if (!auth) {
+    return <PasswordGate pw={pw} setPw={setPw} error={pwError} onSubmit={handleLogin} />;
+  }
+
+  return <Dashboard />;
+}
+
+/* ─── Password Gate ──────────────────────────────────────────────────── */
+function PasswordGate({
+  pw, setPw, error, onSubmit,
+}: {
+  pw: string;
+  setPw: (v: string) => void;
+  error: boolean;
+  onSubmit: (e: React.FormEvent) => void;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#0B0D12] px-4">
+      <form
+        onSubmit={onSubmit}
+        className="w-full max-w-[360px] rounded-2xl border border-white/10 bg-white/[0.04] p-8 backdrop-blur-xl"
+      >
+        <div className="mx-auto mb-6 grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-lg font-bold text-white shadow-lg shadow-emerald-500/20">
+          S
+        </div>
+        <h1 className="text-center text-lg font-semibold text-white">Acesso restrito</h1>
+        <p className="mt-1 text-center text-sm text-white/50">
+          Digite a senha para ver as métricas
+        </p>
+        <div className="mt-6">
+          <input
+            type="password"
+            value={pw}
+            onChange={(e) => { setPw(e.target.value); }}
+            placeholder="Senha"
+            autoFocus
+            className={`w-full rounded-lg border bg-white/[0.06] px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition-all focus:ring-2 ${
+              error
+                ? "border-red-500/60 focus:ring-red-500/30"
+                : "border-white/10 focus:border-emerald-500/50 focus:ring-emerald-500/20"
+            }`}
+          />
+          {error && (
+            <p className="mt-2 text-xs text-red-400">Senha incorreta. Tente novamente.</p>
+          )}
+        </div>
+        <button
+          type="submit"
+          className="mt-4 w-full rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-medium text-white shadow-lg shadow-emerald-500/20 transition-all hover:shadow-emerald-500/30 active:scale-[0.98]"
+        >
+          Entrar
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* ─── Dashboard ──────────────────────────────────────────────────────── */
+function Dashboard() {
+  const [token, setToken] = useState(() => {
     if (typeof window === "undefined") return "";
     const p = new URLSearchParams(window.location.search).get("token");
-    return p || window.localStorage.getItem("metrics_token") || "";
+    return p || window.localStorage.getItem(TOKEN_KEY) || "";
   });
   const [days, setDays] = useState(30);
   const [data, setData] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     setError(null);
@@ -41,164 +132,379 @@ function MetricasPage() {
       if (!res.ok) throw new Error(res.status === 401 ? "Token inválido" : `Erro ${res.status}`);
       const j = (await res.json()) as Metrics;
       setData(j);
-      try {
-        window.localStorage.setItem("metrics_token", token);
-      } catch {}
+      try { window.localStorage.setItem(TOKEN_KEY, token); } catch {}
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro");
     } finally {
       setLoading(false);
     }
-  }
+  }, [token, days]);
 
   useEffect(() => {
     if (token) void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [days]);
+  }, [days, load]);
 
   return (
-    <div className="min-h-screen bg-[#F7F5F1] p-6 font-sans text-[#191A18]">
-      <div className="mx-auto max-w-[1100px]">
-        <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-[650] tracking-tight">Métricas do site</h1>
-            <p className="mt-1 text-sm text-[#5F625E]">
-              Visitantes únicos por aparelho, funil e origens de tráfego.
-            </p>
+    <div className="min-h-screen bg-[#0B0D12] font-sans text-white">
+      {/* ── Header ─────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#0B0D12]/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-5 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-xs font-bold text-white">
+              S
+            </div>
+            <h1 className="text-base font-semibold tracking-tight">Métricas</h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <input
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="Token de acesso"
-              className="rounded-md border border-[#DDDAD3] bg-white px-3 py-2 text-sm"
+              type="password"
+              className="w-[140px] rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white placeholder-white/25 outline-none focus:border-emerald-500/50 sm:w-[180px]"
             />
             <select
               value={days}
               onChange={(e) => setDays(Number(e.target.value))}
-              className="rounded-md border border-[#DDDAD3] bg-white px-3 py-2 text-sm"
+              className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white outline-none focus:border-emerald-500/50"
             >
               <option value={7}>7 dias</option>
               <option value={14}>14 dias</option>
               <option value={30}>30 dias</option>
               <option value={90}>90 dias</option>
+              <option value={180}>180 dias</option>
+              <option value={365}>365 dias</option>
             </select>
             <button
               onClick={load}
-              className="rounded-md bg-[#191A18] px-4 py-2 text-sm font-medium text-white"
+              disabled={loading}
+              className="rounded-lg bg-emerald-500/90 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-emerald-500 active:scale-[0.97] disabled:opacity-50"
             >
-              {loading ? "..." : "Atualizar"}
+              {loading ? "Carregando…" : "Atualizar"}
             </button>
           </div>
-        </header>
+        </div>
+      </header>
 
+      <main className="mx-auto max-w-[1280px] px-5 py-8 sm:px-6 lg:px-8">
         {error && (
-          <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-5 py-4 text-sm text-red-300">
             {error}
           </div>
         )}
 
-        {data && (
-          <div className="space-y-8">
-            <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Kpi label="Visitantes únicos" value={data.totals.unique_visitors} />
-              <Kpi label="Page views" value={data.totals.page_views} />
-              <Kpi label="Formulários iniciados" value={data.totals.form_starts} />
-              <Kpi label="Leads salvos" value={data.totals.leads_saved} />
-            </section>
-
-            <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <Kpi label="View → Início" value={`${data.conversion.view_to_start}%`} muted />
-              <Kpi label="Início → Envio" value={`${data.conversion.start_to_submit}%`} muted />
-              <Kpi label="Visitante → Lead" value={`${data.conversion.visitor_to_lead}%`} muted />
-            </section>
-
-            <section className="rounded-lg border border-[#DDDAD3] bg-white p-5">
-              <h2 className="mb-4 text-lg font-[600]">Evolução diária</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[500px] text-sm">
-                  <thead className="text-left text-[#7B7E78]">
-                    <tr>
-                      <th className="py-2">Data</th>
-                      <th>Visitantes</th>
-                      <th>Page views</th>
-                      <th>Leads</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.daily.map((r) => (
-                      <tr key={r.day} className="border-t border-[#F0EEE9]">
-                        <td className="py-2">{r.day}</td>
-                        <td>{r.unique_visitors}</td>
-                        <td>{r.page_views}</td>
-                        <td>{r.leads}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-[#DDDAD3] bg-white p-5">
-              <h2 className="mb-4 text-lg font-[600]">Origem (utm_source / medium / campaign)</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[500px] text-sm">
-                  <thead className="text-left text-[#7B7E78]">
-                    <tr>
-                      <th className="py-2">Origem</th>
-                      <th>Visitantes únicos</th>
-                      <th>Leads</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.utm_breakdown.map((r) => (
-                      <tr key={r.key} className="border-t border-[#F0EEE9]">
-                        <td className="py-2">{r.key}</td>
-                        <td>{r.unique_visitors}</td>
-                        <td>{r.leads}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-[#DDDAD3] bg-white p-5">
-              <h2 className="mb-4 text-lg font-[600]">Classificação dos leads</h2>
-              <ul className="text-sm">
-                {Object.entries(data.lead_classification).map(([k, v]) => (
-                  <li key={k} className="flex justify-between border-t border-[#F0EEE9] py-2 first:border-0">
-                    <span className="capitalize">{k}</span>
-                    <span className="font-[600]">{v}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <p className="text-xs text-[#7B7E78]">
-              Atualizado em {new Date(data.generated_at).toLocaleString("pt-BR")} · Período: {data.period_days} dias
+        {!data && !error && (
+          <div className="flex flex-col items-center justify-center py-32 text-center">
+            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white/[0.04] text-2xl">📊</div>
+            <p className="mt-4 text-sm text-white/40">
+              Cole seu token de acesso e clique em "Atualizar" para ver as métricas.
             </p>
           </div>
         )}
 
-        {!data && !error && (
-          <p className="text-sm text-[#7B7E78]">
-            Cole seu token de acesso e clique em "Atualizar". Você também pode acessar direto por{" "}
-            <code className="rounded bg-white px-1 py-0.5">/metricas?token=SEU_TOKEN</code>.
-          </p>
-        )}
-      </div>
+        {data && <MetricsDashboard data={data} />}
+      </main>
     </div>
   );
 }
 
-function Kpi({ label, value, muted }: { label: string; value: number | string; muted?: boolean }) {
+/* ─── Dashboard Content ──────────────────────────────────────────────── */
+function MetricsDashboard({ data }: { data: Metrics }) {
+  const maxDailyVisitors = useMemo(
+    () => Math.max(...data.daily.map((d) => d.unique_visitors), 1),
+    [data.daily]
+  );
+
+  const totalDevices = useMemo(
+    () => Object.values(data.device_type).reduce((s, n) => s + n, 0) || 1,
+    [data.device_type]
+  );
+
   return (
-    <div
-      className={`rounded-lg border p-4 ${muted ? "border-[#E3E0D9] bg-[#F0EEE9]" : "border-[#DDDAD3] bg-white"}`}
-    >
-      <p className="text-xs uppercase tracking-wider text-[#7B7E78]">{label}</p>
-      <p className="mt-1 text-2xl font-[650]">{value}</p>
+    <div className="space-y-6">
+      {/* ── KPIs Principais ──────────────────────────────── */}
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Kpi icon="👁" label="Visitantes únicos" value={data.totals.unique_visitors} color="emerald" />
+        <Kpi icon="📄" label="Visualizações" value={data.totals.page_views} color="blue" />
+        <Kpi icon="📝" label="Formulários iniciados" value={data.totals.form_starts} color="amber" />
+        <Kpi icon="✅" label="Leads salvos" value={data.totals.leads_saved} color="purple" />
+      </section>
+
+      {/* ── Funil de Conversão ────────────────────────────── */}
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+        <Kpi icon="👀" label="Visualiz. formulário" value={data.totals.form_views} color="slate" small />
+        <FunnelKpi label="View → Início" value={data.conversion.view_to_start} />
+        <FunnelKpi label="Início → Envio" value={data.conversion.start_to_submit} />
+        <FunnelKpi label="Visitante → Lead" value={data.conversion.visitor_to_lead} highlight />
+      </section>
+
+      {/* ── Evolução Diária (bar chart via CSS) ─────────── */}
+      <Card title="📈 Evolução diária" subtitle={`Últimos ${data.period_days} dias`}>
+        {data.daily.length === 0 ? (
+          <p className="py-8 text-center text-sm text-white/30">Nenhum dado no período</p>
+        ) : (
+          <div className="space-y-1">
+            <div className="mb-3 flex gap-4 text-[10px] uppercase tracking-wider text-white/30">
+              <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" /> Visitantes</span>
+              <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-blue-500" /> Page Views</span>
+              <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-purple-500" /> Leads</span>
+            </div>
+            {data.daily.map((r) => (
+              <div key={r.day} className="group flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.03]">
+                <span className="w-[72px] shrink-0 text-xs text-white/40 tabular-nums">
+                  {formatDay(r.day)}
+                </span>
+                <div className="flex flex-1 gap-1">
+                  <div
+                    className="h-5 rounded-sm bg-emerald-500/80 transition-all"
+                    style={{ width: `${(r.unique_visitors / maxDailyVisitors) * 100}%`, minWidth: r.unique_visitors ? "4px" : 0 }}
+                  />
+                </div>
+                <span className="w-[50px] text-right text-xs tabular-nums text-white/60">{r.unique_visitors}</span>
+                <span className="w-[50px] text-right text-xs tabular-nums text-blue-400/70">{r.page_views}</span>
+                <span className="w-[40px] text-right text-xs tabular-nums text-purple-400/70">{r.leads}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {/* ── Origens UTM ──────────────────────────────────── */}
+        <Card title="🔗 Origem de tráfego" subtitle="utm_source / medium / campaign">
+          {data.utm_breakdown.length === 0 ? (
+            <p className="py-6 text-center text-sm text-white/30">Nenhuma origem rastreada</p>
+          ) : (
+            <div className="divide-y divide-white/[0.04]">
+              <div className="grid grid-cols-[1fr_80px_50px] gap-2 pb-2 text-[10px] uppercase tracking-wider text-white/30">
+                <span>Origem</span><span className="text-right">Visitantes</span><span className="text-right">Leads</span>
+              </div>
+              {data.utm_breakdown.map((r) => (
+                <div key={r.key} className="grid grid-cols-[1fr_80px_50px] gap-2 py-2.5 text-xs">
+                  <span className="truncate text-white/70" title={r.key}>{r.key}</span>
+                  <span className="text-right tabular-nums text-white/50">{r.unique_visitors}</span>
+                  <span className="text-right tabular-nums font-medium text-emerald-400">{r.leads}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        {/* ── Dispositivos ─────────────────────────────────── */}
+        <Card title="📱 Dispositivos">
+          {Object.keys(data.device_type).length === 0 ? (
+            <p className="py-6 text-center text-sm text-white/30">Sem dados</p>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(data.device_type)
+                .sort(([, a], [, b]) => b - a)
+                .map(([type, count]) => {
+                  const pct = Math.round((count / totalDevices) * 100);
+                  return (
+                    <div key={type}>
+                      <div className="mb-1 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-2 capitalize text-white/70">
+                          {type === "mobile" ? "📱" : type === "desktop" ? "💻" : type === "tablet" ? "📟" : "❓"} {type}
+                        </span>
+                        <span className="tabular-nums text-white/50">{count} <span className="text-white/30">({pct}%)</span></span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {/* ── Geolocalização ───────────────────────────────── */}
+        <Card title="🌍 Geolocalização — Países">
+          {(!data.geo_country || data.geo_country.length === 0) ? (
+            <p className="py-6 text-center text-sm text-white/30">Sem dados geográficos</p>
+          ) : (
+            <div className="divide-y divide-white/[0.04]">
+              {data.geo_country.map((r) => (
+                <div key={r.key} className="flex items-center justify-between py-2.5 text-xs">
+                  <span className="text-white/70">{r.key}</span>
+                  <span className="tabular-nums text-white/50">{r.unique_visitors}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <Card title="📍 Geolocalização — Cidades">
+          {(!data.geo_city || data.geo_city.length === 0) ? (
+            <p className="py-6 text-center text-sm text-white/30">Sem dados de cidades</p>
+          ) : (
+            <div className="divide-y divide-white/[0.04]">
+              {data.geo_city.slice(0, 15).map((r) => (
+                <div key={r.key} className="flex items-center justify-between py-2.5 text-xs">
+                  <span className="truncate text-white/70">{r.key}</span>
+                  <span className="ml-4 tabular-nums text-white/50">{r.unique_visitors}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {/* ── Tempo médio por pergunta ─────────────────────── */}
+        <Card title="⏱ Tempo médio por pergunta">
+          {(!data.timing?.avg_time_per_question_ms || Object.keys(data.timing.avg_time_per_question_ms).length === 0) ? (
+            <p className="py-6 text-center text-sm text-white/30">Sem dados de tempo</p>
+          ) : (
+            <div className="divide-y divide-white/[0.04]">
+              {Object.entries(data.timing.avg_time_per_question_ms).map(([q, ms]) => (
+                <div key={q} className="flex items-center justify-between py-2.5 text-xs">
+                  <span className="truncate text-white/70" title={q}>{q}</span>
+                  <span className="ml-4 tabular-nums text-amber-400">{formatMs(ms)}</span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between pt-3 text-xs font-medium">
+                <span className="text-white/50">Total médio</span>
+                <span className="tabular-nums text-emerald-400">{formatMs(data.timing.avg_total_form_ms)}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 text-xs">
+                <span className="text-white/50">Mediana total</span>
+                <span className="tabular-nums text-emerald-400/70">{formatMs(data.timing.median_total_form_ms)}</span>
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* ── Classificação dos leads ──────────────────────── */}
+        <Card title="🏷 Classificação dos leads">
+          {Object.keys(data.lead_classification).length === 0 ? (
+            <p className="py-6 text-center text-sm text-white/30">Nenhum lead classificado</p>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(data.lead_classification)
+                .sort(([, a], [, b]) => b - a)
+                .map(([k, v]) => {
+                  const total = Object.values(data.lead_classification).reduce((s, n) => s + n, 0) || 1;
+                  const pct = Math.round((v / total) * 100);
+                  const colorClass =
+                    k === "hot" ? "from-red-500 to-orange-500" :
+                    k === "warm" ? "from-amber-500 to-yellow-500" :
+                    k === "cold" ? "from-blue-400 to-cyan-400" :
+                    "from-slate-400 to-slate-500";
+                  return (
+                    <div key={k}>
+                      <div className="mb-1 flex items-center justify-between text-xs">
+                        <span className="capitalize text-white/70">{k}</span>
+                        <span className="tabular-nums text-white/50">{v} <span className="text-white/30">({pct}%)</span></span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                        <div
+                          className={`h-full rounded-full bg-gradient-to-r ${colorClass} transition-all`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* ── Resumo Geral ──────────────────────────────────── */}
+      <Card title="📋 Resumo do funil completo">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-xs sm:grid-cols-4">
+          <SummaryItem label="Total de eventos" value={data.totals.total_events} />
+          <SummaryItem label="Visualiz. formulário" value={data.totals.form_views} />
+          <SummaryItem label="Formulários iniciados" value={data.totals.form_starts} />
+          <SummaryItem label="Submissões com sucesso" value={data.totals.form_submit_success} />
+        </div>
+      </Card>
+
+      {/* ── Footer ────────────────────────────────────────── */}
+      <p className="pb-8 text-center text-[11px] text-white/20">
+        Atualizado em {new Date(data.generated_at).toLocaleString("pt-BR")} · Período: {data.period_days} dias
+      </p>
     </div>
   );
+}
+
+/* ─── Components ─────────────────────────────────────────────────────── */
+function Card({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+      <div className="mb-4">
+        <h2 className="text-sm font-semibold text-white/90">{title}</h2>
+        {subtitle && <p className="mt-0.5 text-[11px] text-white/30">{subtitle}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Kpi({ icon, label, value, color, small }: { icon: string; label: string; value: number; color: string; small?: boolean }) {
+  const bg = {
+    emerald: "from-emerald-500/10 to-emerald-500/[0.03] border-emerald-500/20",
+    blue: "from-blue-500/10 to-blue-500/[0.03] border-blue-500/20",
+    amber: "from-amber-500/10 to-amber-500/[0.03] border-amber-500/20",
+    purple: "from-purple-500/10 to-purple-500/[0.03] border-purple-500/20",
+    slate: "from-slate-500/10 to-slate-500/[0.03] border-slate-500/20",
+  }[color] ?? "from-white/5 to-white/[0.02] border-white/10";
+
+  return (
+    <div className={`rounded-xl border bg-gradient-to-br ${bg} p-4`}>
+      <div className="text-lg">{icon}</div>
+      <p className="mt-2 text-[10px] uppercase tracking-wider text-white/40">{label}</p>
+      <p className={`mt-1 font-semibold tabular-nums ${small ? "text-xl" : "text-2xl"}`}>{value.toLocaleString("pt-BR")}</p>
+    </div>
+  );
+}
+
+function FunnelKpi({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+  return (
+    <div className={`rounded-xl border p-4 ${
+      highlight
+        ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-emerald-500/[0.03]"
+        : "border-white/[0.06] bg-white/[0.02]"
+    }`}>
+      <p className="text-[10px] uppercase tracking-wider text-white/40">{label}</p>
+      <p className={`mt-1 text-2xl font-semibold tabular-nums ${highlight ? "text-emerald-400" : "text-white/80"}`}>
+        {value}%
+      </p>
+    </div>
+  );
+}
+
+function SummaryItem({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <p className="text-white/40">{label}</p>
+      <p className="mt-0.5 text-lg font-semibold tabular-nums">{value.toLocaleString("pt-BR")}</p>
+    </div>
+  );
+}
+
+/* ─── Helpers ────────────────────────────────────────────────────────── */
+function formatDay(iso: string): string {
+  try {
+    const d = new Date(iso + "T12:00:00");
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+  } catch {
+    return iso;
+  }
+}
+
+function formatMs(ms: number): string {
+  if (!ms || ms <= 0) return "—";
+  if (ms < 1000) return `${ms}ms`;
+  const s = ms / 1000;
+  if (s < 60) return `${s.toFixed(1)}s`;
+  const m = Math.floor(s / 60);
+  const rest = Math.round(s % 60);
+  return `${m}m ${rest}s`;
 }
