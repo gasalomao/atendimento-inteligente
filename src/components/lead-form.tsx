@@ -552,16 +552,16 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       ) : (
         <>
           {step === 0 ? (
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div>
-                <p className="text-[12px] font-[600] uppercase tracking-[0.12em] text-[#207A50]">
+                <p className="text-[11px] font-[600] uppercase tracking-[0.14em] text-[#207A50]">
                   Comece por aqui
                 </p>
-                <h2 className="mt-2 text-[20px] font-[650] leading-[1.25] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
-                  Veja como isso funcionaria na sua loja
+                <h2 className="mt-1.5 text-[18px] font-[650] leading-[1.25] tracking-[-0.015em] text-[#191A18] sm:mt-2 sm:text-[22px]">
+                  Veja como ficaria na sua loja
                 </h2>
-                <p className="mt-2 text-[15px] leading-[1.55] text-[#5F625E]">
-                  Responda algumas perguntas rápidas e a gente mostra pelo WhatsApp.
+                <p className="mt-1.5 text-[14px] leading-[1.5] text-[#5F625E] sm:mt-2 sm:text-[15px] sm:leading-[1.55]">
+                  1 minuto de perguntas. A gente mostra pelo WhatsApp.
                 </p>
               </div>
               <button
@@ -574,10 +574,11 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               >
                 Ver como funcionaria na minha loja
               </button>
-              <p className="text-[13px] leading-[1.5] text-[#5F625E] sm:text-[14px]">
-                Leva cerca de 1 minuto. Indicado para lojas que faturam a partir de R$ 50 mil por mês.
+              <p className="text-[12px] leading-[1.5] text-[#5F625E] sm:text-[14px]">
+                Indicado para lojas que faturam a partir de R$ 50 mil/mês.
               </p>
             </div>
+
           ) : (
             <>
               <div className="mb-6">
