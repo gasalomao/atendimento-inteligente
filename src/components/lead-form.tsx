@@ -21,9 +21,24 @@ type Step1 = {
 type Papel =
   | ""
   | "owner_partner"
-  | "decision_participant"
-  | "needs_other_decision_maker"
-  | "no_decision_authority";
+  | "manager_decision_maker"
+  | "team_member_no_final_decision"
+  | "other";
+type Conversas =
+  | ""
+  | "up_to_10"
+  | "from_11_to_30"
+  | "from_31_to_60"
+  | "more_than_60"
+  | "unknown";
+type Problema =
+  | ""
+  | "delayed_response_busy_store"
+  | "price_request_then_disappears"
+  | "messages_outside_business_hours"
+  | "no_customer_recontact"
+  | "repetitive_questions"
+  | "wants_to_scale_without_overload";
 type Faturamento =
   | ""
   | "up_to_30k"
@@ -31,37 +46,30 @@ type Faturamento =
   | "from_50k_to_100k"
   | "from_100k_to_300k"
   | "above_300k"
-  | "discuss_later";
-type Problema =
-  | ""
-  | "slow_response"
-  | "price_shoppers_disappear"
-  | "no_recontact_after_no_purchase"
-  | "after_hours_messages"
-  | "overloaded_sellers"
-  | "disorganized_service";
+  | "prefer_not_to_say";
 type Investimento =
   | ""
   | "ready_if_value_is_clear"
-  | "open_to_evaluate"
+  | "wants_to_see_first"
   | "needs_other_decision_maker"
   | "above_current_budget";
 
-type Step2Field = keyof Pick<
-  Step2,
-  "papel" | "faturamento" | "problema_principal" | "investimento"
->;
+type Step2 = {
+  papel: Papel;
+  conversas_dia: Conversas;
+  problema_principal: Problema;
+  faturamento: Faturamento;
+  investimento: Investimento;
+  consentimento: boolean;
+};
 
+type Step2Field = keyof Omit<Step2, "consentimento">;
 type Step2Value = Exclude<
-  Papel | Faturamento | Problema | Investimento,
+  Papel | Conversas | Problema | Faturamento | Investimento,
   ""
 >;
 
-type QuestionOption = {
-  v: Step2Value;
-  t: string;
-};
-
+type QuestionOption = { v: Step2Value; t: string };
 type Step2Question = {
   field: Step2Field;
   question: string;
@@ -69,18 +77,10 @@ type Step2Question = {
   options: QuestionOption[];
 };
 
-type Step2 = {
-  papel: Papel;
-  faturamento: Faturamento;
-  problema_principal: Problema;
-  investimento: Investimento;
-  consentimento: boolean;
-};
-
 type Errors = Partial<Record<string, string>>;
 
 const fieldBase =
-  "block w-full rounded-lg bg-white px-3.5 py-3 text-[15px] leading-6 text-[#101828] placeholder:text-[#667085] border border-[#D0D5DD] outline-none transition-shadow focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20 disabled:opacity-60 min-h-[48px]";
+  "block w-full rounded-lg bg-white px-3.5 py-3 text-[16px] leading-6 text-[#101828] placeholder:text-[#667085] border border-[#D0D5DD] outline-none transition-shadow focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20 disabled:opacity-60 min-h-[48px]";
 const fieldError =
   "border-[#B42318] bg-[#FEF3F2] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
@@ -94,7 +94,7 @@ function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-1.5 block text-sm font-semibold text-[#101828]"
+      className="mb-1.5 block text-[15px] font-semibold text-[#101828]"
     >
       {children}
     </label>
@@ -111,71 +111,95 @@ function ErrorText({ id, msg }: { id: string; msg?: string }) {
 }
 
 const cardOptionBase =
-  "w-full text-left rounded-lg border border-[#D0D5DD] bg-white px-4 py-3 text-[15px] text-[#101828] min-h-[48px] transition-colors hover:border-[#22C55E] focus:outline-none focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20";
+  "w-full text-left rounded-lg border border-[#D0D5DD] bg-white px-4 py-3 text-[16px] leading-6 text-[#101828] min-h-[52px] transition-colors hover:border-[#22C55E] focus:outline-none focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20";
 const cardOptionActive =
   "border-[#22C55E] bg-[#F0FDF4] ring-2 ring-[#22C55E]";
 
 const STEP2_QUESTIONS: Step2Question[] = [
   {
     field: "papel",
-    question:
-      "Você participa da decisão sobre novas ferramentas para a loja?",
+    question: "Qual é o seu papel na loja?",
     options: [
-      { v: "owner_partner", t: "Sim, sou proprietário ou sócio" },
-      { v: "decision_participant", t: "Sim, participo da decisão" },
+      { v: "owner_partner", t: "Sou proprietário ou sócio" },
       {
-        v: "needs_other_decision_maker",
-        t: "Preciso conversar com outro responsável",
+        v: "manager_decision_maker",
+        t: "Sou gerente e participo das decisões",
       },
-      { v: "no_decision_authority", t: "Não participo da decisão" },
+      {
+        v: "team_member_no_final_decision",
+        t: "Trabalho na equipe, mas não decido sozinho",
+      },
+      { v: "other", t: "Outro" },
+    ],
+  },
+  {
+    field: "conversas_dia",
+    question:
+      "Em média, quantas novas conversas chegam por dia no WhatsApp da loja?",
+    options: [
+      { v: "up_to_10", t: "Até 10" },
+      { v: "from_11_to_30", t: "De 11 a 30" },
+      { v: "from_31_to_60", t: "De 31 a 60" },
+      { v: "more_than_60", t: "Mais de 60" },
+      { v: "unknown", t: "Não sei ao certo" },
+    ],
+  },
+  {
+    field: "problema_principal",
+    question: "Qual dessas situações mais acontece hoje na sua loja?",
+    options: [
+      {
+        v: "delayed_response_busy_store",
+        t: "Demoramos para responder quando a loja está cheia",
+      },
+      {
+        v: "price_request_then_disappears",
+        t: "Muitos clientes pedem preço e depois desaparecem",
+      },
+      {
+        v: "messages_outside_business_hours",
+        t: "Mensagens chegam fora do horário e ficam para o dia seguinte",
+      },
+      {
+        v: "no_customer_recontact",
+        t: "Falta alguém para voltar a falar com quem não comprou",
+      },
+      {
+        v: "repetitive_questions",
+        t: "Os vendedores repetem as mesmas perguntas o dia todo",
+      },
+      {
+        v: "wants_to_scale_without_overload",
+        t: "O atendimento funciona, mas queremos atender mais sem sobrecarregar a equipe",
+      },
     ],
   },
   {
     field: "faturamento",
-    question: "Qual faixa representa melhor o faturamento mensal da loja?",
-    description: "Não precisa informar o valor exato.",
+    question: "Qual faixa mais se aproxima do faturamento mensal da loja?",
+    description:
+      "Não precisa informar o valor exato. Essa resposta ajuda a entender o tamanho do atendimento.",
     options: [
       { v: "up_to_30k", t: "Até R$ 30 mil" },
       { v: "from_30k_to_50k", t: "De R$ 30 mil a R$ 50 mil" },
       { v: "from_50k_to_100k", t: "De R$ 50 mil a R$ 100 mil" },
       { v: "from_100k_to_300k", t: "De R$ 100 mil a R$ 300 mil" },
       { v: "above_300k", t: "Acima de R$ 300 mil" },
-      { v: "discuss_later", t: "Prefiro conversar sobre isso depois" },
-    ],
-  },
-  {
-    field: "problema_principal",
-    question: "O que mais atrapalha suas vendas pelo WhatsApp hoje?",
-    options: [
-      { v: "slow_response", t: "Demoramos para responder" },
-      {
-        v: "price_shoppers_disappear",
-        t: "Muitos clientes pedem preço e desaparecem",
-      },
-      {
-        v: "no_recontact_after_no_purchase",
-        t: "Ninguém volta a falar com quem não comprou",
-      },
-      { v: "after_hours_messages", t: "Chegam mensagens fora do horário" },
-      {
-        v: "overloaded_sellers",
-        t: "Os vendedores ficam sobrecarregados",
-      },
-      { v: "disorganized_service", t: "Falta organização no atendimento" },
+      { v: "prefer_not_to_say", t: "Prefiro falar sobre isso depois" },
     ],
   },
   {
     field: "investimento",
     question:
-      "Se a ferramenta fizer sentido para sua loja, como você avalia um investimento de R$ 1.500 por mês?",
+      "Se isso fizer sentido para sua loja, qual opção melhor descreve seu momento para investir R$ 1.500 por mês?",
     options: [
       {
         v: "ready_if_value_is_clear",
-        t: "Consigo investir esse valor se enxergar resultado",
+        t: "Posso investir esse valor se enxergar benefício para a loja",
       },
       {
-        v: "open_to_evaluate",
-        t: "Posso avaliar esse valor depois de entender como funciona",
+        v: "wants_to_see_first",
+        t: "Posso avaliar depois de ver como funciona",
       },
       {
         v: "needs_other_decision_maker",
@@ -183,79 +207,12 @@ const STEP2_QUESTIONS: Step2Question[] = [
       },
       {
         v: "above_current_budget",
-        t: "Hoje esse valor está acima do meu orçamento",
+        t: "Esse valor não cabe no orçamento hoje",
       },
     ],
   },
 ];
 
-function OptionCard({
-  active,
-  onClick,
-  children,
-  id,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  id?: string;
-}) {
-  return (
-    <button
-      id={id}
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Step2QuestionCard({
-  question,
-  value,
-  error,
-  onSelect,
-}: {
-  question: Step2Question;
-  value: Step2[Step2Field];
-  error?: string;
-  onSelect: (field: Step2Field, value: Step2Value) => void;
-}) {
-  return (
-    <fieldset
-      id={`q-${question.field}`}
-      tabIndex={-1}
-      aria-describedby={error ? `err-${question.field}` : undefined}
-      className="rounded-lg border border-[#E5E7EB] bg-white p-4 outline-none focus:ring-4 focus:ring-[#22C55E]/20"
-    >
-      <legend className="mb-1 block text-base font-semibold leading-6 text-[#101828]">
-        {question.question}
-      </legend>
-      {question.description ? (
-        <p className="mb-3 text-sm text-[#667085]">{question.description}</p>
-      ) : null}
-      <div className="grid gap-2.5">
-        {question.options.map((opt) => (
-          <OptionCard
-            key={opt.v}
-            active={value === opt.v}
-            onClick={() => onSelect(question.field, opt.v)}
-          >
-            {opt.t}
-          </OptionCard>
-        ))}
-      </div>
-      <ErrorText id={`err-${question.field}`} msg={error} />
-    </fieldset>
-  );
-}
-
-// Estilo inline garante que o honeypot fique realmente fora do fluxo visual,
-// independente de purge/reset de Tailwind — evita o bug do texto "Não preencha"
-// aparecendo na tela.
 const HONEYPOT_STYLE: React.CSSProperties = {
   position: "absolute",
   left: "-10000px",
@@ -271,10 +228,31 @@ const HONEYPOT_STYLE: React.CSSProperties = {
   margin: -1,
 };
 
+function OptionCard({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function LeadForm({ id = "formulario" }: { id?: string }) {
   const submit = useServerFn(submitLeadForm);
   const [step, setStep] = useState<1 | 2>(1);
-  const [step2Question, setStep2Question] = useState(0);
+  const [q, setQ] = useState(0);
   const [started, setStarted] = useState(false);
   const startedAtRef = useRef<number>(0);
   const hpRef = useRef<HTMLInputElement>(null);
@@ -291,15 +269,15 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   });
   const [step2, setStep2] = useState<Step2>({
     papel: "",
-    faturamento: "",
+    conversas_dia: "",
     problema_principal: "",
+    faturamento: "",
     investimento: "",
     consentimento: false,
   });
   const [errors, setErrors] = useState<Errors>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // form_view (uma vez por sessão)
   useEffect(() => {
     if (!containerRef.current) return;
     const el = containerRef.current;
@@ -317,6 +295,10 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     );
     obs.observe(el);
     return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    captureAndPersistTracking();
   }, []);
 
   function markStarted() {
@@ -342,70 +324,18 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     setErrors(e);
     if (Object.keys(e).length > 0) {
       const first = Object.keys(e)[0];
-      const el = document.getElementById(`f-${first}`);
-      el?.focus();
+      document.getElementById(`f-${first}`)?.focus();
       return false;
     }
     return true;
   }
 
-  function firstMissingStep2Field(): Step2Field | "consentimento" | null {
-    if (!step2.papel) return "papel";
-    if (!step2.faturamento) return "faturamento";
-    if (!step2.problema_principal) return "problema_principal";
-    if (!step2.investimento) return "investimento";
-    if (!step2.consentimento) return "consentimento";
-    return null;
-  }
-
-  function validateStep2(): boolean {
-    const missing = firstMissingStep2Field();
-    const e: Errors = {};
-    if (missing && missing !== "consentimento") {
-      e[missing] = "Escolha uma opção para continuar.";
-    }
-    if (missing === "consentimento") {
-      e.consentimento = "É necessário autorizar o contato.";
-    }
-    setErrors(e);
-    if (missing) {
-      const questionIndex = STEP2_QUESTIONS.findIndex((q) => q.field === missing);
-      if (questionIndex >= 0) setStep2Question(questionIndex);
-      setTimeout(() => {
-        const el = document.getElementById(`q-${missing}`);
-        el?.scrollIntoView({ behavior: "smooth", block: "center" });
-        el?.focus();
-      }, 50);
-      return false;
-    }
-    return true;
-  }
-
-  function handleStep2Select(field: Step2Field, value: Step2Value) {
-    setStep2((s) => ({ ...s, [field]: value }));
-    setErrors((e) => ({ ...e, [field]: undefined }));
-    if (step2Question < STEP2_QUESTIONS.length - 1) {
-      window.setTimeout(() => {
-        setStep2Question((q) => Math.min(q + 1, STEP2_QUESTIONS.length - 1));
-      }, 180);
-    }
-  }
-
-  function handleStep2Back() {
-    setErrors({});
-    if (step2Question > 0) {
-      setStep2Question((q) => q - 1);
-      return;
-    }
-    setStep(1);
-  }
-
-  function onContinue() {
+  function onStep1Continue() {
     markStarted();
     if (!validateStep1()) return;
     track("form_step_1_complete");
     setStep(2);
-    setStep2Question(0);
+    setQ(0);
     setTimeout(() => {
       containerRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -414,9 +344,75 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     }, 50);
   }
 
+  function currentField(): Step2Field {
+    return STEP2_QUESTIONS[q].field;
+  }
+
+  function currentValue(): Step2[Step2Field] {
+    return step2[currentField()];
+  }
+
+  function onSelect(field: Step2Field, value: Step2Value) {
+    setStep2((s) => ({ ...s, [field]: value }));
+    setErrors((e) => ({ ...e, [field]: undefined }));
+  }
+
+  function onQuestionContinue() {
+    const field = currentField();
+    if (!step2[field]) {
+      setErrors({ [field]: "Escolha uma opção para continuar." });
+      return;
+    }
+    if (q < STEP2_QUESTIONS.length - 1) {
+      setQ((n) => n + 1);
+      setErrors({});
+      setTimeout(() => {
+        containerRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 30);
+    } else {
+      // última pergunta respondida → mostra bloco de consentimento/envio
+      setErrors({});
+      setTimeout(() => {
+        document
+          .getElementById("consent-block")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 30);
+    }
+  }
+
+  function onQuestionBack() {
+    setErrors({});
+    if (q > 0) {
+      setQ((n) => n - 1);
+      return;
+    }
+    setStep(1);
+  }
+
   async function onFinalSubmit() {
     if (loading) return;
-    if (!validateStep2()) return;
+    // Verifica todas as respostas antes de enviar.
+    const order: Step2Field[] = [
+      "papel",
+      "conversas_dia",
+      "problema_principal",
+      "faturamento",
+      "investimento",
+    ];
+    for (let i = 0; i < order.length; i++) {
+      if (!step2[order[i]]) {
+        setQ(i);
+        setErrors({ [order[i]]: "Escolha uma opção para continuar." });
+        return;
+      }
+    }
+    if (!step2.consentimento) {
+      setErrors({ consentimento: "É necessário autorizar o contato." });
+      return;
+    }
     setSubmitError(null);
     setLoading(true);
     track("form_submit_attempt");
@@ -430,11 +426,12 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           loja: step1.loja.trim(),
           email: step1.email.trim(),
           papel: step2.papel as Exclude<Papel, "">,
-          faturamento: step2.faturamento as Exclude<Faturamento, "">,
+          conversas_dia: step2.conversas_dia as Exclude<Conversas, "">,
           problema_principal: step2.problema_principal as Exclude<
             Problema,
             ""
           >,
+          faturamento: step2.faturamento as Exclude<Faturamento, "">,
           investimento: step2.investimento as Exclude<Investimento, "">,
           consentimento: true as const,
           utm_source: utms.utm_source,
@@ -451,7 +448,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         },
       });
       if (res?.ok) {
-        // Proteção contra double-fire do evento de conversão.
         if (!successFiredRef.current) {
           successFiredRef.current = true;
           track("generate_lead");
@@ -477,29 +473,12 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     }
   }
 
-  useEffect(() => {
-    captureAndPersistTracking();
-  }, []);
-
   function onWhatsappClick() {
     track("whatsapp_click");
   }
 
-  const stepIndicator = success ? null : (
-    <div className="mb-4 flex items-center justify-between">
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#667085]">
-        {step === 1 ? "1 de 2" : "2 de 2"}
-      </p>
-      <div className="flex gap-1.5" aria-hidden>
-        <span
-          className={`h-1.5 w-8 rounded-full ${step === 1 ? "bg-[#22C55E]" : "bg-[#E5E7EB]"}`}
-        />
-        <span
-          className={`h-1.5 w-8 rounded-full ${step === 2 ? "bg-[#22C55E]" : "bg-[#E5E7EB]"}`}
-        />
-      </div>
-    </div>
-  );
+  const isLastQuestion = q === STEP2_QUESTIONS.length - 1;
+  const showConsent = isLastQuestion && !!step2[currentField()];
 
   return (
     <div
@@ -507,7 +486,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       ref={containerRef}
       className="relative rounded-2xl bg-white p-5 shadow-[0_10px_40px_-15px_rgba(16,24,40,0.25)] ring-1 ring-black/5 sm:p-7"
     >
-      {/* Honeypot invisível para bots — fora do fluxo visual e da navegação. */}
+      {/* Honeypot invisível para bots. */}
       <div aria-hidden="true" style={HONEYPOT_STYLE}>
         <input
           ref={hpRef}
@@ -527,21 +506,36 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         />
       ) : (
         <>
-          {stepIndicator}
-          <div>
-            <h2 className="text-xl font-semibold text-[#101828] sm:text-2xl">
-              Veja como isso funcionaria na sua loja
-            </h2>
-            <p className="mt-1.5 text-sm text-[#667085]">
-              Responda algumas perguntas rápidas. Leva cerca de um minuto.
+          <div className="mb-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#667085]">
+              {step === 1
+                ? "Etapa 1 de 2"
+                : `Etapa 2 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`}
             </p>
+            <div className="mt-2 flex gap-1.5" aria-hidden>
+              {step === 1 ? (
+                <>
+                  <span className="h-1.5 flex-1 rounded-full bg-[#22C55E]" />
+                  <span className="h-1.5 flex-1 rounded-full bg-[#E5E7EB]" />
+                </>
+              ) : (
+                STEP2_QUESTIONS.map((qq, i) => (
+                  <span
+                    key={qq.field}
+                    className={`h-1.5 flex-1 rounded-full ${i <= q ? "bg-[#22C55E]" : "bg-[#E5E7EB]"}`}
+                  />
+                ))
+              )}
+            </div>
           </div>
 
           {step === 1 ? (
-            <div className="mt-5 space-y-4">
-              <p className="text-[15px] font-medium text-[#101828]">
-                Primeiro, fale um pouco sobre você
-              </p>
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-xl font-semibold text-[#101828] sm:text-2xl">
+                  Primeiro, fale um pouco sobre você
+                </h2>
+              </div>
 
               <div>
                 <Label htmlFor="f-nome">Seu nome</Label>
@@ -583,7 +577,9 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                       setErrors((x) => ({ ...x, whatsapp: undefined }));
                   }}
                   aria-invalid={!!errors.whatsapp}
-                  aria-describedby={errors.whatsapp ? "err-whatsapp" : undefined}
+                  aria-describedby={
+                    errors.whatsapp ? "err-whatsapp" : undefined
+                  }
                   className={`${fieldBase} ${errors.whatsapp ? fieldError : ""}`}
                 />
                 <ErrorText id="err-whatsapp" msg={errors.whatsapp} />
@@ -635,76 +631,62 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
 
               <button
                 type="button"
-                onClick={onContinue}
+                onClick={onStep1Continue}
                 className="mt-1 flex min-h-[52px] w-full items-center justify-center rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white transition-colors hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#22C55E]/30"
               >
                 Continuar
               </button>
               <p className="text-xs text-[#667085]">
-                Na próxima etapa, faremos quatro perguntas sobre sua loja.
+                Na próxima etapa, faremos cinco perguntas rápidas sobre sua
+                loja.
               </p>
             </div>
           ) : (
-            <div className="mt-5 space-y-5">
-              <div>
-                <p className="text-[15px] font-medium text-[#101828]">
-                  Agora, sobre sua loja
-                </p>
-                <p className="mt-1 text-sm text-[#667085]">
-                  Escolha as opções que mais combinam com sua realidade.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 text-xs text-[#667085]">
-                <span className="font-semibold">
-                  Pergunta {step2Question + 1} de {STEP2_QUESTIONS.length}
-                </span>
-                <div className="flex gap-1.5" aria-hidden>
-                  {STEP2_QUESTIONS.map((q, i) => (
-                    <span
-                      key={q.field}
-                      className={`h-1.5 w-6 rounded-full ${i <= step2Question ? "bg-[#22C55E]" : "bg-[#E5E7EB]"}`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <Step2QuestionCard
-                question={STEP2_QUESTIONS[step2Question]}
-                value={step2[STEP2_QUESTIONS[step2Question].field]}
-                error={errors[STEP2_QUESTIONS[step2Question].field]}
-                onSelect={handleStep2Select}
+            <div className="space-y-5">
+              <QuestionBlock
+                question={STEP2_QUESTIONS[q]}
+                value={currentValue()}
+                error={errors[currentField()]}
+                onSelect={onSelect}
               />
 
-              <div
-                id="q-consentimento"
-                tabIndex={-1}
-                className="rounded-lg bg-[#F6F7F9] p-4"
-              >
-                <label className="flex items-start gap-3 text-sm font-normal text-[#101828]">
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 h-5 w-5 shrink-0 rounded border-[#D0D5DD] text-[#22C55E] focus:ring-[#22C55E]"
-                    checked={step2.consentimento}
-                    onChange={(e) =>
-                      setStep2((s) => ({
-                        ...s,
-                        consentimento: e.target.checked,
-                      }))
-                    }
+              {showConsent ? (
+                <div
+                  id="consent-block"
+                  className="rounded-lg bg-[#F6F7F9] p-4"
+                >
+                  <label className="flex items-start gap-3 text-sm font-normal text-[#101828]">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-5 w-5 shrink-0 rounded border-[#D0D5DD] text-[#22C55E] focus:ring-[#22C55E]"
+                      checked={step2.consentimento}
+                      onChange={(e) => {
+                        setStep2((s) => ({
+                          ...s,
+                          consentimento: e.target.checked,
+                        }));
+                        if (errors.consentimento)
+                          setErrors((x) => ({
+                            ...x,
+                            consentimento: undefined,
+                          }));
+                      }}
+                    />
+                    <span>
+                      Autorizo o contato pelo WhatsApp sobre esta solicitação
+                      e li a <PrivacyDialog />.
+                    </span>
+                  </label>
+                  <ErrorText
+                    id="err-consentimento"
+                    msg={errors.consentimento}
                   />
-                  <span>
-                    Autorizo o contato pelo WhatsApp sobre esta solicitação e
-                    li a <PrivacyDialog />.
-                  </span>
-                </label>
-                <ErrorText id="err-consentimento" msg={errors.consentimento} />
-              </div>
-
-              <p className="text-xs text-[#667085]">
-                Usaremos suas respostas somente para entender sua loja e entrar
-                em contato.
-              </p>
+                  <p className="mt-3 text-xs text-[#667085]">
+                    Usaremos suas respostas somente para entender sua loja e
+                    entrar em contato pelo WhatsApp.
+                  </p>
+                </div>
+              ) : null}
 
               {submitError ? (
                 <div className="rounded-lg border border-[#B42318]/30 bg-[#FEF3F2] p-3 text-sm text-[#B42318]">
@@ -715,25 +697,75 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               <div className="flex flex-col-reverse gap-2 sm:flex-row">
                 <button
                   type="button"
-                  onClick={handleStep2Back}
+                  onClick={onQuestionBack}
                   className="inline-flex min-h-[52px] items-center justify-center gap-1 rounded-lg border border-[#D0D5DD] bg-white px-5 text-base font-semibold text-[#101828] hover:bg-[#F6F7F9] focus:outline-none focus:ring-4 focus:ring-black/10"
                 >
                   <ChevronLeft className="h-4 w-4" /> Voltar
                 </button>
-                <button
-                  type="button"
-                  onClick={onFinalSubmit}
-                  disabled={loading}
-                  className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white transition-colors hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#22C55E]/30 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {loading ? "Enviando..." : "Receber minha análise"}
-                </button>
+                {isLastQuestion && showConsent ? (
+                  <button
+                    type="button"
+                    onClick={onFinalSubmit}
+                    disabled={loading}
+                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white transition-colors hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#22C55E]/30 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {loading
+                      ? "Enviando..."
+                      : "Quero ver como funcionaria na minha loja"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onQuestionContinue}
+                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white transition-colors hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#22C55E]/30"
+                  >
+                    Continuar
+                  </button>
+                )}
               </div>
             </div>
           )}
         </>
       )}
     </div>
+  );
+}
+
+function QuestionBlock({
+  question,
+  value,
+  error,
+  onSelect,
+}: {
+  question: Step2Question;
+  value: Step2[Step2Field];
+  error?: string;
+  onSelect: (field: Step2Field, value: Step2Value) => void;
+}) {
+  return (
+    <fieldset
+      id={`q-${question.field}`}
+      className="rounded-lg border border-[#E5E7EB] bg-white p-4"
+    >
+      <legend className="mb-1 block px-1 text-[17px] font-semibold leading-6 text-[#101828]">
+        {question.question}
+      </legend>
+      {question.description ? (
+        <p className="mb-3 text-sm text-[#667085]">{question.description}</p>
+      ) : null}
+      <div className="mt-2 grid gap-2.5">
+        {question.options.map((opt) => (
+          <OptionCard
+            key={opt.v}
+            active={value === opt.v}
+            onClick={() => onSelect(question.field, opt.v)}
+          >
+            {opt.t}
+          </OptionCard>
+        ))}
+      </div>
+      <ErrorText id={`err-${question.field}`} msg={error} />
+    </fieldset>
   );
 }
 
@@ -755,8 +787,8 @@ function SuccessState({
         Recebemos suas respostas.
       </h2>
       <p className="mt-2 text-[15px] leading-6 text-[#475467]">
-        Vamos analisar as informações da sua loja e entrar em contato pelo
-        WhatsApp informado.
+        Agora vamos analisar como o atendimento poderia funcionar na sua loja.
+        Entraremos em contato pelo WhatsApp informado.
       </p>
       <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
         <a
