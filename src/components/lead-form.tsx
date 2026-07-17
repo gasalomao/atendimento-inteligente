@@ -80,9 +80,9 @@ type Step2Question = {
 type Errors = Partial<Record<string, string>>;
 
 const fieldBase =
-  "block w-full rounded-lg bg-white px-3.5 py-3 text-[16px] leading-6 text-[#101828] placeholder:text-[#667085] border border-[#D0D5DD] outline-none transition-shadow focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20 disabled:opacity-60 min-h-[48px]";
+  "block w-full rounded-[10px] bg-white px-4 py-3 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[52px]";
 const fieldError =
-  "border-[#B42318] bg-[#FEF3F2] focus:border-[#B42318] focus:ring-[#B42318]/20";
+  "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
 function Label({
   htmlFor,
@@ -94,7 +94,7 @@ function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-1.5 block text-[15px] font-semibold text-[#101828]"
+      className="mb-2 block text-[14px] font-[600] text-[#191A18]"
     >
       {children}
     </label>
@@ -104,16 +104,16 @@ function Label({
 function ErrorText({ id, msg }: { id: string; msg?: string }) {
   if (!msg) return null;
   return (
-    <p id={id} className="mt-1.5 text-sm text-[#B42318]">
+    <p id={id} role="alert" className="mt-2 text-[13px] text-[#B42318]">
       {msg}
     </p>
   );
 }
 
 const cardOptionBase =
-  "w-full text-left rounded-lg border border-[#D0D5DD] bg-white px-4 py-3 text-[16px] leading-6 text-[#101828] min-h-[52px] transition-colors hover:border-[#22C55E] focus:outline-none focus:border-[#22C55E] focus:ring-4 focus:ring-[#22C55E]/20";
+  "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-3.5 text-[16px] leading-[1.4] text-[#2B2D29] min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] flex items-center gap-3";
 const cardOptionActive =
-  "border-[#22C55E] bg-[#F0FDF4] ring-2 ring-[#22C55E]";
+  "border-[#207A50] bg-[#EDF6F0] hover:border-[#207A50] hover:bg-[#EDF6F0]";
 
 const STEP2_QUESTIONS: Step2Question[] = [
   {
@@ -244,7 +244,19 @@ function OptionCard({
       aria-pressed={active}
       className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
     >
-      {children}
+      <span
+        aria-hidden
+        className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border transition-colors ${
+          active ? "border-[#207A50]" : "border-[#C8C4BB]"
+        }`}
+      >
+        <span
+          className={`h-[8px] w-[8px] rounded-full transition-opacity ${
+            active ? "bg-[#207A50] opacity-100" : "opacity-0"
+          }`}
+        />
+      </span>
+      <span className="flex-1">{children}</span>
     </button>
   );
 }
@@ -480,11 +492,21 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const isLastQuestion = q === STEP2_QUESTIONS.length - 1;
   const showConsent = isLastQuestion && !!step2[currentField()];
 
+  const totalSteps = 1 + STEP2_QUESTIONS.length;
+  const currentStepIndex = step === 1 ? 1 : q + 2;
+  const progressPct = Math.round((currentStepIndex / totalSteps) * 100);
+  const stepLabel =
+    step === 1 ? "Seus dados" : "Sobre sua loja";
+  const stepCounter =
+    step === 1
+      ? "Etapa 1 de 2"
+      : `Etapa 2 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`;
+
   return (
     <div
       id={id}
       ref={containerRef}
-      className="relative rounded-2xl bg-white p-5 shadow-[0_10px_40px_-15px_rgba(16,24,40,0.25)] ring-1 ring-black/5 sm:p-7"
+      className="relative w-full rounded-[14px] border border-[#DDDAD3] bg-white p-6 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:p-8 lg:max-w-[500px] lg:ml-auto"
     >
       {/* Honeypot invisível para bots. */}
       <div aria-hidden="true" style={HONEYPOT_STYLE}>
@@ -506,37 +528,36 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         />
       ) : (
         <>
-          <div className="mb-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#667085]">
-              {step === 1
-                ? "Etapa 1 de 2"
-                : `Etapa 2 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`}
+          <div className="mb-6">
+            <h2 className="text-[22px] font-[650] leading-[1.2] tracking-[-0.02em] text-[#191A18] sm:text-[24px]">
+              Veja como isso funcionaria na sua loja
+            </h2>
+            <p className="mt-2 text-[15px] leading-[1.55] text-[#5F625E]">
+              Responda algumas perguntas rápidas. Leva cerca de um minuto.
             </p>
-            <div className="mt-2 flex gap-1.5" aria-hidden>
-              {step === 1 ? (
-                <>
-                  <span className="h-1.5 flex-1 rounded-full bg-[#22C55E]" />
-                  <span className="h-1.5 flex-1 rounded-full bg-[#E5E7EB]" />
-                </>
-              ) : (
-                STEP2_QUESTIONS.map((qq, i) => (
-                  <span
-                    key={qq.field}
-                    className={`h-1.5 flex-1 rounded-full ${i <= q ? "bg-[#22C55E]" : "bg-[#E5E7EB]"}`}
-                  />
-                ))
-              )}
+          </div>
+
+          <div className="mb-6">
+            <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
+              <span>{stepCounter}</span>
+              <span>{stepLabel}</span>
+            </div>
+            <div
+              className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-[#E8E5DF]"
+              role="progressbar"
+              aria-valuenow={progressPct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="h-full rounded-full bg-[#207A50] transition-[width] duration-200 ease-out"
+                style={{ width: `${progressPct}%` }}
+              />
             </div>
           </div>
 
           {step === 1 ? (
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-xl font-semibold text-[#101828] sm:text-2xl">
-                  Primeiro, fale um pouco sobre você
-                </h2>
-              </div>
-
+            <div className="space-y-5">
               <div>
                 <Label htmlFor="f-nome">Seu nome</Label>
                 <input
@@ -632,17 +653,16 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               <button
                 type="button"
                 onClick={onStep1Continue}
-                className="mt-1 flex min-h-[52px] w-full items-center justify-center rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white transition-colors hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#22C55E]/30"
+                className="mt-2 flex min-h-[52px] w-full items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
               >
                 Continuar
               </button>
-              <p className="text-xs text-[#667085]">
-                Na próxima etapa, faremos cinco perguntas rápidas sobre sua
-                loja.
+              <p className="text-[13px] text-[#7B7E78]">
+                Depois, cinco perguntas curtas sobre sua loja.
               </p>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <QuestionBlock
                 question={STEP2_QUESTIONS[q]}
                 value={currentValue()}
@@ -653,12 +673,12 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               {showConsent ? (
                 <div
                   id="consent-block"
-                  className="rounded-lg bg-[#F6F7F9] p-4"
+                  className="rounded-[10px] border border-[#E3E0D9] bg-[#F7F5F1] p-4"
                 >
-                  <label className="flex items-start gap-3 text-sm font-normal text-[#101828]">
+                  <label className="flex items-start gap-3 text-[14px] leading-[1.55] text-[#191A18]">
                     <input
                       type="checkbox"
-                      className="mt-0.5 h-5 w-5 shrink-0 rounded border-[#D0D5DD] text-[#22C55E] focus:ring-[#22C55E]"
+                      className="mt-0.5 h-[18px] w-[18px] shrink-0 rounded border-[#C8C4BB] text-[#207A50] accent-[#207A50] focus:ring-[#207A50]/30"
                       checked={step2.consentimento}
                       onChange={(e) => {
                         setStep2((s) => ({
@@ -681,24 +701,28 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                     id="err-consentimento"
                     msg={errors.consentimento}
                   />
-                  <p className="mt-3 text-xs text-[#667085]">
-                    Usaremos suas respostas somente para entender sua loja e
-                    entrar em contato pelo WhatsApp.
+                  <p className="mt-3 text-[12px] leading-[1.5] text-[#7B7E78]">
+                    Suas respostas serão usadas apenas para entender sua loja
+                    e retornar pelo WhatsApp.
                   </p>
                 </div>
               ) : null}
 
               {submitError ? (
-                <div className="rounded-lg border border-[#B42318]/30 bg-[#FEF3F2] p-3 text-sm text-[#B42318]">
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className="rounded-[10px] border border-[#B42318]/30 bg-[#FEF8F7] p-3 text-[14px] text-[#B42318]"
+                >
                   {submitError}
                 </div>
               ) : null}
 
-              <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <div className="flex flex-col-reverse gap-2.5 sm:flex-row">
                 <button
                   type="button"
                   onClick={onQuestionBack}
-                  className="inline-flex min-h-[52px] items-center justify-center gap-1 rounded-lg border border-[#D0D5DD] bg-white px-5 text-base font-semibold text-[#101828] hover:bg-[#F6F7F9] focus:outline-none focus:ring-4 focus:ring-black/10"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-1 rounded-[10px] border border-[#CFCBC3] bg-transparent px-5 text-[15px] font-[600] text-[#30322E] transition-colors duration-150 hover:bg-[#F0EEE9] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#191A18]/15 active:scale-[0.99]"
                 >
                   <ChevronLeft className="h-4 w-4" /> Voltar
                 </button>
@@ -707,17 +731,17 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                     type="button"
                     onClick={onFinalSubmit}
                     disabled={loading}
-                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white transition-colors hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#22C55E]/30 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
                   >
                     {loading
                       ? "Enviando..."
-                      : "Quero ver como funcionaria na minha loja"}
+                      : "Ver como funcionaria na minha loja"}
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={onQuestionContinue}
-                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white transition-colors hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#22C55E]/30"
+                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
                   >
                     Continuar
                   </button>
@@ -731,6 +755,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   );
 }
 
+
 function QuestionBlock({
   question,
   value,
@@ -743,17 +768,16 @@ function QuestionBlock({
   onSelect: (field: Step2Field, value: Step2Value) => void;
 }) {
   return (
-    <fieldset
-      id={`q-${question.field}`}
-      className="rounded-lg border border-[#E5E7EB] bg-white p-4"
-    >
-      <legend className="mb-1 block px-1 text-[17px] font-semibold leading-6 text-[#101828]">
+    <fieldset id={`q-${question.field}`} className="border-0 p-0">
+      <legend className="block text-[17px] font-[600] leading-[1.35] text-[#191A18]">
         {question.question}
       </legend>
       {question.description ? (
-        <p className="mb-3 text-sm text-[#667085]">{question.description}</p>
+        <p className="mt-2 text-[14px] leading-[1.55] text-[#5F625E]">
+          {question.description}
+        </p>
       ) : null}
-      <div className="mt-2 grid gap-2.5">
+      <div className="mt-4 grid gap-2.5" role="radiogroup">
         {question.options.map((opt) => (
           <OptionCard
             key={opt.v}
@@ -779,28 +803,29 @@ function SuccessState({
   const digits = onlyDigits(whatsapp);
   const waHref = digits ? `https://wa.me/55${digits}` : "https://wa.me/";
   return (
-    <div className="text-center">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F0FDF4] text-[#16A34A]">
-        <CheckCircle2 className="h-8 w-8" />
+    <div className="text-center" aria-live="polite">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F3EC] text-[#207A50]">
+        <CheckCircle2 className="h-6 w-6" strokeWidth={2.25} />
       </div>
-      <h2 className="mt-4 text-xl font-semibold text-[#101828] sm:text-2xl">
+      <h2 className="mt-5 text-[22px] font-[650] leading-[1.25] tracking-[-0.02em] text-[#191A18] sm:text-[24px]">
         Recebemos suas respostas.
       </h2>
-      <p className="mt-2 text-[15px] leading-6 text-[#475467]">
-        Agora vamos analisar como o atendimento poderia funcionar na sua loja.
-        Entraremos em contato pelo WhatsApp informado.
+      <p className="mx-auto mt-3 max-w-[380px] text-[15px] leading-[1.6] text-[#5F625E]">
+        Agora vamos entender como esse atendimento poderia funcionar na sua
+        loja. Entraremos em contato pelo WhatsApp informado.
       </p>
-      <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+      <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:justify-center">
         <a
           href={waHref}
           target="_blank"
           rel="noopener noreferrer"
           onClick={onWhatsappClick}
-          className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white hover:bg-[#16A34A]"
+          className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[10px] bg-[#207A50] px-6 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
         >
-          <MessageCircle className="h-5 w-5" /> Falar pelo WhatsApp agora
+          <MessageCircle className="h-5 w-5" /> Continuar pelo WhatsApp
         </a>
       </div>
     </div>
   );
 }
+
