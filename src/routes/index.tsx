@@ -189,15 +189,15 @@ function DemoSection() {
 
 function ChatDemo() {
   const messages: { from: "cliente" | "loja"; text: string }[] = [
-    { from: "cliente", text: "Tem iPhone 15 Pro 256 GB?" },
-    { from: "loja", text: "Você procura novo ou seminovo?" },
+    { from: "cliente", text: "Oi, vocês têm aquele modelo em estoque?" },
+    { from: "loja", text: "Temos sim. Você prefere novo ou seminovo?" },
     {
       from: "cliente",
-      text: "Seminovo. Tenho um iPhone 13 para dar na troca.",
+      text: "Seminovo. Tenho um usado para dar na troca.",
     },
     {
       from: "loja",
-      text: "Como está o aparelho e você pretende pagar à vista ou parcelado?",
+      text: "Como está o produto e você pretende pagar à vista ou parcelado?",
     },
     { from: "cliente", text: "Está bem conservado e quero parcelar." },
   ];
