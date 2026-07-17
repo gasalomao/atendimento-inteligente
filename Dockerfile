@@ -23,10 +23,10 @@ RUN npm run build
 # Backend Express roda direto via tsx em produção (evita problemas de
 # resolução ESM de imports sem extensão no output do tsc).
 
-# Descobre onde o build do frontend caiu e normaliza para /app/dist/client.
+# Descobre onde o build do frontend caiu e normaliza para /app/dist/client e /app/dist/server.
 RUN set -eux; \
-    if   [ -d "output/public" ];  then mkdir -p dist && cp -r output/public dist/client; \
-    elif [ -d ".output/public" ]; then mkdir -p dist && cp -r .output/public dist/client; \
+    if   [ -d "output/public" ];  then mkdir -p dist && cp -r output/public dist/client && cp -r output/server dist/server; \
+    elif [ -d ".output/public" ]; then mkdir -p dist && cp -r .output/public dist/client && cp -r .output/server dist/server; \
     elif [ -d "dist/client" ];    then :; \
     elif [ -d "dist" ];           then mv dist dist-tmp && mkdir dist && mv dist-tmp dist/client; \
     else echo "Frontend build output not found" && ls -la && exit 1; fi; \
@@ -60,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/healthz || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["npm", "start"]
+CMD ["sh", "-c", "PORT=3001 node dist/server/index.mjs & PORT=3000 tsx server/src/index.ts"]
