@@ -32,12 +32,6 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-function scrollToForm() {
-  if (typeof window === "undefined") return;
-  document
-    .getElementById("formulario")
-    ?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
 
 function LandingPage() {
   useEffect(() => {
@@ -81,7 +75,7 @@ function Header() {
           : "border-transparent bg-[#F7F5F1]"
       }`}
     >
-      <div className="mx-auto flex h-[60px] w-full max-w-[1180px] items-center justify-between px-5 sm:h-[68px] sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-[56px] w-full max-w-[1180px] items-center px-5 sm:h-16 sm:px-6 lg:px-8">
         <a
           href="/"
           className="flex items-center gap-2.5"
@@ -97,13 +91,6 @@ function Header() {
             Salomão AI
           </span>
         </a>
-        <button
-          type="button"
-          onClick={scrollToForm}
-          className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#207A50] px-4 text-[14px] font-semibold text-white transition-colors duration-150 hover:bg-[#17613E] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
-        >
-          Analisar meu atendimento
-        </button>
       </div>
     </header>
   );
@@ -118,18 +105,17 @@ function Hero() {
             Atendimento para lojas de iPhone
           </p>
           <h1 className="mt-5 text-[clamp(36px,10vw,46px)] font-[650] leading-[1.06] tracking-[-0.035em] text-[#191A18] sm:text-[clamp(42px,4.5vw,64px)] sm:leading-[1.04]">
-            Quem quer comprar um iPhone não espera. Se você demora, ele chama
-            outra loja.
+            Enquanto você demora, o cliente chama outra loja.
           </h1>
           <p className="mt-6 max-w-[620px] text-[17px] leading-[1.6] text-[#5F625E] sm:text-[18px]">
-            O atendimento automático responde as primeiras perguntas, entende
-            qual aparelho a pessoa procura e deixa a conversa organizada para
-            o vendedor continuar.
+            Quando sua equipe está ocupada, o atendimento responde as primeiras
+            perguntas, entende qual aparelho a pessoa procura e deixa a conversa
+            organizada para o vendedor continuar.
           </p>
 
           <ul className="mt-8 space-y-3 border-t border-[#DDDAD3] pt-6 text-[16px] leading-[1.55] text-[#191A18] sm:text-[17px]">
             <HeroPoint>Responde quando o vendedor está ocupado</HeroPoint>
-            <HeroPoint>Retoma conversas que ficaram paradas</HeroPoint>
+            <HeroPoint>Volta a falar com quem parou de responder</HeroPoint>
             <HeroPoint>Organiza as informações para o vendedor</HeroPoint>
           </ul>
 
@@ -214,7 +200,7 @@ function DemoSection() {
       <div className="mx-auto w-full max-w-[1180px] px-5 py-16 sm:px-6 sm:py-24 lg:px-8">
         <h2 className="max-w-[820px] text-[clamp(30px,3vw,44px)] font-[650] leading-[1.1] tracking-[-0.025em] text-[#191A18]">
           O atendimento começa organizado. O vendedor continua com mais
-          contexto.
+          informações.
         </h2>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10">
