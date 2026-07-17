@@ -55,10 +55,12 @@ export async function leadsHandler(req: Request, res: Response) {
 
   const score = calcScore(data);
   const classification = classify(score);
-  const formAnswers = buildFormAnswers(data);
+  const baseFormAnswers = buildFormAnswers(data);
   const ipHash = req.ip
     ? crypto.createHash("sha256").update(String(req.ip)).digest("hex").slice(0, 16)
     : null;
+  const geo = await lookupGeo(req.ip ?? null);
+  const formAnswers = geo ? { ...baseFormAnswers, geo } : baseFormAnswers;
 
   const insert = {
     event_id: eventId,
