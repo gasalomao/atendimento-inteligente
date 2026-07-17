@@ -7,6 +7,7 @@ import { env } from "./env";
 import { logger } from "./logger";
 import { healthHandler } from "./routes/health";
 import { leadsHandler } from "./routes/leads";
+import { trackHandler, metricsHandler } from "./routes/track";
 import { leadsRateLimit } from "./security/rate-limit";
 import { startWorker } from "./notifications/worker";
 
@@ -30,6 +31,12 @@ app.get("/healthz", healthHandler);
 // API
 app.post("/api/leads", leadsRateLimit, (req, res, next) => {
   void Promise.resolve(leadsHandler(req, res)).catch(next);
+});
+app.post("/api/track", (req, res, next) => {
+  void Promise.resolve(trackHandler(req, res)).catch(next);
+});
+app.get("/api/metrics", (req, res, next) => {
+  void Promise.resolve(metricsHandler(req, res)).catch(next);
 });
 
 // Static SPA (produção)
