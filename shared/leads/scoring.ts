@@ -36,10 +36,13 @@ export function calcScore(input: LeadInput): number {
     needs_other_decision_maker: 1,
     above_current_budget: 0,
   };
+  const problemaScore = Array.isArray(input.problema_principal)
+    ? Math.max(0, ...input.problema_principal.map((p) => problema[p] ?? 0))
+    : 0;
   return (
     (papel[input.papel] ?? 0) +
     (conversas[input.conversas_dia] ?? 0) +
-    (problema[input.problema_principal] ?? 0) +
+    problemaScore +
     (faturamento[input.faturamento] ?? 0) +
     (investimento[input.investimento] ?? 0)
   );
