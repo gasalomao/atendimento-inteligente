@@ -68,7 +68,7 @@ function Header() {
             <Sparkles className="h-4 w-4 text-[#22C55E]" />
           </span>
           <span className="text-sm font-semibold text-[#101828] sm:text-base">
-            Atendo IA
+            Salomão AI
           </span>
         </div>
         <button
@@ -346,7 +346,7 @@ function Footer() {
           >
             <Sparkles className="h-3 w-3 text-[#22C55E]" />
           </span>
-          <span className="font-medium text-[#101828]">Atendo IA</span>
+          <span className="font-medium text-[#101828]">Salomão AI</span>
           <span>· © {new Date().getFullYear()}</span>
         </div>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -357,10 +357,10 @@ function Footer() {
             Política de Privacidade
           </a>
           <a
-            href="mailto:contato@atendoia.com"
+            href="mailto:contato@salomaoai.com"
             className="hover:text-[#101828]"
           >
-            contato@atendoia.com
+            contato@salomaoai.com
           </a>
         </div>
       </div>

@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       {
         title:
-          "Atendo IA — IA para atendimento no WhatsApp de lojas de iPhone",
+          "Salomão AI — IA para atendimento no WhatsApp de lojas de iPhone",
       },
       {
         name: "description",
