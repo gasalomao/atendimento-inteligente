@@ -374,10 +374,10 @@ function Footer() {
             Política de Privacidade
           </a>
           <a
-            href="mailto:contato@salomaoai.com"
+            href="mailto:ga.pancione@gmail.com"
             className="text-[#F5F3EE]/80 transition-colors hover:text-[#F5F3EE]"
           >
-            contato@salomaoai.com
+            ga.pancione@gmail.com
           </a>
         </div>
       </div>

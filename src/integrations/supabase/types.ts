@@ -16,12 +16,16 @@ export type Database = {
     Tables: {
       contatos: {
         Row: {
+          consent_timestamp: string | null
           consentimento: boolean
           conversas_dia: string | null
           created_at: string
           email: string | null
+          email_status: string
+          event_id: string | null
           faturamento: string | null
           fbclid: string | null
+          form_answers: Json | null
           gclid: string | null
           id: string
           investimento: string | null
@@ -32,23 +36,30 @@ export type Database = {
           nome: string
           papel: string | null
           pontuacao: number
+          privacy_policy_version: string | null
           problema_principal: string | null
           referrer: string | null
+          status: string
           user_agent: string | null
           utm_campaign: string | null
           utm_content: string | null
           utm_medium: string | null
           utm_source: string | null
           utm_term: string | null
+          webhook_status: string
           whatsapp: string
         }
         Insert: {
+          consent_timestamp?: string | null
           consentimento?: boolean
           conversas_dia?: string | null
           created_at?: string
           email?: string | null
+          email_status?: string
+          event_id?: string | null
           faturamento?: string | null
           fbclid?: string | null
+          form_answers?: Json | null
           gclid?: string | null
           id?: string
           investimento?: string | null
@@ -59,23 +70,30 @@ export type Database = {
           nome: string
           papel?: string | null
           pontuacao?: number
+          privacy_policy_version?: string | null
           problema_principal?: string | null
           referrer?: string | null
+          status?: string
           user_agent?: string | null
           utm_campaign?: string | null
           utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
           utm_term?: string | null
+          webhook_status?: string
           whatsapp: string
         }
         Update: {
+          consent_timestamp?: string | null
           consentimento?: boolean
           conversas_dia?: string | null
           created_at?: string
           email?: string | null
+          email_status?: string
+          event_id?: string | null
           faturamento?: string | null
           fbclid?: string | null
+          form_answers?: Json | null
           gclid?: string | null
           id?: string
           investimento?: string | null
@@ -86,24 +104,110 @@ export type Database = {
           nome?: string
           papel?: string | null
           pontuacao?: number
+          privacy_policy_version?: string | null
           problema_principal?: string | null
           referrer?: string | null
+          status?: string
           user_agent?: string | null
           utm_campaign?: string | null
           utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
           utm_term?: string | null
+          webhook_status?: string
           whatsapp?: string
         }
         Relationships: []
+      }
+      lead_notification_jobs: {
+        Row: {
+          attempts: number
+          channel: string
+          created_at: string
+          event_id: string
+          id: string
+          last_error: string | null
+          lead_id: string
+          locked_at: string | null
+          next_attempt_at: string
+          provider_message_id: string | null
+          response_status: number | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          created_at?: string
+          event_id: string
+          id?: string
+          last_error?: string | null
+          lead_id: string
+          locked_at?: string | null
+          next_attempt_at?: string
+          provider_message_id?: string | null
+          response_status?: number | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          last_error?: string | null
+          lead_id?: string
+          locked_at?: string | null
+          next_attempt_at?: string
+          provider_message_id?: string | null
+          response_status?: number | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_notification_jobs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "contatos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_notification_jobs: {
+        Args: { _limit: number }
+        Returns: {
+          attempts: number
+          channel: string
+          created_at: string
+          event_id: string
+          id: string
+          last_error: string | null
+          lead_id: string
+          locked_at: string | null
+          next_attempt_at: string
+          provider_message_id: string | null
+          response_status: number | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "lead_notification_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       [_ in never]: never
