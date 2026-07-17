@@ -60,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/healthz || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "PORT=3001 node dist/server/index.mjs & PORT=3000 tsx server/src/index.ts"]
+CMD ["sh", "-c", "PORT=3001 node dist/server/index.mjs & PORT=3000 ./node_modules/.bin/tsx server/src/index.ts"]
