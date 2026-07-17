@@ -18,7 +18,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build do frontend (TanStack/Vite). Nitro emite output/public para SPA.
-RUN npm run build
+RUN NITRO_PRESET=node-server npm run build
 
 # Backend Express roda direto via tsx em produção (evita problemas de
 # resolução ESM de imports sem extensão no output do tsc).
