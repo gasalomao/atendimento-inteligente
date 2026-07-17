@@ -182,7 +182,6 @@ const STEP2_QUESTIONS: Step2Question[] = [
       { v: "from_50k_to_100k", t: "De R$ 50 mil a R$ 100 mil" },
       { v: "from_100k_to_300k", t: "De R$ 100 mil a R$ 300 mil" },
       { v: "above_300k", t: "Acima de R$ 300 mil" },
-      { v: "prefer_not_to_say", t: "Prefiro falar sobre isso depois" },
     ],
   },
   {
@@ -307,7 +306,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     problema_principal: [],
     faturamento: "",
     investimento: "",
-    consentimento: false,
+    consentimento: true,
   });
   const [errors, setErrors] = useState<Errors>({});
   const containerRef = useRef<HTMLDivElement>(null);
@@ -482,10 +481,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         });
         return;
       }
-    }
-    if (!step2.consentimento) {
-      setErrors({ consentimento: "É necessário autorizar o contato." });
-      return;
     }
     setSubmitError(null);
     setLoading(true);
@@ -774,43 +769,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                 onSelect={onSelect}
               />
 
-              {showConsent ? (
-                <div
-                  id="consent-block"
-                  className="rounded-[10px] border border-[#E3E0D9] bg-[#F7F5F1] p-4"
-                >
-                  <label className="flex items-start gap-3 text-[14px] leading-[1.55] text-[#191A18]">
-                    <input
-                      type="checkbox"
-                      className="mt-0.5 h-[18px] w-[18px] shrink-0 rounded border-[#C8C4BB] text-[#207A50] accent-[#207A50] focus:ring-[#207A50]/30"
-                      checked={step2.consentimento}
-                      onChange={(e) => {
-                        setStep2((s) => ({
-                          ...s,
-                          consentimento: e.target.checked,
-                        }));
-                        if (errors.consentimento)
-                          setErrors((x) => ({
-                            ...x,
-                            consentimento: undefined,
-                          }));
-                      }}
-                    />
-                    <span>
-                      Autorizo o contato pelo WhatsApp sobre esta solicitação
-                      e li a <PrivacyDialog />.
-                    </span>
-                  </label>
-                  <ErrorText
-                    id="err-consentimento"
-                    msg={errors.consentimento}
-                  />
-                  <p className="mt-3 text-[12px] leading-[1.5] text-[#7B7E78]">
-                    Suas respostas serão usadas apenas para entender sua loja
-                    e retornar pelo WhatsApp.
-                  </p>
-                </div>
-              ) : null}
 
               {submitError ? (
                 <div
@@ -934,17 +892,6 @@ function SuccessState({
         Agora vamos entender como esse atendimento poderia funcionar na sua
         loja. Entraremos em contato pelo WhatsApp informado.
       </p>
-      <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:justify-center">
-        <a
-          href={waHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={onWhatsappClick}
-          className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[10px] bg-[#207A50] px-6 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
-        >
-          <MessageCircle className="h-5 w-5" /> Continuar pelo WhatsApp
-        </a>
-      </div>
     </div>
   );
 }
