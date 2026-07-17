@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contatos: {
+        Row: {
+          consentimento: boolean
+          conversas_dia: string | null
+          created_at: string
+          email: string | null
+          faturamento: string | null
+          fbclid: string | null
+          gclid: string | null
+          id: string
+          ip: string | null
+          landing_path: string | null
+          loja: string
+          nome: string
+          papel: string | null
+          pontuacao: number
+          problema_principal: string | null
+          referrer: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          whatsapp: string
+        }
+        Insert: {
+          consentimento?: boolean
+          conversas_dia?: string | null
+          created_at?: string
+          email?: string | null
+          faturamento?: string | null
+          fbclid?: string | null
+          gclid?: string | null
+          id?: string
+          ip?: string | null
+          landing_path?: string | null
+          loja: string
+          nome: string
+          papel?: string | null
+          pontuacao?: number
+          problema_principal?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          whatsapp: string
+        }
+        Update: {
+          consentimento?: boolean
+          conversas_dia?: string | null
+          created_at?: string
+          email?: string | null
+          faturamento?: string | null
+          fbclid?: string | null
+          gclid?: string | null
+          id?: string
+          ip?: string | null
+          landing_path?: string | null
+          loja?: string
+          nome?: string
+          papel?: string | null
+          pontuacao?: number
+          problema_principal?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          whatsapp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
