@@ -11,7 +11,7 @@ const submitSchema = z.object({
     .trim()
     .min(10, "Confira o número e inclua o DDD.")
     .max(20),
-  loja: z.string().trim().min(2, "Digite o nome ou Instagram da loja.").max(120),
+  loja: z.string().trim().max(120).optional().or(z.literal("")),
   email: z
     .string()
     .trim()
@@ -159,7 +159,7 @@ export const submitLeadForm = createServerFn({ method: "POST" })
       .insert({
         nome: data.nome,
         whatsapp: data.whatsapp,
-        loja: data.loja,
+        loja: data.loja ?? "",
         email: data.email && data.email !== "" ? data.email : null,
         papel: data.papel,
         conversas_dia: data.conversas_dia,
