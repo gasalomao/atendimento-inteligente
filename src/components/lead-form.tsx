@@ -244,7 +244,19 @@ function OptionCard({
       aria-pressed={active}
       className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
     >
-      {children}
+      <span
+        aria-hidden
+        className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border transition-colors ${
+          active ? "border-[#207A50]" : "border-[#C8C4BB]"
+        }`}
+      >
+        <span
+          className={`h-[8px] w-[8px] rounded-full transition-opacity ${
+            active ? "bg-[#207A50] opacity-100" : "opacity-0"
+          }`}
+        />
+      </span>
+      <span className="flex-1">{children}</span>
     </button>
   );
 }
