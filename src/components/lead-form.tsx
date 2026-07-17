@@ -769,43 +769,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                 onSelect={onSelect}
               />
 
-              {showConsent ? (
-                <div
-                  id="consent-block"
-                  className="rounded-[10px] border border-[#E3E0D9] bg-[#F7F5F1] p-4"
-                >
-                  <label className="flex items-start gap-3 text-[14px] leading-[1.55] text-[#191A18]">
-                    <input
-                      type="checkbox"
-                      className="mt-0.5 h-[18px] w-[18px] shrink-0 rounded border-[#C8C4BB] text-[#207A50] accent-[#207A50] focus:ring-[#207A50]/30"
-                      checked={step2.consentimento}
-                      onChange={(e) => {
-                        setStep2((s) => ({
-                          ...s,
-                          consentimento: e.target.checked,
-                        }));
-                        if (errors.consentimento)
-                          setErrors((x) => ({
-                            ...x,
-                            consentimento: undefined,
-                          }));
-                      }}
-                    />
-                    <span>
-                      Autorizo o contato pelo WhatsApp sobre esta solicitação
-                      e li a <PrivacyDialog />.
-                    </span>
-                  </label>
-                  <ErrorText
-                    id="err-consentimento"
-                    msg={errors.consentimento}
-                  />
-                  <p className="mt-3 text-[12px] leading-[1.5] text-[#7B7E78]">
-                    Suas respostas serão usadas apenas para entender sua loja
-                    e retornar pelo WhatsApp.
-                  </p>
-                </div>
-              ) : null}
 
               {submitError ? (
                 <div
