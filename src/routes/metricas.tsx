@@ -251,6 +251,15 @@ function Dashboard() {
         body,
       });
       if (!res.ok) throw new Error("Erro ao apagar");
+      if (isSelective && data) {
+        setData({
+          ...data,
+          visitors: data.visitors.filter(v => !selectedVisitors.has(v.visitor_id)),
+        });
+        setSelectedVisitors(new Set());
+      } else if (!isSelective) {
+        setData(null);
+      }
       alert(isSelective ? "Visitantes selecionados apagados com sucesso!" : "Todos os dados foram apagados com sucesso!");
       void load();
     } catch (e) {
@@ -404,7 +413,8 @@ function VisitorsDashboard({
         )}
       </div>
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-        <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_auto] gap-4 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 items-center">
+        {/* Desktop-only Header */}
+        <div className="hidden md:grid grid-cols-[auto_2.5fr_1.5fr_2fr_1.5fr_auto] gap-4 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 items-center">
           <div>
             <input 
               type="checkbox" 
@@ -419,68 +429,92 @@ function VisitorsDashboard({
           <div>Local/Disp.</div>
           <div className="text-right">Ações</div>
         </div>
+
+        {/* Mobile Header (toggles all) */}
+        <div className="flex md:hidden items-center gap-2 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase text-white/40">
+          <input 
+            type="checkbox" 
+            checked={allSelected} 
+            onChange={toggleAll}
+            className="rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30"
+          />
+          <span>Selecionar todos ({data.visitors.length})</span>
+        </div>
+
         <div className="divide-y divide-white/[0.04]">
           {data.visitors.map((v) => (
             <div key={v.visitor_id} className="flex flex-col">
-              <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_auto] items-center gap-4 px-4 py-3 text-sm transition-colors hover:bg-white/[0.02]">
-                <div>
+              {/* Responsive layout: row on desktop, stack on mobile */}
+              <div className="flex flex-col md:grid md:grid-cols-[auto_2.5fr_1.5fr_2fr_1.5fr_auto] items-stretch md:items-center gap-3 md:gap-4 px-4 py-4 md:py-3 text-sm transition-colors hover:bg-white/[0.02]">
+                
+                {/* Checkbox & Lead main name/phone */}
+                <div className="flex items-center gap-3 truncate">
                   <input 
                     type="checkbox" 
                     checked={selectedVisitors.has(v.visitor_id)}
                     onChange={() => toggleOne(v.visitor_id)}
-                    className="rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30"
+                    className="rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30 shrink-0"
                   />
-                </div>
-                <div className="flex items-center gap-3 truncate">
-                  {v.lead ? (
-                    <>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30">
-                        ⭐
-                      </div>
-                      <div className="truncate">
-                        <p className="font-medium text-emerald-400 truncate">{v.lead.nome}</p>
-                        <p className="text-xs text-white/40 truncate">{v.lead.whatsapp}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/30">
-                        👤
-                      </div>
-                      <div className="truncate">
-                        <p className="text-white/70">Visitante Anônimo</p>
-                        <p className="text-xs text-white/30 font-mono truncate" title={v.visitor_id}>
-                          {v.visitor_id.slice(0, 8)}...
-                        </p>
-                      </div>
-                    </>
-                  )}
+                  <div className="flex items-center gap-3 truncate">
+                    {v.lead ? (
+                      <>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30 shrink-0">
+                          ⭐
+                        </div>
+                        <div className="truncate">
+                          <p className="font-medium text-emerald-400 truncate">{v.lead.nome}</p>
+                          <p className="text-xs text-white/40 truncate">{v.lead.whatsapp}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/30 shrink-0">
+                          👤
+                        </div>
+                        <div className="truncate">
+                          <p className="text-white/70">Visitante Anônimo</p>
+                          <p className="text-xs text-white/30 font-mono truncate" title={v.visitor_id}>
+                            {v.visitor_id.slice(0, 8)}...
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
                 
-                <div className="text-xs text-white/60">
-                  {formatDay(v.last_seen)} às {new Date(v.last_seen).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                {/* Last Seen (hidden label on desktop) */}
+                <div className="text-xs text-white/60 md:text-sm pl-8 md:pl-0 flex justify-between md:block">
+                  <span className="md:hidden text-white/30 font-medium">Acesso:</span>
+                  <span>{formatDay(v.last_seen)} às {new Date(v.last_seen).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
 
-                <div className="truncate text-xs text-white/50">
-                  {v.utm_source ? (
-                    <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-blue-400 border border-blue-500/20">
-                      {v.utm_source} {v.utm_campaign ? `/ ${v.utm_campaign}` : ""}
-                    </span>
-                  ) : v.referrer ? (
-                    <span className="truncate" title={v.referrer}>{v.referrer.replace(/^https?:\/\//, '')}</span>
-                  ) : (
-                    <span className="text-white/20">Direto / Sem origem</span>
-                  )}
+                {/* UTM Source (hidden label on desktop) */}
+                <div className="truncate text-xs text-white/50 pl-8 md:pl-0 flex justify-between md:block w-full md:w-auto">
+                  <span className="md:hidden text-white/30 font-medium shrink-0 mr-2">Origem:</span>
+                  <div className="truncate">
+                    {v.utm_source ? (
+                      <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-blue-400 border border-blue-500/20">
+                        {v.utm_source} {v.utm_campaign ? `/ ${v.utm_campaign}` : ""}
+                      </span>
+                    ) : v.referrer ? (
+                      <span className="truncate" title={v.referrer}>{v.referrer.replace(/^https?:\/\//, '')}</span>
+                    ) : (
+                      <span className="text-white/20">Direto / Sem origem</span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="text-xs text-white/50 truncate">
-                  {v.city}, {v.country} <br/> {v.device}
+                {/* Geo / Device */}
+                <div className="text-xs text-white/50 truncate pl-8 md:pl-0 flex justify-between md:block">
+                  <span className="md:hidden text-white/30 font-medium shrink-0 mr-2">Local/Disp:</span>
+                  <span className="truncate">{v.city}, {v.country} · {v.device}</span>
                 </div>
 
-                <div className="flex justify-end">
+                {/* Expand Journey button */}
+                <div className="flex justify-end pl-8 md:pl-0 mt-1 md:mt-0">
                   <button 
                     onClick={() => setExpandedVisitor(expandedVisitor === v.visitor_id ? null : v.visitor_id)}
-                    className="rounded bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
+                    className="rounded bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 hover:text-white w-full md:w-auto text-center"
                   >
                     {expandedVisitor === v.visitor_id ? "Fechar" : "Ver Jornada"}
                   </button>
@@ -618,7 +652,7 @@ function MetricsDashboard({ data }: { data: Metrics }) {
       </section>
 
       {/* ── Funil de Conversão ────────────────────────────── */}
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Kpi icon="👀" label="Visualiz. formulário" value={data.totals.form_views} color="slate" small />
         <FunnelKpi label="View → Início" value={data.conversion.view_to_start} />
         <FunnelKpi label="Início → Envio" value={data.conversion.start_to_submit} />
@@ -633,8 +667,8 @@ function MetricsDashboard({ data }: { data: Metrics }) {
           <div className="space-y-1">
             <div className="mb-3 flex gap-4 text-[10px] uppercase tracking-wider text-white/30">
               <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" /> Visitantes</span>
-              <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-blue-500" /> Page Views</span>
-              <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-purple-500" /> Leads</span>
+              <span className="hidden sm:flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-blue-500" /> Page Views</span>
+              <span className="hidden sm:flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-purple-500" /> Leads</span>
             </div>
             {data.daily.map((r) => (
               <div key={r.day} className="group flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.03]">
@@ -648,8 +682,8 @@ function MetricsDashboard({ data }: { data: Metrics }) {
                   />
                 </div>
                 <span className="w-[50px] text-right text-xs tabular-nums text-white/60">{r.unique_visitors}</span>
-                <span className="w-[50px] text-right text-xs tabular-nums text-blue-400/70">{r.page_views}</span>
-                <span className="w-[40px] text-right text-xs tabular-nums text-purple-400/70">{r.leads}</span>
+                <span className="hidden sm:inline w-[50px] text-right text-xs tabular-nums text-blue-400/70">{r.page_views}</span>
+                <span className="hidden sm:inline w-[40px] text-right text-xs tabular-nums text-purple-400/70">{r.leads}</span>
               </div>
             ))}
           </div>
@@ -663,20 +697,20 @@ function MetricsDashboard({ data }: { data: Metrics }) {
             <p className="py-6 text-center text-sm text-white/30">Nenhuma origem rastreada</p>
           ) : (
             <div className="divide-y divide-white/[0.04]">
-              <div className="grid grid-cols-[1fr_80px_50px_60px] gap-2 pb-2 text-[10px] uppercase tracking-wider text-white/30">
+              <div className="grid grid-cols-[1fr_60px_50px] sm:grid-cols-[1fr_80px_50px_60px] gap-2 pb-2 text-[10px] uppercase tracking-wider text-white/30">
                 <span>Origem</span>
-                <span className="text-right">Visitantes</span>
+                <span className="text-right">Visitas</span>
                 <span className="text-right">Leads</span>
-                <span className="text-right">Taxa (Conv.)</span>
+                <span className="hidden sm:block text-right">Taxa (Conv.)</span>
               </div>
               {data.utm_breakdown.map((r) => {
                 const conv = r.unique_visitors > 0 ? Math.round((r.leads / r.unique_visitors) * 100) : 0;
                 return (
-                <div key={r.key} className="grid grid-cols-[1fr_80px_50px_60px] gap-2 py-2.5 text-xs">
+                <div key={r.key} className="grid grid-cols-[1fr_60px_50px] sm:grid-cols-[1fr_80px_50px_60px] gap-2 py-2.5 text-xs">
                   <span className="truncate text-white/70" title={r.key}>{r.key}</span>
                   <span className="text-right tabular-nums text-white/50">{r.unique_visitors}</span>
                   <span className="text-right tabular-nums font-medium text-emerald-400">{r.leads}</span>
-                  <span className="text-right tabular-nums text-amber-400">{conv}%</span>
+                  <span className="hidden sm:block text-right tabular-nums text-amber-400">{conv}%</span>
                 </div>
               )})}
             </div>
