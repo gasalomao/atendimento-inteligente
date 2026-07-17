@@ -278,7 +278,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const [step2, setStep2] = useState<Step2>({
     papel: "",
     conversas_dia: "",
-    problema_principal: "",
+    problema_principal: [],
     faturamento: "",
     investimento: "",
     consentimento: false,
