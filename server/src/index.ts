@@ -37,6 +37,23 @@ app.get("/api/metrics", (req, res, next) => {
 });
 
 import http from "node:http";
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDir = path.resolve(__dirname, "../../dist/client");
+
+if (fs.existsSync(clientDir)) {
+  app.use(
+    express.static(clientDir, {
+      maxAge: "1h"
+    })
+  );
+} else {
+  logger.warn({ clientDir }, "spa_dir_missing");
+}
 
 const nitroPort = 3001;
 app.use((req, res) => {
