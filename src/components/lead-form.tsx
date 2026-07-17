@@ -213,6 +213,46 @@ function OptionCard({
   );
 }
 
+function Step2QuestionCard({
+  question,
+  value,
+  error,
+  onSelect,
+}: {
+  question: Step2Question;
+  value: Step2[Step2Field];
+  error?: string;
+  onSelect: (field: Step2Field, value: Step2Value) => void;
+}) {
+  return (
+    <fieldset
+      id={`q-${question.field}`}
+      tabIndex={-1}
+      aria-describedby={error ? `err-${question.field}` : undefined}
+      className="rounded-lg border border-[#E5E7EB] bg-white p-4 outline-none focus:ring-4 focus:ring-[#22C55E]/20"
+    >
+      <legend className="mb-1 block text-base font-semibold leading-6 text-[#101828]">
+        {question.question}
+      </legend>
+      {question.description ? (
+        <p className="mb-3 text-sm text-[#667085]">{question.description}</p>
+      ) : null}
+      <div className="grid gap-2.5">
+        {question.options.map((opt) => (
+          <OptionCard
+            key={opt.v}
+            active={value === opt.v}
+            onClick={() => onSelect(question.field, opt.v)}
+          >
+            {opt.t}
+          </OptionCard>
+        ))}
+      </div>
+      <ErrorText id={`err-${question.field}`} msg={error} />
+    </fieldset>
+  );
+}
+
 // Estilo inline garante que o honeypot fique realmente fora do fluxo visual,
 // independente de purge/reset de Tailwind — evita o bug do texto "Não preencha"
 // aparecendo na tela.
