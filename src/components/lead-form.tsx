@@ -846,26 +846,41 @@ function QuestionBlock({
   error?: string;
   onSelect: (field: Step2Field, value: Step2Value) => void;
 }) {
+  const multi = Array.isArray(value);
   return (
     <fieldset id={`q-${question.field}`} className="border-0 p-0">
       <legend className="block text-[17px] font-[600] leading-[1.35] text-[#191A18]">
         {question.question}
       </legend>
+      {multi ? (
+        <p className="mt-1.5 text-[13px] leading-[1.5] text-[#5F625E]">
+          Pode marcar mais de uma.
+        </p>
+      ) : null}
       {question.description ? (
         <p className="mt-2 text-[14px] leading-[1.55] text-[#5F625E]">
           {question.description}
         </p>
       ) : null}
-      <div className="mt-4 grid gap-2.5" role="radiogroup">
-        {question.options.map((opt) => (
-          <OptionCard
-            key={opt.v}
-            active={value === opt.v}
-            onClick={() => onSelect(question.field, opt.v)}
-          >
-            {opt.t}
-          </OptionCard>
-        ))}
+      <div
+        className="mt-4 grid gap-2.5"
+        role={multi ? "group" : "radiogroup"}
+      >
+        {question.options.map((opt) => {
+          const active = multi
+            ? (value as string[]).includes(opt.v)
+            : value === opt.v;
+          return (
+            <OptionCard
+              key={opt.v}
+              active={active}
+              multi={multi}
+              onClick={() => onSelect(question.field, opt.v)}
+            >
+              {opt.t}
+            </OptionCard>
+          );
+        })}
       </div>
       <ErrorText id={`err-${question.field}`} msg={error} />
     </fieldset>
