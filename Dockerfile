@@ -3,7 +3,7 @@
 # =========================
 # Stage 1: install deps
 # =========================
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock* package-lock.json* ./
 RUN --mount=type=cache,target=/root/.npm \
@@ -12,7 +12,7 @@ RUN --mount=type=cache,target=/root/.npm \
 # =========================
 # Stage 2: build (frontend + backend)
 # =========================
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -38,7 +38,7 @@ RUN npm prune --omit=dev
 # =========================
 # Stage 3: runtime
 # =========================
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
