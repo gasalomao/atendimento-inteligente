@@ -78,7 +78,7 @@ export const Route = createFileRoute("/api/leads")({
             privacy_policy_version: privacyVersion,
             pontuacao: score,
             lead_classification: classification,
-            form_answers: answers,
+            form_answers: answers as any,
             utm_source: data.utm_source ?? null,
             utm_medium: data.utm_medium ?? null,
             utm_campaign: data.utm_campaign ?? null,

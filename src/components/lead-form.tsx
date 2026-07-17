@@ -7,6 +7,7 @@ import {
   track,
   trackOnce,
 } from "@/lib/tracking";
+import { trackEvent } from "@/lib/analytics";
 import { PrivacyDialog } from "./privacy-dialog";
 
 type Step1 = {
@@ -288,6 +289,8 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const [q, setQ] = useState(0);
   const [started, setStarted] = useState(false);
   const startedAtRef = useRef<number>(0);
+  const questionStartRef = useRef<number>(0);
+  const stepTimesRef = useRef<Record<string, number>>({});
   const hpRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -351,6 +354,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     if (!started) {
       setStarted(true);
       startedAtRef.current = Date.now();
+      questionStartRef.current = Date.now();
       track("form_start");
     }
   }
@@ -382,9 +386,15 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   function onStep1Continue() {
     markStarted();
     if (!validateStep1()) return;
+    const dur = questionStartRef.current ? Date.now() - questionStartRef.current : 0;
+    if (dur > 0) {
+      stepTimesRef.current["step1_contact"] = dur;
+      trackEvent("form_step_complete", { question: "step1_contact", index: -1, duration_ms: dur });
+    }
     track("form_step_1_complete");
     setStep(2);
     setQ(0);
+    questionStartRef.current = Date.now();
     setTimeout(() => {
       containerRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -432,9 +442,15 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       });
       return;
     }
+    const dur = questionStartRef.current ? Date.now() - questionStartRef.current : 0;
+    if (dur > 0) {
+      stepTimesRef.current[field] = dur;
+      trackEvent("form_step_complete", { question: field, index: q, duration_ms: dur });
+    }
     if (q < STEP2_QUESTIONS.length - 1) {
       setQ((n) => n + 1);
       setErrors({});
+      questionStartRef.current = Date.now();
       setTimeout(() => {
         containerRef.current?.scrollIntoView({
           behavior: "smooth",
@@ -455,9 +471,11 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     setErrors({});
     if (q > 0) {
       setQ((n) => n - 1);
+      questionStartRef.current = Date.now();
       return;
     }
     setStep(1);
+    questionStartRef.current = Date.now();
   }
 
   async function onFinalSubmit() {
@@ -513,6 +531,8 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           landing_path: utms.landing_path,
           hp_field: hpRef.current?.value ?? "",
           started_at: startedAtRef.current || Date.now(),
+          total_time_ms: startedAtRef.current ? Date.now() - startedAtRef.current : undefined,
+          step_times_ms: { ...stepTimesRef.current },
         }),
       });
       const body = await res.json().catch(() => ({}));
