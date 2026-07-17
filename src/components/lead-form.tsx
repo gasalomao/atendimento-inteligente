@@ -529,7 +529,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     <div
       id={id}
       ref={containerRef}
-      className="relative mx-auto w-full rounded-[14px] border border-[#DDDAD3] bg-white p-6 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:p-8"
+      className="relative mx-auto w-full rounded-[14px] border border-[#DDDAD3] bg-white p-5 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:p-8"
     >
       {/* Honeypot invisível para bots. */}
       <div aria-hidden="true" style={HONEYPOT_STYLE}>
