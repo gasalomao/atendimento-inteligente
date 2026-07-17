@@ -1,6 +1,7 @@
 // Utilidades de rastreio no cliente. Todas as chamadas são seguras se o
 // respectivo script (GTM, Meta Pixel) ainda não estiver instalado — usamos
 // stubs / dataLayer que preservam os eventos até o script carregar.
+import { trackEvent, type AnalyticsEventType } from "./analytics";
 
 type EventName =
   | "page_view"
@@ -20,6 +21,18 @@ declare global {
   }
 }
 
+// Mapeia nomes legados para o analytics próprio (server-side)
+const ANALYTICS_MAP: Record<EventName, AnalyticsEventType | null> = {
+  page_view: "page_view",
+  form_view: "form_view",
+  form_start: "form_start",
+  form_step_1_complete: "form_step_complete",
+  form_submit_attempt: "form_submit_attempt",
+  generate_lead: "form_submit_success",
+  form_submit_error: "form_submit_error",
+  whatsapp_click: "whatsapp_click",
+};
+
 export function track(event: EventName, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
   try {
@@ -28,7 +41,6 @@ export function track(event: EventName, params: Record<string, unknown> = {}) {
   } catch {}
   try {
     if (typeof window.fbq === "function") {
-      // Mapeia generate_lead para o evento padrão do Pixel.
       if (event === "generate_lead") {
         window.fbq("track", "Lead", params);
       } else {
@@ -36,6 +48,12 @@ export function track(event: EventName, params: Record<string, unknown> = {}) {
       }
     }
   } catch {}
+  const mapped = ANALYTICS_MAP[event];
+  if (mapped) {
+    try {
+      trackEvent(mapped, params);
+    } catch {}
+  }
 }
 
 export function trackOnce(event: EventName, params: Record<string, unknown> = {}) {
