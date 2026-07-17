@@ -243,10 +243,10 @@ function ChatDemo() {
 
 function SummaryCard() {
   const rows: [string, string][] = [
-    ["Aparelho procurado", "iPhone 15 Pro"],
-    ["Capacidade", "256 GB"],
-    ["Condição", "Seminovo"],
-    ["Possui aparelho para troca", "Sim"],
+    ["Produto de interesse", "Modelo em destaque"],
+    ["Preferência", "Seminovo"],
+    ["Forma de contato", "WhatsApp"],
+    ["Possui item para troca", "Sim"],
     ["Forma de pagamento", "Parcelado"],
   ];
   return (
