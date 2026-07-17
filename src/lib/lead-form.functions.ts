@@ -159,7 +159,7 @@ export const submitLeadForm = createServerFn({ method: "POST" })
       .insert({
         nome: data.nome,
         whatsapp: data.whatsapp,
-        loja: data.loja && data.loja !== "" ? data.loja : null,
+        loja: data.loja ?? "",
         email: data.email && data.email !== "" ? data.email : null,
         papel: data.papel,
         conversas_dia: data.conversas_dia,
