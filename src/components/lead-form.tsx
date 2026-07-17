@@ -327,7 +327,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     if (!step1.whatsapp.trim()) e.whatsapp = "Digite seu número de WhatsApp.";
     else if (!isValidBRPhone(step1.whatsapp))
       e.whatsapp = "Confira o número e inclua o DDD.";
-    if (step1.loja.trim().length < 2)
+    if (step1.loja.trim().length > 0 && step1.loja.trim().length < 2)
       e.loja = "Digite o nome ou Instagram da loja.";
     if (step1.email.trim() !== "") {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
