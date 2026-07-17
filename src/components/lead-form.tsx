@@ -768,17 +768,16 @@ function QuestionBlock({
   onSelect: (field: Step2Field, value: Step2Value) => void;
 }) {
   return (
-    <fieldset
-      id={`q-${question.field}`}
-      className="rounded-lg border border-[#E5E7EB] bg-white p-4"
-    >
-      <legend className="mb-1 block px-1 text-[17px] font-semibold leading-6 text-[#101828]">
+    <fieldset id={`q-${question.field}`} className="border-0 p-0">
+      <legend className="block text-[17px] font-[600] leading-[1.35] text-[#191A18]">
         {question.question}
       </legend>
       {question.description ? (
-        <p className="mb-3 text-sm text-[#667085]">{question.description}</p>
+        <p className="mt-2 text-[14px] leading-[1.55] text-[#5F625E]">
+          {question.description}
+        </p>
       ) : null}
-      <div className="mt-2 grid gap-2.5">
+      <div className="mt-4 grid gap-2.5" role="radiogroup">
         {question.options.map((opt) => (
           <OptionCard
             key={opt.v}
@@ -804,28 +803,29 @@ function SuccessState({
   const digits = onlyDigits(whatsapp);
   const waHref = digits ? `https://wa.me/55${digits}` : "https://wa.me/";
   return (
-    <div className="text-center">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F0FDF4] text-[#16A34A]">
-        <CheckCircle2 className="h-8 w-8" />
+    <div className="text-center" aria-live="polite">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F3EC] text-[#207A50]">
+        <CheckCircle2 className="h-6 w-6" strokeWidth={2.25} />
       </div>
-      <h2 className="mt-4 text-xl font-semibold text-[#101828] sm:text-2xl">
+      <h2 className="mt-5 text-[22px] font-[650] leading-[1.25] tracking-[-0.02em] text-[#191A18] sm:text-[24px]">
         Recebemos suas respostas.
       </h2>
-      <p className="mt-2 text-[15px] leading-6 text-[#475467]">
-        Agora vamos analisar como o atendimento poderia funcionar na sua loja.
-        Entraremos em contato pelo WhatsApp informado.
+      <p className="mx-auto mt-3 max-w-[380px] text-[15px] leading-[1.6] text-[#5F625E]">
+        Agora vamos entender como esse atendimento poderia funcionar na sua
+        loja. Entraremos em contato pelo WhatsApp informado.
       </p>
-      <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+      <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:justify-center">
         <a
           href={waHref}
           target="_blank"
           rel="noopener noreferrer"
           onClick={onWhatsappClick}
-          className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-[#22C55E] px-5 text-base font-semibold text-white hover:bg-[#16A34A]"
+          className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[10px] bg-[#207A50] px-6 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
         >
-          <MessageCircle className="h-5 w-5" /> Falar pelo WhatsApp agora
+          <MessageCircle className="h-5 w-5" /> Continuar pelo WhatsApp
         </a>
       </div>
     </div>
   );
 }
+
