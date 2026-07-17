@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { trackEventSchema } from "../../../shared/analytics/schema";
 import { supabaseAdmin } from "../db/supabase";
 import { logger } from "../logger";
+import { lookupGeo } from "../lib/geo";
 
 export async function trackHandler(req: Request, res: Response) {
   const parsed = trackEventSchema.safeParse(req.body);
@@ -10,9 +11,17 @@ export async function trackHandler(req: Request, res: Response) {
     return res.status(204).end();
   }
   const d = parsed.data;
-  const ipHash = req.ip
-    ? crypto.createHash("sha256").update(String(req.ip)).digest("hex").slice(0, 16)
+  const rawIp = req.ip ?? null;
+  const ipHash = rawIp
+    ? crypto.createHash("sha256").update(String(rawIp)).digest("hex").slice(0, 16)
     : null;
+
+  const geo = await lookupGeo(rawIp);
+  const meta = {
+    ...(d.meta ?? {}),
+    ...(geo ? { geo } : {}),
+  };
+
   const { error } = await supabaseAdmin.from("site_events").insert({
     visitor_id: d.visitor_id,
     session_id: d.session_id,
@@ -28,7 +37,7 @@ export async function trackHandler(req: Request, res: Response) {
     gclid: d.gclid ?? null,
     user_agent: (req.headers["user-agent"] as string) ?? null,
     ip_hash: ipHash,
-    meta: d.meta ?? null,
+    meta,
   });
   if (error) logger.warn({ err: error }, "track_insert_failed");
   return res.status(204).end();
