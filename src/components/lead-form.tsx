@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, ChevronLeft, MessageCircle } from "lucide-react";
-import { submitLeadForm } from "@/lib/lead-form.functions";
 import { formatBRPhone, isValidBRPhone, onlyDigits } from "@/lib/phone-mask";
 import {
   captureAndPersistTracking,
@@ -262,7 +260,6 @@ function OptionCard({
 }
 
 export function LeadForm({ id = "formulario" }: { id?: string }) {
-  const submit = useServerFn(submitLeadForm);
   const [step, setStep] = useState<1 | 2>(1);
   const [q, setQ] = useState(0);
   const [started, setStarted] = useState(false);
@@ -434,21 +431,20 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
 
     const utms = getPersistedTracking();
     try {
-      const res = await submit({
-        data: {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           nome: step1.nome.trim(),
           whatsapp: onlyDigits(step1.whatsapp),
           loja: step1.loja.trim(),
           email: step1.email.trim(),
-          papel: step2.papel as Exclude<Papel, "">,
-          conversas_dia: step2.conversas_dia as Exclude<Conversas, "">,
-          problema_principal: step2.problema_principal as Exclude<
-            Problema,
-            ""
-          >,
-          faturamento: step2.faturamento as Exclude<Faturamento, "">,
-          investimento: step2.investimento as Exclude<Investimento, "">,
-          consentimento: true as const,
+          papel: step2.papel,
+          conversas_dia: step2.conversas_dia,
+          problema_principal: step2.problema_principal,
+          faturamento: step2.faturamento,
+          investimento: step2.investimento,
+          consentimento: true,
           utm_source: utms.utm_source,
           utm_medium: utms.utm_medium,
           utm_campaign: utms.utm_campaign,
@@ -460,9 +456,10 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           landing_path: utms.landing_path,
           hp_field: hpRef.current?.value ?? "",
           started_at: startedAtRef.current || Date.now(),
-        },
+        }),
       });
-      if (res?.ok) {
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && body?.success) {
         if (!successFiredRef.current) {
           successFiredRef.current = true;
           track("generate_lead");
@@ -474,6 +471,14 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
             block: "start",
           });
         }, 50);
+      } else if (res.status === 429) {
+        setSubmitError(
+          body?.message ?? "Aguarde alguns minutos antes de tentar novamente.",
+        );
+      } else if (res.status === 422) {
+        setSubmitError(
+          body?.message ?? "Confira as informações preenchidas.",
+        );
       } else {
         throw new Error("erro");
       }

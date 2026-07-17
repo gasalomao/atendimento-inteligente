@@ -46,7 +46,14 @@ function PrivacyPage() {
         </p>
         <p>
           Você pode solicitar a remoção dos seus dados a qualquer momento pelo
-          mesmo canal de contato utilizado no formulário.
+          mesmo canal de contato utilizado no formulário, ou pelo e-mail{" "}
+          <a
+            href="mailto:ga.pancione@gmail.com"
+            className="text-[#207A50] underline"
+          >
+            ga.pancione@gmail.com
+          </a>
+          .
         </p>
       </div>
     </main>
