@@ -55,15 +55,17 @@ export async function metricsHandler(req: Request, res: Response) {
 
   const { data: events, error } = await supabaseAdmin
     .from("site_events")
-    .select("visitor_id, event_type, utm_source, utm_medium, utm_campaign, created_at, meta, user_agent")
+    .select("visitor_id, event_type, utm_source, utm_medium, utm_campaign, created_at, meta, user_agent, referrer, path")
     .gte("created_at", since)
-    .limit(50000);
+    .order("created_at", { ascending: true }) // important to sort by time
+    .limit(100000);
   if (error) return res.status(500).json({ error: error.message });
 
   const { data: leads } = await supabaseAdmin
     .from("contatos")
-    .select("id, lead_classification, pontuacao, utm_source, utm_medium, utm_campaign, created_at, form_answers")
-    .gte("created_at", since);
+    .select("id, nome, email, whatsapp, lead_classification, pontuacao, utm_source, utm_medium, utm_campaign, created_at, form_answers")
+    .gte("created_at", since)
+    .order("created_at", { ascending: false });
 
   const rows = events ?? [];
   const uniqueVisitors = new Set(rows.map((r) => r.visitor_id));
@@ -158,6 +160,68 @@ export async function metricsHandler(req: Request, res: Response) {
     ? totalTimes[Math.floor(totalTimes.length / 2)]
     : 0;
 
+  // Montar array de visitantes (jornadas individuais)
+  const visitorsMap = new Map<string, any>();
+  
+  // Agrupar eventos
+  for (const r of rows) {
+    let v = visitorsMap.get(r.visitor_id);
+    if (!v) {
+      v = {
+        visitor_id: r.visitor_id,
+        first_seen: r.created_at,
+        last_seen: r.created_at,
+        utm_source: r.utm_source,
+        utm_medium: r.utm_medium,
+        utm_campaign: r.utm_campaign,
+        referrer: r.referrer,
+        device: (r.meta as any)?.device?.type ?? "desconhecido",
+        city: (r.meta as any)?.geo?.city ?? "Desconhecida",
+        country: (r.meta as any)?.geo?.country ?? "Desconhecido",
+        events: [],
+        lead: null,
+      };
+      visitorsMap.set(r.visitor_id, v);
+    }
+    v.last_seen = r.created_at;
+    v.events.push({
+      type: r.event_type,
+      time: r.created_at,
+      path: r.path,
+      meta: r.meta,
+    });
+  }
+
+  // Anexar leads
+  for (const l of leads ?? []) {
+    const vid = (l.form_answers as any)?.visitor_id;
+    if (vid && visitorsMap.has(vid)) {
+      visitorsMap.get(vid).lead = l;
+    } else {
+      // Se não tem visitor_id (leads antigos), cria uma entrada fictícia
+      const fakeVid = "lead-" + l.id;
+      visitorsMap.set(fakeVid, {
+        visitor_id: fakeVid,
+        first_seen: l.created_at,
+        last_seen: l.created_at,
+        utm_source: l.utm_source,
+        utm_medium: l.utm_medium,
+        utm_campaign: l.utm_campaign,
+        referrer: null,
+        device: "desconhecido",
+        city: (l.form_answers as any)?.geo?.city ?? "Desconhecida",
+        country: (l.form_answers as any)?.geo?.country ?? "Desconhecido",
+        events: [],
+        lead: l,
+      });
+    }
+  }
+
+  // Ordenar visitantes pelos mais recentes (last_seen decrescente)
+  const visitorsArray = Array.from(visitorsMap.values())
+    .sort((a, b) => new Date(b.last_seen).getTime() - new Date(a.last_seen).getTime())
+    .slice(0, 500); // Limite de 500 para não estourar payload
+
   return res.json({
     period_days: days,
     generated_at: new Date().toISOString(),
@@ -191,7 +255,7 @@ export async function metricsHandler(req: Request, res: Response) {
     utm_breakdown: Object.entries(utmBreakdown)
       .map(([key, v]) => ({ key, unique_visitors: v.visitors.size, leads: v.leads }))
       .sort((a, b) => b.unique_visitors - a.unique_visitors)
-      .slice(0, 20),
+      .slice(0, 50),
     geo_country: Object.entries(geoCountry)
       .map(([key, v]) => ({ key, unique_visitors: v.size }))
       .sort((a, b) => b.unique_visitors - a.unique_visitors)
@@ -204,7 +268,29 @@ export async function metricsHandler(req: Request, res: Response) {
       Object.entries(deviceType).map(([k, v]) => [k, v.size])
     ),
     lead_classification: classification,
+    visitors: visitorsArray,
   });
+}
+
+export async function metricsDeleteHandler(req: Request, res: Response) {
+  const token = (req.query.token as string) || (req.body?.token as string);
+  const expected = process.env.METRICS_TOKEN;
+  if (!expected || token !== expected) {
+    return res.status(401).json({ error: "unauthorized" });
+  }
+
+  // Deletar todos os eventos
+  const { error: err1 } = await supabaseAdmin.from("site_events").delete().neq("id", "00000000-0000-0000-0000-000000000000"); // hack to delete all
+  
+  // Deletar todos os leads
+  const { error: err2 } = await supabaseAdmin.from("contatos").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  
+  if (err1 || err2) {
+    logger.error({ err1, err2 }, "metrics_delete_failed");
+    return res.status(500).json({ error: "Erro ao deletar dados" });
+  }
+
+  return res.json({ success: true, message: "Todos os dados foram resetados." });
 }
 
 function safeRate(num: number | undefined, den: number | undefined): number {

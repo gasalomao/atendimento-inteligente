@@ -28,9 +28,34 @@ type Metrics = {
   geo_city: { key: string; unique_visitors: number }[];
   device_type: Record<string, number>;
   lead_classification: Record<string, number>;
+  visitors: VisitorJourney[];
 };
 
-const PASS = "30741852";
+type VisitorJourney = {
+  visitor_id: string;
+  first_seen: string;
+  last_seen: string;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  referrer: string | null;
+  device: string;
+  city: string;
+  country: string;
+  events: Array<{ type: string; time: string; path?: string; meta?: any }>;
+  lead: {
+    id: string;
+    nome: string;
+    email?: string;
+    whatsapp: string;
+    lead_classification: string;
+    pontuacao: number;
+    created_at: string;
+    form_answers: Record<string, any>;
+  } | null;
+};
+
+const PASS = "metricas2026"; // Senha antiga atualizada visualmente se necessário, mas backend valida o real
 const TOKEN_KEY = "sai_metrics_token";
 const AUTH_KEY = "sai_metrics_auth";
 
@@ -45,10 +70,13 @@ function MetricasPage() {
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (pw === PASS) {
+    if (pw.length > 3) {
       setAuth(true);
       setPwError(false);
-      try { window.sessionStorage.setItem(AUTH_KEY, "1"); } catch {}
+      try {
+        window.sessionStorage.setItem(AUTH_KEY, "1");
+        window.localStorage.setItem(TOKEN_KEY, pw); // Guarda o token digitado
+      } catch {}
     } else {
       setPwError(true);
     }
@@ -81,7 +109,7 @@ function PasswordGate({
         </div>
         <h1 className="text-center text-lg font-semibold text-white">Acesso restrito</h1>
         <p className="mt-1 text-center text-sm text-white/50">
-          Digite a senha para ver as métricas
+          Digite a senha (METRICS_TOKEN) para ver as métricas
         </p>
         <div className="mt-6">
           <input
@@ -122,6 +150,7 @@ function Dashboard() {
   const [data, setData] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"geral" | "visitantes">("geral");
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -129,7 +158,7 @@ function Dashboard() {
     setError(null);
     try {
       const res = await fetch(`/api/metrics?token=${encodeURIComponent(token)}&days=${days}`);
-      if (!res.ok) throw new Error(res.status === 401 ? "Token inválido" : `Erro ${res.status}`);
+      if (!res.ok) throw new Error(res.status === 401 ? "Token inválido (senha incorreta)" : `Erro ${res.status}`);
       const j = (await res.json()) as Metrics;
       setData(j);
       try { window.localStorage.setItem(TOKEN_KEY, token); } catch {}
@@ -144,35 +173,59 @@ function Dashboard() {
     if (token) void load();
   }, [days, load]);
 
+  const handleDelete = async () => {
+    const pw = prompt("ATENÇÃO: Isso apagará TODOS os eventos e LEADS do banco de dados.\n\nPara confirmar, digite a senha das métricas:");
+    if (!pw) return;
+    try {
+      const res = await fetch(`/api/metrics?token=${encodeURIComponent(pw)}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(res.status === 401 ? "Senha incorreta" : "Erro ao apagar");
+      alert("Dados apagados com sucesso!");
+      void load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Erro");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0B0D12] font-sans text-white">
       {/* ── Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#0B0D12]/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-5 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-xs font-bold text-white">
-              S
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-xs font-bold text-white">
+                S
+              </div>
+              <h1 className="text-base font-semibold tracking-tight">Métricas</h1>
             </div>
-            <h1 className="text-base font-semibold tracking-tight">Métricas</h1>
+            
+            <nav className="hidden sm:flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab("geral")}
+                className={`rounded-md px-3 py-1.5 text-sm transition-all ${activeTab === "geral" ? "bg-white/10 font-medium text-white" : "text-white/50 hover:text-white/80"}`}
+              >
+                Visão Geral
+              </button>
+              <button
+                onClick={() => setActiveTab("visitantes")}
+                className={`rounded-md px-3 py-1.5 text-sm transition-all ${activeTab === "visitantes" ? "bg-white/10 font-medium text-white" : "text-white/50 hover:text-white/80"}`}
+              >
+                Visitantes e Jornadas
+              </button>
+            </nav>
           </div>
+
           <div className="flex items-center gap-2">
-            <input
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="Token de acesso"
-              type="password"
-              className="w-[140px] rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white placeholder-white/25 outline-none focus:border-emerald-500/50 sm:w-[180px]"
-            />
             <select
               value={days}
               onChange={(e) => setDays(Number(e.target.value))}
               className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white outline-none focus:border-emerald-500/50"
             >
+              <option value={1}>Hoje</option>
               <option value={7}>7 dias</option>
               <option value={14}>14 dias</option>
               <option value={30}>30 dias</option>
               <option value={90}>90 dias</option>
-              <option value={180}>180 dias</option>
               <option value={365}>365 dias</option>
             </select>
             <button
@@ -182,11 +235,34 @@ function Dashboard() {
             >
               {loading ? "Carregando…" : "Atualizar"}
             </button>
+            
+            <button
+              onClick={handleDelete}
+              title="Zerar Dados"
+              className="ml-4 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-xs font-medium text-red-400 transition-all hover:bg-red-500/20 hover:text-red-300 active:scale-[0.97]"
+            >
+              🗑️
+            </button>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-[1280px] px-5 py-8 sm:px-6 lg:px-8">
+        <div className="mb-6 flex sm:hidden gap-2 border-b border-white/10 pb-4">
+            <button
+              onClick={() => setActiveTab("geral")}
+              className={`rounded-md px-3 py-1.5 text-sm transition-all flex-1 ${activeTab === "geral" ? "bg-white/10 font-medium text-white" : "text-white/50 bg-white/[0.02]"}`}
+            >
+              Geral
+            </button>
+            <button
+              onClick={() => setActiveTab("visitantes")}
+              className={`rounded-md px-3 py-1.5 text-sm transition-all flex-1 ${activeTab === "visitantes" ? "bg-white/10 font-medium text-white" : "text-white/50 bg-white/[0.02]"}`}
+            >
+              Visitantes
+            </button>
+        </div>
+
         {error && (
           <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-5 py-4 text-sm text-red-300">
             {error}
@@ -195,15 +271,199 @@ function Dashboard() {
 
         {!data && !error && (
           <div className="flex flex-col items-center justify-center py-32 text-center">
-            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white/[0.04] text-2xl">📊</div>
+            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white/[0.04] text-2xl animate-pulse">📊</div>
             <p className="mt-4 text-sm text-white/40">
-              Cole seu token de acesso e clique em "Atualizar" para ver as métricas.
+              Carregando métricas...
             </p>
           </div>
         )}
 
-        {data && <MetricsDashboard data={data} />}
+        {data && activeTab === "geral" && <MetricsDashboard data={data} />}
+        {data && activeTab === "visitantes" && <VisitorsDashboard data={data} />}
       </main>
+    </div>
+  );
+}
+
+/* ─── Visitors Dashboard ─────────────────────────────────────────────── */
+function VisitorsDashboard({ data }: { data: Metrics }) {
+  const [expandedVisitor, setExpandedVisitor] = useState<string | null>(null);
+  
+  if (!data.visitors || data.visitors.length === 0) {
+    return <p className="py-20 text-center text-white/40">Nenhum visitante registrado nesse período.</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold text-white/90">Pessoa por Pessoa (Últimos {data.visitors.length})</h2>
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+        <div className="grid grid-cols-12 gap-4 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40">
+          <div className="col-span-3">Pessoa / Lead</div>
+          <div className="col-span-2">Último Acesso</div>
+          <div className="col-span-3">Origem (UTM)</div>
+          <div className="col-span-2">Local/Disp.</div>
+          <div className="col-span-2 text-right">Ações</div>
+        </div>
+        <div className="divide-y divide-white/[0.04]">
+          {data.visitors.map((v) => (
+            <div key={v.visitor_id} className="flex flex-col">
+              <div className="grid grid-cols-12 items-center gap-4 px-4 py-3 text-sm transition-colors hover:bg-white/[0.02]">
+                <div className="col-span-3 flex items-center gap-3 truncate">
+                  {v.lead ? (
+                    <>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30">
+                        ⭐
+                      </div>
+                      <div className="truncate">
+                        <p className="font-medium text-emerald-400 truncate">{v.lead.nome}</p>
+                        <p className="text-xs text-white/40 truncate">{v.lead.whatsapp}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/30">
+                        👤
+                      </div>
+                      <div className="truncate">
+                        <p className="text-white/70">Visitante Anônimo</p>
+                        <p className="text-xs text-white/30 font-mono truncate" title={v.visitor_id}>
+                          {v.visitor_id.slice(0, 8)}...
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+                
+                <div className="col-span-2 text-xs text-white/60">
+                  {formatDay(v.last_seen)} às {new Date(v.last_seen).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+
+                <div className="col-span-3 truncate text-xs text-white/50">
+                  {v.utm_source ? (
+                    <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-blue-400 border border-blue-500/20">
+                      {v.utm_source} {v.utm_campaign ? `/ ${v.utm_campaign}` : ""}
+                    </span>
+                  ) : v.referrer ? (
+                    <span className="truncate" title={v.referrer}>{v.referrer.replace(/^https?:\/\//, '')}</span>
+                  ) : (
+                    <span className="text-white/20">Direto / Sem origem</span>
+                  )}
+                </div>
+
+                <div className="col-span-2 text-xs text-white/50 truncate">
+                  {v.city}, {v.country} <br/> {v.device}
+                </div>
+
+                <div className="col-span-2 flex justify-end">
+                  <button 
+                    onClick={() => setExpandedVisitor(expandedVisitor === v.visitor_id ? null : v.visitor_id)}
+                    className="rounded bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
+                  >
+                    {expandedVisitor === v.visitor_id ? "Fechar" : "Ver Jornada"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Expansion Panel */}
+              {expandedVisitor === v.visitor_id && (
+                <div className="border-t border-white/[0.04] bg-[#080A0E] p-6 text-sm">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Timeline */}
+                    <div>
+                      <h3 className="mb-4 font-semibold text-white/80">Linha do Tempo (Eventos)</h3>
+                      <div className="space-y-4 border-l-2 border-white/10 ml-2 pl-4">
+                        {v.events.map((evt, idx) => {
+                          let label = evt.type;
+                          let detail = "";
+                          let color = "bg-white/20";
+                          let dotColor = "bg-white/30";
+                          
+                          if (evt.type === "page_view") { label = "Acessou a página"; color = "bg-blue-500/20 text-blue-300"; dotColor = "bg-blue-400"; }
+                          if (evt.type === "form_view") { label = "Viu o formulário"; color = "bg-purple-500/20 text-purple-300"; dotColor = "bg-purple-400"; }
+                          if (evt.type === "form_start") { label = "Começou o formulário"; color = "bg-amber-500/20 text-amber-300"; dotColor = "bg-amber-400"; }
+                          if (evt.type === "form_step_complete") { 
+                            label = "Preencheu etapa"; 
+                            color = "bg-slate-500/20 text-slate-300";
+                            dotColor = "bg-slate-400";
+                            if (evt.meta?.question) detail = `(Tela: ${evt.meta.question} · Tempo gasto: ${formatMs(evt.meta.duration_ms)})`;
+                          }
+                          if (evt.type === "form_submit_success") { label = "Enviou formulário com Sucesso!"; color = "bg-emerald-500/20 text-emerald-300 font-bold"; dotColor = "bg-emerald-400"; }
+                          
+                          return (
+                            <div key={idx} className="relative">
+                              <div className={`absolute -left-[21px] top-1.5 h-2 w-2 rounded-full ${dotColor} ring-4 ring-[#080A0E]`} />
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[11px] font-mono text-white/40">
+                                  {new Date(evt.time).toLocaleTimeString('pt-BR')}
+                                </span>
+                                <div>
+                                  <span className={`rounded px-1.5 py-0.5 text-xs ${color}`}>{label}</span>
+                                </div>
+                                {detail && <span className="text-xs text-white/50 mt-1">{detail}</span>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Respostas do Lead (se houver) */}
+                    <div>
+                      {v.lead ? (
+                        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+                          <h3 className="mb-4 font-semibold text-emerald-400 flex items-center gap-2">
+                            <span>✅ Respostas Preenchidas</span>
+                            <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs">Score: {v.lead.pontuacao}</span>
+                          </h3>
+                          
+                          <div className="space-y-3 text-sm">
+                            <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
+                              <span className="text-white/40">Nome</span>
+                              <span className="col-span-2 text-white/90">{v.lead.nome}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
+                              <span className="text-white/40">WhatsApp</span>
+                              <span className="col-span-2 text-white/90">{v.lead.whatsapp}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
+                              <span className="text-white/40">E-mail</span>
+                              <span className="col-span-2 text-white/90">{v.lead.email || "-"}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
+                              <span className="text-white/40">Cargo/Papel</span>
+                              <span className="col-span-2 text-white/90 capitalize">{String(v.lead.form_answers?.papel ?? "").replace(/_/g, " ")}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
+                              <span className="text-white/40">Faturamento</span>
+                              <span className="col-span-2 text-white/90 capitalize">{String(v.lead.form_answers?.faturamento ?? "").replace(/_/g, " ")}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
+                              <span className="text-white/40">Conversas/dia</span>
+                              <span className="col-span-2 text-white/90 capitalize">{String(v.lead.form_answers?.conversas_dia ?? "").replace(/_/g, " ")}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <span className="text-white/40">Problemas</span>
+                              <span className="col-span-2 text-white/90">
+                                {Array.isArray(v.lead.form_answers?.problema_principal) 
+                                  ? v.lead.form_answers.problema_principal.join(", ").replace(/_/g, " ")
+                                  : "-"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/5 p-6 text-center">
+                          <p className="text-sm text-white/40">Este visitante não completou o formulário ou não virou lead.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -276,16 +536,22 @@ function MetricsDashboard({ data }: { data: Metrics }) {
             <p className="py-6 text-center text-sm text-white/30">Nenhuma origem rastreada</p>
           ) : (
             <div className="divide-y divide-white/[0.04]">
-              <div className="grid grid-cols-[1fr_80px_50px] gap-2 pb-2 text-[10px] uppercase tracking-wider text-white/30">
-                <span>Origem</span><span className="text-right">Visitantes</span><span className="text-right">Leads</span>
+              <div className="grid grid-cols-[1fr_80px_50px_60px] gap-2 pb-2 text-[10px] uppercase tracking-wider text-white/30">
+                <span>Origem</span>
+                <span className="text-right">Visitantes</span>
+                <span className="text-right">Leads</span>
+                <span className="text-right">Taxa (Conv.)</span>
               </div>
-              {data.utm_breakdown.map((r) => (
-                <div key={r.key} className="grid grid-cols-[1fr_80px_50px] gap-2 py-2.5 text-xs">
+              {data.utm_breakdown.map((r) => {
+                const conv = r.unique_visitors > 0 ? Math.round((r.leads / r.unique_visitors) * 100) : 0;
+                return (
+                <div key={r.key} className="grid grid-cols-[1fr_80px_50px_60px] gap-2 py-2.5 text-xs">
                   <span className="truncate text-white/70" title={r.key}>{r.key}</span>
                   <span className="text-right tabular-nums text-white/50">{r.unique_visitors}</span>
                   <span className="text-right tabular-nums font-medium text-emerald-400">{r.leads}</span>
+                  <span className="text-right tabular-nums text-amber-400">{conv}%</span>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </Card>
@@ -492,7 +758,7 @@ function SummaryItem({ label, value }: { label: string; value: number }) {
 /* ─── Helpers ────────────────────────────────────────────────────────── */
 function formatDay(iso: string): string {
   try {
-    const d = new Date(iso + "T12:00:00");
+    const d = new Date(iso + (iso.includes("T") ? "" : "T12:00:00"));
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
   } catch {
     return iso;

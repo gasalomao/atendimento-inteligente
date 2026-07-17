@@ -4,7 +4,7 @@ import { env } from "./env";
 import { logger } from "./logger";
 import { healthHandler } from "./routes/health";
 import { leadsHandler } from "./routes/leads";
-import { trackHandler, metricsHandler } from "./routes/track";
+import { trackHandler, metricsHandler, metricsDeleteHandler } from "./routes/track";
 import { leadsRateLimit } from "./security/rate-limit";
 import { startWorker } from "./notifications/worker";
 import http from "node:http";
@@ -42,6 +42,9 @@ app.post("/api/track", (req, res, next) => {
 });
 app.get("/api/metrics", (req, res, next) => {
   void Promise.resolve(metricsHandler(req, res)).catch(next);
+});
+app.delete("/api/metrics", (req, res, next) => {
+  void Promise.resolve(metricsDeleteHandler(req, res)).catch(next);
 });
 
 // Serve arquivos estáticos do frontend (CSS, JS, Imagens) rapidamente pelo Express

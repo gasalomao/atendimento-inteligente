@@ -533,6 +533,8 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           started_at: startedAtRef.current || Date.now(),
           total_time_ms: startedAtRef.current ? Date.now() - startedAtRef.current : undefined,
           step_times_ms: { ...stepTimesRef.current },
+          visitor_id: window.localStorage.getItem("sai_vid") || undefined,
+          session_id: window.sessionStorage.getItem("sai_sid") || undefined,
         }),
       });
       const body = await res.json().catch(() => ({}));

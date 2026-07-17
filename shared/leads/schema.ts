@@ -83,6 +83,8 @@ export const leadSchema = z.object({
   privacy_policy_version: z.string().max(40).optional(),
   total_time_ms: z.number().int().nonnegative().max(3_600_000).optional(),
   step_times_ms: z.record(z.string(), z.number().int().nonnegative().max(3_600_000)).optional(),
+  visitor_id: z.string().max(64).optional(),
+  session_id: z.string().max(64).optional(),
 });
 
 export type LeadInput = z.infer<typeof leadSchema>;

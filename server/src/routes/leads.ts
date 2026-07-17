@@ -60,7 +60,12 @@ export async function leadsHandler(req: Request, res: Response) {
     ? crypto.createHash("sha256").update(String(req.ip)).digest("hex").slice(0, 16)
     : null;
   const geo = await lookupGeo(req.ip ?? null);
-  const formAnswers = geo ? { ...baseFormAnswers, geo } : baseFormAnswers;
+  const formAnswers = {
+    ...baseFormAnswers,
+    ...(geo ? { geo } : {}),
+    visitor_id: data.visitor_id ?? null,
+    session_id: data.session_id ?? null,
+  };
 
   const insert = {
     event_id: eventId,
