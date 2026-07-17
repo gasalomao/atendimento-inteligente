@@ -97,11 +97,21 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="border-b border-[#E3E0D9] bg-[#F7F5F1]">
-      <div className="mx-auto w-full max-w-[720px] px-5 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:pb-24 lg:pt-16">
-        <p className="mb-6 text-center text-[13px] font-semibold uppercase tracking-[0.14em] text-[#207A50]">
-          Atendimento para lojas de iPhone
-        </p>
+    <section className="relative overflow-hidden border-b border-[#E3E0D9] bg-[#F7F5F1]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-24 h-[420px] bg-[radial-gradient(60%_60%_at_50%_0%,rgba(32,122,80,0.14),transparent_70%)]"
+      />
+      <div className="relative mx-auto w-full max-w-[720px] px-5 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:pb-24 lg:pt-16">
+        <div className="mb-6 flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#207A50]/20 bg-white/70 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#207A50] shadow-[0_2px_10px_rgba(32,122,80,0.08)] backdrop-blur">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#207A50] opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#207A50]" />
+            </span>
+            Atendimento no WhatsApp com IA
+          </span>
+        </div>
         <LeadForm />
       </div>
     </section>
