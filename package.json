@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite dev",
     "dev:server": "tsx watch server/src/index.ts",
-    "build": "vite build && tsc -p server/tsconfig.json",
+    "build": "vite build",
     "build:dev": "vite build --mode development",
-    "start": "node server/dist/server/src/index.js",
+    "start": "tsx server/src/index.ts",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit && tsc -p server/tsconfig.json --noEmit",

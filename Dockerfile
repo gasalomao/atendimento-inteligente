@@ -20,8 +20,8 @@ COPY . .
 # Build do frontend (TanStack/Vite). Nitro emite output/public para SPA.
 RUN npm run build
 
-# Build do backend Express (server/*).
-RUN npx tsc -p server/tsconfig.json
+# Backend Express roda direto via tsx em produção (evita problemas de
+# resolução ESM de imports sem extensão no output do tsc).
 
 # Descobre onde o build do frontend caiu e normaliza para /app/dist/client.
 RUN set -eux; \
@@ -48,9 +48,11 @@ RUN apk add --no-cache curl tini && \
     addgroup -S app && adduser -S app -G app
 
 COPY --from=build --chown=app:app /app/node_modules ./node_modules
-COPY --from=build --chown=app:app /app/server/dist ./server/dist
+COPY --from=build --chown=app:app /app/server ./server
+COPY --from=build --chown=app:app /app/shared ./shared
 COPY --from=build --chown=app:app /app/dist ./dist
 COPY --from=build --chown=app:app /app/package.json ./package.json
+COPY --from=build --chown=app:app /app/tsconfig.json ./tsconfig.json
 
 USER app
 EXPOSE 3000
@@ -58,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/healthz || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "server/dist/server/src/index.js"]
+CMD ["npm", "start"]
