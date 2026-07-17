@@ -99,50 +99,16 @@ function Header() {
 function Hero() {
   return (
     <section className="border-b border-[#E3E0D9] bg-[#F7F5F1]">
-      <div className="mx-auto w-full max-w-[1180px] px-5 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:grid lg:grid-cols-[minmax(0,54fr)_minmax(0,46fr)] lg:gap-16 lg:px-8 lg:pb-24 lg:pt-20">
-        <div className="lg:max-w-[660px] lg:self-center">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#207A50]">
-            Atendimento para lojas de iPhone
-          </p>
-          <h1 className="mt-5 text-[clamp(36px,10vw,46px)] font-[650] leading-[1.06] tracking-[-0.035em] text-[#191A18] sm:text-[clamp(42px,4.5vw,64px)] sm:leading-[1.04]">
-            Enquanto você demora, o cliente chama outra loja.
-          </h1>
-          <p className="mt-6 max-w-[620px] text-[17px] leading-[1.6] text-[#5F625E] sm:text-[18px]">
-            Quando sua equipe está ocupada, o atendimento responde as primeiras
-            perguntas, entende qual aparelho a pessoa procura e deixa a conversa
-            organizada para o vendedor continuar.
-          </p>
-
-          <ul className="mt-8 space-y-3 border-t border-[#DDDAD3] pt-6 text-[16px] leading-[1.55] text-[#191A18] sm:text-[17px]">
-            <HeroPoint>Responde quando o vendedor está ocupado</HeroPoint>
-            <HeroPoint>Volta a falar com quem parou de responder</HeroPoint>
-            <HeroPoint>Organiza as informações para o vendedor</HeroPoint>
-          </ul>
-
-          <p className="mt-8 text-[14px] text-[#7B7E78]">
-            Indicado para lojas que faturam a partir de R$ 50 mil por mês.
-          </p>
-        </div>
-
-        <div className="mt-10 lg:mt-0 lg:self-center">
-          <LeadForm />
-        </div>
+      <div className="mx-auto w-full max-w-[720px] px-5 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:pb-24 lg:pt-16">
+        <p className="mb-6 text-center text-[13px] font-semibold uppercase tracking-[0.14em] text-[#207A50]">
+          Atendimento para lojas de iPhone
+        </p>
+        <LeadForm />
       </div>
     </section>
   );
 }
 
-function HeroPoint({ children }: { children: React.ReactNode }) {
-  return (
-    <li className="flex items-start gap-3">
-      <span
-        aria-hidden
-        className="mt-[10px] h-px w-6 shrink-0 bg-[#207A50]"
-      />
-      <span>{children}</span>
-    </li>
-  );
-}
 
 function PainSection() {
   const items = [
