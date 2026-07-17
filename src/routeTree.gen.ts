@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiTrackRouteImport } from './routes/api/track'
 import { Route as ApiLeadsRouteImport } from './routes/api/leads'
 
 const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
@@ -29,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTrackRoute = ApiTrackRouteImport.update({
+  id: '/api/track',
+  path: '/api/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeadsRoute = ApiLeadsRouteImport.update({
   id: '/api/leads',
   path: '/api/leads',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/obrigado': typeof ObrigadoRoute
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/track': typeof ApiTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/obrigado': typeof ObrigadoRoute
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/track': typeof ApiTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,30 @@ export interface FileRoutesById {
   '/obrigado': typeof ObrigadoRoute
   '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/track': typeof ApiTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/obrigado' | '/politica-de-privacidade' | '/api/leads'
+  fullPaths:
+    | '/'
+    | '/obrigado'
+    | '/politica-de-privacidade'
+    | '/api/leads'
+    | '/api/track'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/obrigado' | '/politica-de-privacidade' | '/api/leads'
-  id: '__root__' | '/' | '/obrigado' | '/politica-de-privacidade' | '/api/leads'
+  to:
+    | '/'
+    | '/obrigado'
+    | '/politica-de-privacidade'
+    | '/api/leads'
+    | '/api/track'
+  id:
+    | '__root__'
+    | '/'
+    | '/obrigado'
+    | '/politica-de-privacidade'
+    | '/api/leads'
+    | '/api/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +92,7 @@ export interface RootRouteChildren {
   ObrigadoRoute: typeof ObrigadoRoute
   PoliticaDePrivacidadeRoute: typeof PoliticaDePrivacidadeRoute
   ApiLeadsRoute: typeof ApiLeadsRoute
+  ApiTrackRoute: typeof ApiTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,6 +118,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/track': {
+      id: '/api/track'
+      path: '/api/track'
+      fullPath: '/api/track'
+      preLoaderRoute: typeof ApiTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/leads': {
       id: '/api/leads'
       path: '/api/leads'
@@ -107,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   ObrigadoRoute: ObrigadoRoute,
   PoliticaDePrivacidadeRoute: PoliticaDePrivacidadeRoute,
   ApiLeadsRoute: ApiLeadsRoute,
+  ApiTrackRoute: ApiTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

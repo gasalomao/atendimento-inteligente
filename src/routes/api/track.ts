@@ -30,7 +30,7 @@ export const Route = createFileRoute("/api/track")({
             fbclid: d.fbclid ?? null,
             gclid: d.gclid ?? null,
             user_agent: request.headers.get("user-agent") ?? null,
-            meta: d.meta ?? null,
+            meta: (d.meta ?? null) as never,
           });
         } catch (err) {
           console.warn("[/api/track] insert error", err);
