@@ -50,11 +50,9 @@ function LandingPage() {
       <Header />
       <main>
         <Hero />
-        <PainSection />
-        <DemoSection />
-        <FaqSection />
       </main>
       <Footer />
+
     </div>
   );
 }
