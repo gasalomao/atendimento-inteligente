@@ -446,9 +446,14 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       "investimento",
     ];
     for (let i = 0; i < order.length; i++) {
-      if (!step2[order[i]]) {
+      if (!isAnswered(order[i])) {
         setQ(i);
-        setErrors({ [order[i]]: "Escolha uma opção para continuar." });
+        setErrors({
+          [order[i]]:
+            order[i] === "problema_principal"
+              ? "Escolha ao menos uma opção."
+              : "Escolha uma opção para continuar.",
+        });
         return;
       }
     }
