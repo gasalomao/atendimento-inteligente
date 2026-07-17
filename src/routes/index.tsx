@@ -81,7 +81,7 @@ function Header() {
           : "border-transparent bg-[#F7F5F1]"
       }`}
     >
-      <div className="mx-auto flex h-[60px] w-full max-w-[1180px] items-center justify-between px-5 sm:h-[68px] sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-[56px] w-full max-w-[1180px] items-center px-5 sm:h-16 sm:px-6 lg:px-8">
         <a
           href="/"
           className="flex items-center gap-2.5"
@@ -97,13 +97,6 @@ function Header() {
             Salomão AI
           </span>
         </a>
-        <button
-          type="button"
-          onClick={scrollToForm}
-          className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#207A50] px-4 text-[14px] font-semibold text-white transition-colors duration-150 hover:bg-[#17613E] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
-        >
-          Analisar meu atendimento
-        </button>
       </div>
     </header>
   );
