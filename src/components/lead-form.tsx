@@ -54,7 +54,7 @@ type Investimento =
 type Step2 = {
   papel: Papel;
   conversas_dia: Conversas;
-  problema_principal: Problema;
+  problema_principal: Problema[];
   faturamento: Faturamento;
   investimento: Investimento;
   consentimento: boolean;
