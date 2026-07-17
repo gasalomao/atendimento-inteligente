@@ -20,8 +20,15 @@ COPY . .
 # Build do frontend (TanStack/Vite) com preset node-server para rodar no Docker.
 RUN NITRO_PRESET=node-server npm run build
 
-# Verifica se o build gerou a pasta .output
-RUN ls -la .output/server/ && ls -la .output/public/ | head -20
+# Organiza os arquivos estáticos. O Nitro procura em /app/dist/public/ durante o SSR.
+# O Express vai servir de /app/dist/client/ (podemos criar links simbólicos para ambos).
+RUN set -eux; \
+    mkdir -p dist/client dist/public dist/server; \
+    if [ -d ".output/public" ]; then \
+        cp -a .output/public/. dist/client/; \
+        cp -a .output/public/. dist/public/; \
+        cp -a .output/server/. dist/server/; \
+    fi
 
 # Remove devDependencies para o runtime.
 RUN npm prune --omit=dev
@@ -37,7 +44,8 @@ ENV TZ=America/Sao_Paulo
 RUN apk add --no-cache curl tini && \
     addgroup -S app && adduser -S app -G app
 
-# Copia .output intacto (Nitro precisa dos paths relativos para servir CSS/JS)
+# Copia os builds
+COPY --from=build --chown=app:app /app/dist ./dist
 COPY --from=build --chown=app:app /app/.output ./.output
 
 # Express API server + notification worker
@@ -53,5 +61,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/healthz || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-# Nitro SSR na porta 3000 (principal) | Express API na porta 3001 (interno)
-CMD ["sh", "-c", "NITRO_PORT=3000 PORT=3000 HOST=0.0.0.0 node .output/server/index.mjs & PORT=3001 ./node_modules/.bin/tsx server/src/index.ts & wait"]
+# Inicia Express na porta 3000 (API + Proxy) e Nitro na porta 3001
+CMD ["sh", "-c", "PORT=3001 node .output/server/index.mjs & PORT=3000 ./node_modules/.bin/tsx server/src/index.ts & wait"]
