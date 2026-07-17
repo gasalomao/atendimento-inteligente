@@ -562,13 +562,13 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           {step === 1 ? (
             <div className="space-y-5">
               <div>
-                <Label htmlFor="f-nome">Seu nome</Label>
+                <Label htmlFor="f-nome">Seu nome completo</Label>
                 <input
                   id="f-nome"
                   name="nome"
                   type="text"
                   autoComplete="name"
-                  placeholder="Como podemos chamar você?"
+                  placeholder="Nome e sobrenome"
                   value={step1.nome}
                   onFocus={markStarted}
                   onChange={(e) => {
