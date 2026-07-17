@@ -809,14 +809,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   );
 }
 
-function IntroPoint({ children }: { children: React.ReactNode }) {
-  return (
-    <li className="flex items-start gap-3">
-      <span aria-hidden className="mt-[10px] h-px w-6 shrink-0 bg-[#207A50]" />
-      <span>{children}</span>
-    </li>
-  );
-}
 
 
 function QuestionBlock({
