@@ -516,6 +516,8 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           landing_path: utms.landing_path,
           hp_field: hpRef.current?.value ?? "",
           started_at: startedAtRef.current || Date.now(),
+          total_time_ms: startedAtRef.current ? Date.now() - startedAtRef.current : undefined,
+          step_times_ms: { ...stepTimesRef.current },
         }),
       });
       const body = await res.json().catch(() => ({}));
