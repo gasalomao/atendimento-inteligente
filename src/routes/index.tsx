@@ -356,9 +356,6 @@ function Footer() {
           </a>
         </div>
       </div>
-      <div className="mx-auto w-full max-w-[1180px] px-5 pb-8 text-[12px] text-[#F5F3EE]/45 sm:px-6 lg:px-8">
-        Esta empresa não possui vínculo oficial com a Apple.
-      </div>
     </footer>
   );
 }
