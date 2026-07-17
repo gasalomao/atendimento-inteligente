@@ -30,7 +30,6 @@ type Conversas =
   | "more_than_60"
   | "unknown";
 type Problema =
-  | ""
   | "delayed_response_busy_store"
   | "price_request_then_disappears"
   | "messages_outside_business_hours"
@@ -55,7 +54,7 @@ type Investimento =
 type Step2 = {
   papel: Papel;
   conversas_dia: Conversas;
-  problema_principal: Problema;
+  problema_principal: Problema[];
   faturamento: Faturamento;
   investimento: Investimento;
   consentimento: boolean;
@@ -228,10 +227,12 @@ const HONEYPOT_STYLE: React.CSSProperties = {
 
 function OptionCard({
   active,
+  multi = false,
   onClick,
   children,
 }: {
   active: boolean;
+  multi?: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
@@ -242,22 +243,46 @@ function OptionCard({
       aria-pressed={active}
       className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
     >
-      <span
-        aria-hidden
-        className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border transition-colors ${
-          active ? "border-[#207A50]" : "border-[#C8C4BB]"
-        }`}
-      >
+      {multi ? (
         <span
-          className={`h-[8px] w-[8px] rounded-full transition-opacity ${
-            active ? "bg-[#207A50] opacity-100" : "opacity-0"
+          aria-hidden
+          className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] border transition-colors ${
+            active ? "border-[#207A50] bg-[#207A50]" : "border-[#C8C4BB] bg-white"
           }`}
-        />
-      </span>
+        >
+          <svg
+            viewBox="0 0 16 16"
+            className={`h-[12px] w-[12px] text-white transition-opacity ${
+              active ? "opacity-100" : "opacity-0"
+            }`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 8.5l3.2 3.2L13 4.8" />
+          </svg>
+        </span>
+      ) : (
+        <span
+          aria-hidden
+          className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border transition-colors ${
+            active ? "border-[#207A50]" : "border-[#C8C4BB]"
+          }`}
+        >
+          <span
+            className={`h-[8px] w-[8px] rounded-full transition-opacity ${
+              active ? "bg-[#207A50] opacity-100" : "opacity-0"
+            }`}
+          />
+        </span>
+      )}
       <span className="flex-1">{children}</span>
     </button>
   );
 }
+
 
 export function LeadForm({ id = "formulario" }: { id?: string }) {
   const [step, setStep] = useState<0 | 1 | 2>(0);
@@ -279,7 +304,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const [step2, setStep2] = useState<Step2>({
     papel: "",
     conversas_dia: "",
-    problema_principal: "",
+    problema_principal: [],
     faturamento: "",
     investimento: "",
     consentimento: false,
@@ -378,14 +403,34 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   }
 
   function onSelect(field: Step2Field, value: Step2Value) {
+    if (field === "problema_principal") {
+      setStep2((s) => {
+        const list = s.problema_principal;
+        const v = value as Problema;
+        const next = list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+        return { ...s, problema_principal: next };
+      });
+      setErrors((e) => ({ ...e, problema_principal: undefined }));
+      return;
+    }
     setStep2((s) => ({ ...s, [field]: value }));
     setErrors((e) => ({ ...e, [field]: undefined }));
   }
 
+  function isAnswered(field: Step2Field): boolean {
+    if (field === "problema_principal") return step2.problema_principal.length > 0;
+    return Boolean(step2[field]);
+  }
+
   function onQuestionContinue() {
     const field = currentField();
-    if (!step2[field]) {
-      setErrors({ [field]: "Escolha uma opção para continuar." });
+    if (!isAnswered(field)) {
+      setErrors({
+        [field]:
+          field === "problema_principal"
+            ? "Escolha ao menos uma opção."
+            : "Escolha uma opção para continuar.",
+      });
       return;
     }
     if (q < STEP2_QUESTIONS.length - 1) {
@@ -398,7 +443,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         });
       }, 30);
     } else {
-      // última pergunta respondida → mostra bloco de consentimento/envio
       setErrors({});
       setTimeout(() => {
         document
@@ -428,9 +472,14 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       "investimento",
     ];
     for (let i = 0; i < order.length; i++) {
-      if (!step2[order[i]]) {
+      if (!isAnswered(order[i])) {
         setQ(i);
-        setErrors({ [order[i]]: "Escolha uma opção para continuar." });
+        setErrors({
+          [order[i]]:
+            order[i] === "problema_principal"
+              ? "Escolha ao menos uma opção."
+              : "Escolha uma opção para continuar.",
+        });
         return;
       }
     }
@@ -823,26 +872,41 @@ function QuestionBlock({
   error?: string;
   onSelect: (field: Step2Field, value: Step2Value) => void;
 }) {
+  const multi = Array.isArray(value);
   return (
     <fieldset id={`q-${question.field}`} className="border-0 p-0">
       <legend className="block text-[17px] font-[600] leading-[1.35] text-[#191A18]">
         {question.question}
       </legend>
+      {multi ? (
+        <p className="mt-1.5 text-[13px] leading-[1.5] text-[#5F625E]">
+          Pode marcar mais de uma.
+        </p>
+      ) : null}
       {question.description ? (
         <p className="mt-2 text-[14px] leading-[1.55] text-[#5F625E]">
           {question.description}
         </p>
       ) : null}
-      <div className="mt-4 grid gap-2.5" role="radiogroup">
-        {question.options.map((opt) => (
-          <OptionCard
-            key={opt.v}
-            active={value === opt.v}
-            onClick={() => onSelect(question.field, opt.v)}
-          >
-            {opt.t}
-          </OptionCard>
-        ))}
+      <div
+        className="mt-4 grid gap-2.5"
+        role={multi ? "group" : "radiogroup"}
+      >
+        {question.options.map((opt) => {
+          const active = multi
+            ? (value as string[]).includes(opt.v)
+            : value === opt.v;
+          return (
+            <OptionCard
+              key={opt.v}
+              active={active}
+              multi={multi}
+              onClick={() => onSelect(question.field, opt.v)}
+            >
+              {opt.t}
+            </OptionCard>
+          );
+        })}
       </div>
       <ErrorText id={`err-${question.field}`} msg={error} />
     </fieldset>
