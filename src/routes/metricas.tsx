@@ -55,6 +55,63 @@ type VisitorJourney = {
   } | null;
 };
 
+const QUESTION_LABELS: Record<string, string> = {
+  "step1_contact": "Etapa 1: Dados de Contato",
+  "papel": "P1: Qual é o seu papel na loja?",
+  "conversas_dia": "P2: Quantas novas conversas chegam por dia?",
+  "problema_principal": "P3: Qual situação mais acontece hoje?",
+  "faturamento": "P4: Faturamento mensal da loja",
+  "investimento": "P5: Momento para investir R$ 1.500/mês",
+};
+
+const OPTION_LABELS: Record<string, string> = {
+  // papel
+  "owner_partner": "Proprietário ou sócio",
+  "manager_decision_maker": "Gerente / Participa das decisões",
+  "team_member_no_final_decision": "Membro da equipe (sem decisão final)",
+  "other": "Outro",
+  
+  // conversas_dia
+  "up_to_10": "Até 10 novas conversas/dia",
+  "from_11_to_30": "11 a 30 novas conversas/dia",
+  "from_31_to_60": "31 a 60 novas conversas/dia",
+  "more_than_60": "Mais de 60 novas conversas/dia",
+  "unknown": "Não sabe ao certo",
+  
+  // problema_principal
+  "delayed_response_busy_store": "Demora ao responder com a loja cheia",
+  "price_request_then_disappears": "Cliente pede preço e some",
+  "messages_outside_business_hours": "Mensagens fora de hora acumulam",
+  "no_customer_recontact": "Falta recontacto com quem não comprou",
+  "repetitive_questions": "Vendedores repetindo mesmas respostas",
+  "wants_to_scale_without_overload": "Quer escalar sem sobrecarregar equipe",
+
+  // faturamento
+  "up_to_30k": "Até R$ 30 mil",
+  "from_30k_to_50k": "De R$ 30 mil a R$ 50 mil",
+  "from_50k_to_100k": "De R$ 50 mil a R$ 100 mil",
+  "from_100k_to_300k": "De R$ 100 mil a R$ 300 mil",
+  "above_300k": "Acima de R$ 300 mil",
+  "prefer_not_to_say": "Prefere não dizer",
+
+  // investimento
+  "ready_if_value_is_clear": "Posso investir se o valor/benefício for claro",
+  "wants_to_see_first": "Quero ver como funciona primeiro",
+  "needs_other_decision_maker": "Preciso falar com outro decisor",
+  "above_current_budget": "Acima do orçamento atual",
+};
+
+function getQuestionLabel(key: string): string {
+  return QUESTION_LABELS[key] || key;
+}
+
+function translateOption(val: any): string {
+  if (Array.isArray(val)) {
+    return val.map(v => OPTION_LABELS[v] || String(v)).join(", ");
+  }
+  return OPTION_LABELS[val] || String(val);
+}
+
 const PASS = "30741852";
 const TOKEN_KEY = "sai_metrics_token";
 const AUTH_KEY = "sai_metrics_auth";
@@ -451,7 +508,7 @@ function VisitorsDashboard({
                             label = "Preencheu etapa"; 
                             color = "bg-slate-500/20 text-slate-300";
                             dotColor = "bg-slate-400";
-                            if (evt.meta?.question) detail = `(Tela: ${evt.meta.question} · Tempo gasto: ${formatMs(evt.meta.duration_ms)})`;
+                            if (evt.meta?.question) detail = `(${getQuestionLabel(evt.meta.question)} · Tempo: ${formatMs(evt.meta.duration_ms)})`;
                           }
                           if (evt.type === "form_submit_success") { label = "Enviou formulário com Sucesso!"; color = "bg-emerald-500/20 text-emerald-300 font-bold"; dotColor = "bg-emerald-400"; }
                           
@@ -497,21 +554,25 @@ function VisitorsDashboard({
                             </div>
                             <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
                               <span className="text-white/40">Cargo/Papel</span>
-                              <span className="col-span-2 text-white/90 capitalize">{String(v.lead.form_answers?.papel ?? "").replace(/_/g, " ")}</span>
+                              <span className="col-span-2 text-white/90">{translateOption(v.lead.form_answers?.papel)}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
                               <span className="text-white/40">Faturamento</span>
-                              <span className="col-span-2 text-white/90 capitalize">{String(v.lead.form_answers?.faturamento ?? "").replace(/_/g, " ")}</span>
+                              <span className="col-span-2 text-white/90">{translateOption(v.lead.form_answers?.faturamento)}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
                               <span className="text-white/40">Conversas/dia</span>
-                              <span className="col-span-2 text-white/90 capitalize">{String(v.lead.form_answers?.conversas_dia ?? "").replace(/_/g, " ")}</span>
+                              <span className="col-span-2 text-white/90">{translateOption(v.lead.form_answers?.conversas_dia)}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
+                              <span className="text-white/40">Investimento</span>
+                              <span className="col-span-2 text-white/90">{translateOption(v.lead.form_answers?.investimento)}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                               <span className="text-white/40">Problemas</span>
                               <span className="col-span-2 text-white/90">
-                                {Array.isArray(v.lead.form_answers?.problema_principal) 
-                                  ? v.lead.form_answers.problema_principal.join(", ").replace(/_/g, " ")
+                                {v.lead.form_answers?.problema_principal
+                                  ? translateOption(v.lead.form_answers.problema_principal)
                                   : "-"}
                               </span>
                             </div>
@@ -696,7 +757,7 @@ function MetricsDashboard({ data }: { data: Metrics }) {
             <div className="divide-y divide-white/[0.04]">
               {Object.entries(data.timing.avg_time_per_question_ms).map(([q, ms]) => (
                 <div key={q} className="flex items-center justify-between py-2.5 text-xs">
-                  <span className="truncate text-white/70" title={q}>{q}</span>
+                  <span className="truncate text-white/70" title={getQuestionLabel(q)}>{getQuestionLabel(q)}</span>
                   <span className="ml-4 tabular-nums text-amber-400">{formatMs(ms)}</span>
                 </div>
               ))}
