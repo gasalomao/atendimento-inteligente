@@ -482,10 +482,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         return;
       }
     }
-    if (!step2.consentimento) {
-      setErrors({ consentimento: "É necessário autorizar o contato." });
-      return;
-    }
     setSubmitError(null);
     setLoading(true);
     track("form_submit_attempt");
