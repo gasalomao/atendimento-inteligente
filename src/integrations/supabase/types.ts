@@ -24,8 +24,10 @@ export type Database = {
           fbclid: string | null
           gclid: string | null
           id: string
+          investimento: string | null
           ip: string | null
           landing_path: string | null
+          lead_classification: string | null
           loja: string
           nome: string
           papel: string | null
@@ -49,8 +51,10 @@ export type Database = {
           fbclid?: string | null
           gclid?: string | null
           id?: string
+          investimento?: string | null
           ip?: string | null
           landing_path?: string | null
+          lead_classification?: string | null
           loja: string
           nome: string
           papel?: string | null
@@ -74,8 +78,10 @@ export type Database = {
           fbclid?: string | null
           gclid?: string | null
           id?: string
+          investimento?: string | null
           ip?: string | null
           landing_path?: string | null
+          lead_classification?: string | null
           loja?: string
           nome?: string
           papel?: string | null

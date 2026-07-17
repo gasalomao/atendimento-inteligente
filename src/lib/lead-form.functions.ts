@@ -19,7 +19,12 @@ const submitSchema = z.object({
     .email("E-mail inválido.")
     .optional()
     .or(z.literal("")),
-  papel: z.enum(["proprietario_socio", "participa_decisao", "nao_decisor"]),
+  papel: z.enum([
+    "proprietario_socio",
+    "participa_decisao",
+    "precisa_conversar",
+    "nao_decisor",
+  ]),
   faturamento: z.enum([
     "ate_30k",
     "30k_50k",
@@ -28,13 +33,6 @@ const submitSchema = z.object({
     "acima_300k",
     "prefere_nao_dizer",
   ]),
-  conversas_dia: z.enum([
-    "ate_10",
-    "11_30",
-    "31_60",
-    "mais_60",
-    "nao_sabe",
-  ]),
   problema_principal: z.enum([
     "demora",
     "orcamento_sem_retorno",
@@ -42,6 +40,12 @@ const submitSchema = z.object({
     "fora_do_horario",
     "vendedores_sobrecarregados",
     "falta_organizacao",
+  ]),
+  investimento: z.enum([
+    "consegue_investir",
+    "avaliar_depois",
+    "precisa_conversar",
+    "acima_orcamento",
   ]),
   consentimento: z.literal(true, {
     errorMap: () => ({ message: "É necessário autorizar o contato." }),
@@ -61,32 +65,48 @@ const submitSchema = z.object({
   started_at: z.number().optional(), // timestamp ms de quando o form_start foi disparado
 });
 
-function calcularPontuacao(input: z.infer<typeof submitSchema>): number {
+type SubmitInput = z.infer<typeof submitSchema>;
+
+// Regras conforme especificação do produto.
+function calcularPontuacao(input: SubmitInput): number {
   let s = 0;
-  if (input.papel === "proprietario_socio") s += 30;
-  else if (input.papel === "participa_decisao") s += 15;
 
-  const fat: Record<string, number> = {
+  const papelScore: Record<SubmitInput["papel"], number> = {
+    proprietario_socio: 3,
+    participa_decisao: 2,
+    precisa_conversar: 1,
+    nao_decisor: 0,
+  };
+  s += papelScore[input.papel];
+
+  const faturamentoScore: Record<SubmitInput["faturamento"], number> = {
     ate_30k: 0,
-    "30k_50k": 10,
-    "50k_100k": 25,
-    "100k_300k": 35,
-    acima_300k: 40,
-    prefere_nao_dizer: 5,
+    "30k_50k": 1,
+    "50k_100k": 3,
+    "100k_300k": 4,
+    acima_300k: 5,
+    prefere_nao_dizer: 1,
   };
-  s += fat[input.faturamento] ?? 0;
+  s += faturamentoScore[input.faturamento];
 
-  const conv: Record<string, number> = {
-    ate_10: 5,
-    "11_30": 12,
-    "31_60": 20,
-    mais_60: 25,
-    nao_sabe: 5,
+  // Todas as dificuldades pontuam igual: +2.
+  s += 2;
+
+  const investimentoScore: Record<SubmitInput["investimento"], number> = {
+    consegue_investir: 4,
+    avaliar_depois: 3,
+    precisa_conversar: 1,
+    acima_orcamento: 0,
   };
-  s += conv[input.conversas_dia] ?? 0;
+  s += investimentoScore[input.investimento];
 
-  // Problema não altera score, mas fica salvo.
   return s;
+}
+
+function classificar(score: number): string {
+  if (score >= 10) return "contato_prioritario";
+  if (score >= 6) return "contato_potencial";
+  return "contato_acompanhamento";
 }
 
 export const submitLeadForm = createServerFn({ method: "POST" })
@@ -108,6 +128,7 @@ export const submitLeadForm = createServerFn({ method: "POST" })
     const userAgent = getRequestHeader("user-agent") ?? null;
 
     const pontuacao = calcularPontuacao(data);
+    const classificacao = classificar(pontuacao);
 
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
@@ -122,10 +143,12 @@ export const submitLeadForm = createServerFn({ method: "POST" })
         email: data.email && data.email !== "" ? data.email : null,
         papel: data.papel,
         faturamento: data.faturamento,
-        conversas_dia: data.conversas_dia,
         problema_principal: data.problema_principal,
+        // Nova coluna adicionada por migração; campo texto livre com slug estável.
+        investimento: data.investimento,
         consentimento: data.consentimento,
         pontuacao,
+        lead_classification: classificacao,
         utm_source: data.utm_source ?? null,
         utm_medium: data.utm_medium ?? null,
         utm_campaign: data.utm_campaign ?? null,
@@ -147,7 +170,8 @@ export const submitLeadForm = createServerFn({ method: "POST" })
     }
 
     // Webhook opcional para n8n / CRM. Configurar variável WEBHOOK_URL como
-    // secret para ativar. Falha silenciosa: não bloqueia o retorno ao usuário.
+    // secret para ativar. Falha silenciosa: não bloqueia o retorno ao usuário
+    // — o contato já está salvo no banco.
     const webhookUrl = process.env.WEBHOOK_URL;
     if (webhookUrl) {
       try {
@@ -157,6 +181,13 @@ export const submitLeadForm = createServerFn({ method: "POST" })
           body: JSON.stringify({
             id: inserted?.id,
             pontuacao,
+            lead_score: pontuacao,
+            lead_classification: classificacao,
+            // Aliases em inglês (slugs estáveis para o CRM/n8n).
+            decision_authority: data.papel,
+            monthly_revenue_range: data.faturamento,
+            main_service_problem: data.problema_principal,
+            investment_readiness: data.investimento,
             ...data,
             ip,
             user_agent: userAgent,
