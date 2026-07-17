@@ -377,14 +377,34 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   }
 
   function onSelect(field: Step2Field, value: Step2Value) {
+    if (field === "problema_principal") {
+      setStep2((s) => {
+        const list = s.problema_principal;
+        const v = value as Problema;
+        const next = list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+        return { ...s, problema_principal: next };
+      });
+      setErrors((e) => ({ ...e, problema_principal: undefined }));
+      return;
+    }
     setStep2((s) => ({ ...s, [field]: value }));
     setErrors((e) => ({ ...e, [field]: undefined }));
   }
 
+  function isAnswered(field: Step2Field): boolean {
+    if (field === "problema_principal") return step2.problema_principal.length > 0;
+    return Boolean(step2[field]);
+  }
+
   function onQuestionContinue() {
     const field = currentField();
-    if (!step2[field]) {
-      setErrors({ [field]: "Escolha uma opção para continuar." });
+    if (!isAnswered(field)) {
+      setErrors({
+        [field]:
+          field === "problema_principal"
+            ? "Escolha ao menos uma opção."
+            : "Escolha uma opção para continuar.",
+      });
       return;
     }
     if (q < STEP2_QUESTIONS.length - 1) {
@@ -397,7 +417,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         });
       }, 30);
     } else {
-      // última pergunta respondida → mostra bloco de consentimento/envio
       setErrors({});
       setTimeout(() => {
         document
