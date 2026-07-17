@@ -501,14 +501,16 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const showConsent = isLastQuestion && !!step2[currentField()];
 
   const totalSteps = 1 + STEP2_QUESTIONS.length;
-  const currentStepIndex = step === 1 ? 1 : q + 2;
-  const progressPct = Math.round((currentStepIndex / totalSteps) * 100);
+  const currentStepIndex = step === 0 ? 0 : step === 1 ? 1 : q + 2;
+  const progressPct = step === 0 ? 0 : Math.round((currentStepIndex / totalSteps) * 100);
   const stepLabel =
-    step === 1 ? "Seus dados" : "Sobre sua loja";
+    step === 0 ? "Introdução" : step === 1 ? "Seus dados" : "Sobre sua loja";
   const stepCounter =
-    step === 1
-      ? "Etapa 1 de 2"
-      : `Etapa 2 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`;
+    step === 0
+      ? "Comece aqui"
+      : step === 1
+        ? "Etapa 1 de 2"
+        : `Etapa 2 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`;
 
   return (
     <div
