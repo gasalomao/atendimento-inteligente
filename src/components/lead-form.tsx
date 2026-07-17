@@ -7,6 +7,7 @@ import {
   track,
   trackOnce,
 } from "@/lib/tracking";
+import { trackEvent } from "@/lib/analytics";
 import { PrivacyDialog } from "./privacy-dialog";
 
 type Step1 = {
