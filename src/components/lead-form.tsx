@@ -892,17 +892,6 @@ function SuccessState({
         Agora vamos entender como esse atendimento poderia funcionar na sua
         loja. Entraremos em contato pelo WhatsApp informado.
       </p>
-      <div className="mt-7 flex flex-col gap-2 sm:flex-row sm:justify-center">
-        <a
-          href={waHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={onWhatsappClick}
-          className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[10px] bg-[#207A50] px-6 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
-        >
-          <MessageCircle className="h-5 w-5" /> Continuar pelo WhatsApp
-        </a>
-      </div>
     </div>
   );
 }
