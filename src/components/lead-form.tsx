@@ -614,6 +614,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               <div>
                 <Label htmlFor="f-nome">Seu nome completo</Label>
                 <input
+                  ref={nomeRef}
                   id="f-nome"
                   name="nome"
                   type="text"
