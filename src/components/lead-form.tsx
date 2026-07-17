@@ -182,7 +182,6 @@ const STEP2_QUESTIONS: Step2Question[] = [
       { v: "from_50k_to_100k", t: "De R$ 50 mil a R$ 100 mil" },
       { v: "from_100k_to_300k", t: "De R$ 100 mil a R$ 300 mil" },
       { v: "above_300k", t: "Acima de R$ 300 mil" },
-      { v: "prefer_not_to_say", t: "Prefiro falar sobre isso depois" },
     ],
   },
   {
