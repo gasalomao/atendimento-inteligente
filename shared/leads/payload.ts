@@ -10,8 +10,8 @@ import {
 
 export type LabelValue = { value: string; label: string };
 
-export function buildFormAnswers(input: LeadInput): Record<string, LabelValue> {
-  return {
+export function buildFormAnswers(input: LeadInput): Record<string, unknown> {
+  const base: Record<string, unknown> = {
     role: { value: input.papel, label: labelize(PAPEL_LABELS, input.papel) },
     daily_conversations: {
       value: input.conversas_dia,
@@ -32,6 +32,9 @@ export function buildFormAnswers(input: LeadInput): Record<string, LabelValue> {
       label: labelize(INVESTIMENTO_LABELS, input.investimento),
     },
   };
+  if (typeof input.total_time_ms === "number") base.total_time_ms = input.total_time_ms;
+  if (input.step_times_ms) base.step_times_ms = input.step_times_ms;
+  return base;
 }
 
 export function buildWebhookPayload(args: {
