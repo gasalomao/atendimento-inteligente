@@ -607,7 +607,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               </div>
 
               <div>
-                <Label htmlFor="f-loja">Nome ou Instagram da loja</Label>
+                <Label htmlFor="f-loja">Nome ou Instagram da loja — opcional</Label>
                 <input
                   id="f-loja"
                   name="loja"
