@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { Clock, MessageSquare, RotateCcw, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 import { LeadForm } from "@/components/lead-form";
 import { captureAndPersistTracking, trackOnce } from "@/lib/tracking";
 
@@ -13,7 +12,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A IA responde na hora, entende qual iPhone o cliente procura, pergunta sobre pagamento e troca e deixa a conversa pronta para o vendedor continuar.",
+          "A inteligência artificial responde as primeiras perguntas, entende qual aparelho a pessoa procura e deixa a conversa organizada para o vendedor continuar.",
       },
       {
         property: "og:title",
@@ -23,10 +22,11 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Responde novos contatos, entende o aparelho, pergunta sobre pagamento e troca, e entrega a conversa pronta para o vendedor.",
+          "Atendimento automático para lojas de iPhone: responde na hora, retoma conversas paradas e organiza informações para o vendedor.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#F7F5F1" },
     ],
   }),
   component: LandingPage,
@@ -34,8 +34,9 @@ export const Route = createFileRoute("/")({
 
 function scrollToForm() {
   if (typeof window === "undefined") return;
-  const el = document.getElementById("formulario");
-  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById("formulario")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function LandingPage() {
@@ -45,38 +46,63 @@ function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-[#101828]">
+    <div className="min-h-screen bg-[#F7F5F1] font-sans text-[#191A18] antialiased selection:bg-[#207A50]/20">
+      <a
+        href="#formulario"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-[#191A18] focus:px-4 focus:py-2 focus:text-sm focus:text-white"
+      >
+        Ir para o formulário
+      </a>
       <Header />
-      <Hero />
-      <SituationsSection />
-      <DemoSection />
-      <FaqSection />
+      <main>
+        <Hero />
+        <PainSection />
+        <DemoSection />
+        <FaqSection />
+      </main>
       <Footer />
     </div>
   );
 }
 
 function Header() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   return (
-    <header className="sticky top-0 z-40 border-b border-[#E5E7EB] bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-2">
+    <header
+      className={`sticky top-0 z-40 border-b transition-shadow ${
+        scrolled
+          ? "border-[#E3E0D9] bg-[#F7F5F1]/85 shadow-[0_8px_30px_rgba(25,26,24,0.06)] backdrop-blur"
+          : "border-transparent bg-[#F7F5F1]"
+      }`}
+    >
+      <div className="mx-auto flex h-[60px] w-full max-w-[1180px] items-center justify-between px-5 sm:h-[68px] sm:px-6 lg:px-8">
+        <a
+          href="/"
+          className="flex items-center gap-2.5"
+          aria-label="Salomão AI — Página inicial"
+        >
           <span
             aria-hidden
-            className="grid h-8 w-8 place-items-center rounded-md bg-[#0B0D12] text-white"
+            className="grid h-7 w-7 place-items-center rounded-md bg-[#191A18] text-[13px] font-semibold text-[#F7F5F1]"
           >
-            <Sparkles className="h-4 w-4 text-[#22C55E]" />
+            S
           </span>
-          <span className="text-sm font-semibold text-[#101828] sm:text-base">
+          <span className="text-[15px] font-semibold tracking-tight text-[#191A18]">
             Salomão AI
           </span>
-        </div>
+        </a>
         <button
           type="button"
           onClick={scrollToForm}
-          className="inline-flex items-center justify-center rounded-lg bg-[#22C55E] px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#16A34A] sm:px-4"
+          className="inline-flex h-10 items-center justify-center rounded-[10px] bg-[#207A50] px-4 text-[14px] font-semibold text-white transition-colors duration-150 hover:bg-[#17613E] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
         >
-          Quero analisar meu atendimento
+          Analisar meu atendimento
         </button>
       </div>
     </header>
@@ -85,44 +111,34 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="bg-[#0B0D12] text-white">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[1.05fr_1fr] lg:items-start lg:gap-12 lg:py-20">
-        <div className="lg:pt-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#22C55E]">
-            IA para atendimento de lojas de iPhone
+    <section className="border-b border-[#E3E0D9] bg-[#F7F5F1]">
+      <div className="mx-auto w-full max-w-[1180px] px-5 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:grid lg:grid-cols-[minmax(0,54fr)_minmax(0,46fr)] lg:gap-16 lg:px-8 lg:pb-24 lg:pt-20">
+        <div className="lg:max-w-[660px] lg:self-center">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#207A50]">
+            Atendimento para lojas de iPhone
           </p>
-          <h1 className="mt-4 text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl lg:text-[44px] lg:leading-[1.1]">
-            Quem quer comprar um iPhone não espera.
-            <br className="hidden sm:block" /> Se você demora, ele chama outra
-            loja.
+          <h1 className="mt-5 text-[clamp(36px,10vw,46px)] font-[650] leading-[1.06] tracking-[-0.035em] text-[#191A18] sm:text-[clamp(42px,4.5vw,64px)] sm:leading-[1.04]">
+            Quem quer comprar um iPhone não espera. Se você demora, ele chama
+            outra loja.
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">
-            A IA responde na hora, entende qual aparelho a pessoa procura,
-            pergunta sobre pagamento e troca e deixa a conversa pronta para o
-            vendedor continuar.
+          <p className="mt-6 max-w-[620px] text-[17px] leading-[1.6] text-[#5F625E] sm:text-[18px]">
+            O atendimento automático responde as primeiras perguntas, entende
+            qual aparelho a pessoa procura e deixa a conversa organizada para
+            o vendedor continuar.
           </p>
-          <p className="mt-5 inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
-            Para lojas que faturam a partir de R$ 50 mil por mês.
-          </p>
-          <ul className="mt-6 grid gap-2.5 text-[15px] text-white/85">
-            <li className="flex items-start gap-2.5">
-              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-[#22C55E]" />
-              <span>Responde mesmo quando o vendedor está ocupado.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <RotateCcw className="mt-0.5 h-5 w-5 shrink-0 text-[#22C55E]" />
-              <span>Volta a falar com quem pediu preço e sumiu.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
-              <MessageSquare className="mt-0.5 h-5 w-5 shrink-0 text-[#22C55E]" />
-              <span>
-                Organiza as informações antes de chamar o vendedor.
-              </span>
-            </li>
+
+          <ul className="mt-8 space-y-3 border-t border-[#DDDAD3] pt-6 text-[16px] leading-[1.55] text-[#191A18] sm:text-[17px]">
+            <HeroPoint>Responde quando o vendedor está ocupado</HeroPoint>
+            <HeroPoint>Retoma conversas que ficaram paradas</HeroPoint>
+            <HeroPoint>Organiza as informações para o vendedor</HeroPoint>
           </ul>
+
+          <p className="mt-8 text-[14px] text-[#7B7E78]">
+            Indicado para lojas que faturam a partir de R$ 50 mil por mês.
+          </p>
         </div>
 
-        <div>
+        <div className="mt-10 lg:mt-0 lg:self-center">
           <LeadForm />
         </div>
       </div>
@@ -130,44 +146,63 @@ function Hero() {
   );
 }
 
-function SituationsSection() {
+function HeroPoint({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-3">
+      <span
+        aria-hidden
+        className="mt-[10px] h-px w-6 shrink-0 bg-[#207A50]"
+      />
+      <span>{children}</span>
+    </li>
+  );
+}
+
+function PainSection() {
   const items = [
     {
-      icon: MessageSquare,
-      text: "Novas mensagens chegam enquanto o vendedor está atendendo no balcão.",
+      n: "01",
+      title: "Mensagens chegam enquanto o vendedor está ocupado.",
+      text: "Quem está no balcão precisa escolher entre atender a pessoa presente ou responder quem chamou pelo WhatsApp.",
     },
     {
-      icon: RotateCcw,
-      text: "O cliente pede preço, para de responder e ninguém volta a falar com ele.",
+      n: "02",
+      title: "O cliente pede preço e depois desaparece.",
+      text: "Sem alguém para retomar a conversa, aquele interesse pode acabar em outra loja.",
     },
     {
-      icon: Clock,
-      text: "À noite ou no fim de semana, ele procura uma loja que responda primeiro.",
+      n: "03",
+      title: "À noite e nos fins de semana, a procura continua.",
+      text: "Quando a resposta chega somente no dia seguinte, o cliente pode já ter encontrado outra opção.",
     },
   ];
   return (
     <section className="bg-white">
-      <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
-        <h2 className="max-w-2xl text-2xl font-semibold leading-tight text-[#101828] sm:text-3xl">
+      <div className="mx-auto w-full max-w-[1180px] px-5 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <h2 className="max-w-[720px] text-[clamp(30px,3vw,44px)] font-[650] leading-[1.1] tracking-[-0.025em] text-[#191A18]">
           Isso acontece na sua loja?
         </h2>
-        <div className="mt-8 grid gap-3 sm:grid-cols-3">
-          {items.map(({ icon: Icon, text }, i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-[#E5E7EB] bg-white p-5"
+
+        <div className="mt-12 border-t border-[#E3E0D9]">
+          {items.map((it) => (
+            <article
+              key={it.n}
+              className="grid gap-2 border-b border-[#E3E0D9] py-8 sm:grid-cols-[80px_1fr] sm:gap-10 sm:py-10"
             >
-              <Icon className="h-6 w-6 text-[#22C55E]" />
-              <p className="mt-3 text-[15px] leading-6 text-[#101828]">
-                {text}
-              </p>
-            </div>
+              <span className="text-[13px] font-semibold tracking-[0.14em] text-[#207A50]">
+                {it.n}
+              </span>
+              <div className="max-w-[720px]">
+                <h3 className="text-[20px] font-[600] leading-[1.3] text-[#191A18] sm:text-[22px]">
+                  {it.title}
+                </h3>
+                <p className="mt-3 text-[16px] leading-[1.6] text-[#5F625E] sm:text-[17px]">
+                  {it.text}
+                </p>
+              </div>
+            </article>
           ))}
         </div>
-        <p className="mt-8 max-w-2xl text-[15px] leading-7 text-[#475467]">
-          A IA cuida do começo da conversa para que seus vendedores possam se
-          concentrar na negociação.
-        </p>
       </div>
     </section>
   );
@@ -175,70 +210,65 @@ function SituationsSection() {
 
 function DemoSection() {
   return (
-    <section className="bg-[#F6F7F9]">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <h2 className="max-w-3xl text-2xl font-semibold leading-tight text-[#101828] sm:text-3xl">
-          A IA resolve o começo da conversa. O vendedor continua a
-          negociação.
+    <section className="bg-[#F0EEE9]">
+      <div className="mx-auto w-full max-w-[1180px] px-5 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <h2 className="max-w-[820px] text-[clamp(30px,3vw,44px)] font-[650] leading-[1.1] tracking-[-0.025em] text-[#191A18]">
+          O atendimento começa organizado. O vendedor continua com mais
+          contexto.
         </h2>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[1.05fr_1fr]">
+        <div className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10">
           <ChatDemo />
           <SummaryCard />
         </div>
-
-        <p className="mt-8 max-w-3xl text-sm leading-6 text-[#475467]">
-          A IA não deve inventar preço, estoque ou condições. Ela utiliza as
-          informações e regras definidas pela loja.
-        </p>
       </div>
     </section>
   );
 }
 
 function ChatDemo() {
-  const messages: { from: "cliente" | "ia"; text: string }[] = [
+  const messages: { from: "cliente" | "loja"; text: string }[] = [
     { from: "cliente", text: "Tem iPhone 15 Pro 256 GB?" },
-    { from: "ia", text: "Você procura novo ou seminovo?" },
-    { from: "cliente", text: "Seminovo. Tenho um iPhone 13 para dar na troca." },
+    { from: "loja", text: "Você procura novo ou seminovo?" },
     {
-      from: "ia",
-      text: "Perfeito. Como está a bateria e o aparelho? Você pretende pagar à vista ou parcelado?",
+      from: "cliente",
+      text: "Seminovo. Tenho um iPhone 13 para dar na troca.",
+    },
+    {
+      from: "loja",
+      text: "Como está o aparelho e você pretende pagar à vista ou parcelado?",
     },
     { from: "cliente", text: "Está bem conservado e quero parcelar." },
-    {
-      from: "ia",
-      text: "Entendi. Vou organizar essas informações para um vendedor continuar com você.",
-    },
   ];
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-5">
-      <div className="mb-3 flex items-center gap-2 border-b border-[#E5E7EB] pb-3">
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-[#0B0D12] text-white">
-          <MessageSquare className="h-4 w-4 text-[#22C55E]" />
-        </span>
+    <div className="rounded-[14px] border border-[#DDDAD3] bg-white p-5 sm:p-6">
+      <div className="mb-4 flex items-center justify-between border-b border-[#E3E0D9] pb-4">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-[#101828]">
-            Atendimento pelo WhatsApp
+          <p className="text-[14px] font-[600] text-[#191A18]">
+            Conversa pelo WhatsApp
           </p>
-          <p className="text-xs text-[#667085]">Exemplo de conversa</p>
+          <p className="mt-0.5 text-[12px] text-[#7B7E78]">
+            Exemplo ilustrativo
+          </p>
         </div>
+        <span
+          className="text-[11px] font-medium uppercase tracking-[0.12em] text-[#7B7E78]"
+          aria-hidden
+        >
+          Hoje
+        </span>
       </div>
       <ul className="space-y-2.5">
         {messages.map((m, i) => (
           <li
             key={i}
-            className={
-              m.from === "cliente"
-                ? "flex justify-start"
-                : "flex justify-end"
-            }
+            className={m.from === "cliente" ? "flex justify-start" : "flex justify-end"}
           >
             <div
               className={
                 m.from === "cliente"
-                  ? "max-w-[85%] rounded-2xl rounded-tl-sm bg-[#F6F7F9] px-3.5 py-2.5 text-[14px] leading-5 text-[#101828]"
-                  : "max-w-[85%] rounded-2xl rounded-tr-sm bg-[#E7F9EE] px-3.5 py-2.5 text-[14px] leading-5 text-[#0B4B2C]"
+                  ? "max-w-[85%] rounded-[12px] rounded-tl-[4px] bg-[#F0EEE9] px-3.5 py-2.5 text-[15px] leading-[1.5] text-[#191A18]"
+                  : "max-w-[85%] rounded-[12px] rounded-tr-[4px] bg-[#E8F3EC] px-3.5 py-2.5 text-[15px] leading-[1.5] text-[#0F3A26]"
               }
             >
               {m.text}
@@ -251,37 +281,31 @@ function ChatDemo() {
 }
 
 function SummaryCard() {
-  const rows = [
+  const rows: [string, string][] = [
     ["Aparelho procurado", "iPhone 15 Pro"],
     ["Capacidade", "256 GB"],
     ["Condição", "Seminovo"],
     ["Possui aparelho para troca", "Sim"],
-    ["Aparelho da troca", "iPhone 13"],
     ["Forma de pagamento", "Parcelado"],
-    ["Momento da compra", "Não informado"],
   ];
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
-      <p className="text-sm font-semibold text-[#101828]">
+    <div className="rounded-[14px] border border-[#DDDAD3] bg-white p-5 sm:p-6">
+      <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#7B7E78]">
         Informações para o vendedor
       </p>
-      <dl className="mt-4 divide-y divide-[#E5E7EB] text-sm">
+      <dl className="mt-5 divide-y divide-[#E3E0D9]">
         {rows.map(([k, v]) => (
-          <div
-            key={k}
-            className="flex items-center justify-between gap-3 py-2.5"
-          >
-            <dt className="text-[#667085]">{k}</dt>
-            <dd className="text-right font-medium text-[#101828]">{v}</dd>
+          <div key={k} className="flex items-baseline justify-between gap-4 py-3">
+            <dt className="text-[15px] text-[#5F625E]">{k}</dt>
+            <dd className="text-right text-[15px] font-[600] text-[#191A18]">
+              {v}
+            </dd>
           </div>
         ))}
       </dl>
-      <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#E7F9EE] px-3 py-1 text-xs font-semibold text-[#0B4B2C]">
-        <span
-          aria-hidden
-          className="h-1.5 w-1.5 rounded-full bg-[#22C55E]"
-        />
-        Pronto para o vendedor continuar
+      <div className="mt-6 flex items-center gap-2 border-t border-[#E3E0D9] pt-4 text-[13px] text-[#207A50]">
+        <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[#207A50]" />
+        <span className="font-[600]">Pronto para o vendedor continuar</span>
       </div>
     </div>
   );
@@ -290,25 +314,25 @@ function SummaryCard() {
 function FaqSection() {
   const items = [
     {
-      q: "A IA substitui meus vendedores?",
-      a: "Não. Ela responde as primeiras perguntas, reúne informações e volta a falar com clientes que pararam de responder. O vendedor continua responsável pela negociação e pelo fechamento.",
+      q: "A inteligência artificial substitui os vendedores?",
+      a: "Não. Ela responde as primeiras perguntas, reúne informações e retoma conversas que ficaram paradas. A negociação e o fechamento seguem com o vendedor.",
     },
     {
       q: "Ela pode informar preços e estoque?",
-      a: "Sim, quando essas informações estiverem configuradas ou integradas ao sistema da loja. A IA não deve inventar valores ou disponibilidade.",
+      a: "Sim, quando essas informações estiverem configuradas ou integradas ao sistema da loja. Ela não inventa valores nem disponibilidade.",
     },
     {
-      q: "O que acontece depois que eu responder ao formulário?",
-      a: "Vamos analisar as respostas e entrar em contato pelo WhatsApp para mostrar como o atendimento poderia funcionar na sua loja.",
+      q: "O que acontece depois que eu responder?",
+      a: "Analisamos suas respostas e entramos em contato pelo WhatsApp para mostrar como esse atendimento poderia funcionar na sua loja.",
     },
   ];
   return (
     <section className="bg-white">
-      <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
-        <h2 className="text-2xl font-semibold text-[#101828] sm:text-3xl">
-          Perguntas frequentes
+      <div className="mx-auto w-full max-w-[760px] px-5 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <h2 className="text-[clamp(30px,3vw,44px)] font-[650] leading-[1.1] tracking-[-0.025em] text-[#191A18]">
+          Dúvidas comuns
         </h2>
-        <div className="mt-6 divide-y divide-[#E5E7EB] border-y border-[#E5E7EB]">
+        <div className="mt-10 border-t border-[#E3E0D9]">
           {items.map((it, i) => (
             <FaqItem key={i} q={it.q} a={it.a} />
           ))}
@@ -320,51 +344,58 @@ function FaqSection() {
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   return (
-    <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-[15px] font-semibold text-[#101828]">
+    <details className="group border-b border-[#E3E0D9] py-5 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-left text-[17px] font-[600] leading-[1.4] text-[#191A18] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#207A50]/40 focus-visible:ring-offset-4 focus-visible:ring-offset-white">
         <span>{q}</span>
         <span
           aria-hidden
-          className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[#E5E7EB] text-[#667085] transition-transform group-open:rotate-45"
+          className="relative grid h-6 w-6 shrink-0 place-items-center text-[#5F625E] transition-transform duration-[180ms] group-open:rotate-45"
         >
-          +
+          <span className="absolute h-px w-3 bg-[#5F625E]" />
+          <span className="absolute h-3 w-px bg-[#5F625E]" />
         </span>
       </summary>
-      <p className="mt-3 text-[15px] leading-7 text-[#475467]">{a}</p>
+      <p className="mt-3 max-w-[620px] text-[16px] leading-[1.65] text-[#5F625E]">
+        {a}
+      </p>
     </details>
   );
 }
 
 function Footer() {
   return (
-    <footer className="border-t border-[#E5E7EB] bg-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-[#667085] sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <div className="flex items-center gap-2">
+    <footer className="bg-[#191A18] text-[#F5F3EE]">
+      <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-6 px-5 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <div className="flex items-center gap-2.5">
           <span
             aria-hidden
-            className="grid h-6 w-6 place-items-center rounded bg-[#0B0D12] text-white"
+            className="grid h-6 w-6 place-items-center rounded bg-[#F5F3EE] text-[11px] font-semibold text-[#191A18]"
           >
-            <Sparkles className="h-3 w-3 text-[#22C55E]" />
+            S
           </span>
-          <span className="font-medium text-[#101828]">Salomão AI</span>
-          <span>· © {new Date().getFullYear()}</span>
+          <span className="text-[14px] font-[600] text-[#F5F3EE]">
+            Salomão AI
+          </span>
+          <span className="text-[13px] text-[#F5F3EE]/60">
+            · © {new Date().getFullYear()}
+          </span>
         </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px]">
           <a
             href="/politica-de-privacidade"
-            className="hover:text-[#101828]"
+            className="text-[#F5F3EE]/80 transition-colors hover:text-[#F5F3EE]"
           >
             Política de Privacidade
           </a>
           <a
             href="mailto:contato@salomaoai.com"
-            className="hover:text-[#101828]"
+            className="text-[#F5F3EE]/80 transition-colors hover:text-[#F5F3EE]"
           >
             contato@salomaoai.com
           </a>
         </div>
       </div>
-      <div className="mx-auto max-w-6xl px-4 pb-6 text-xs text-[#98A2B3] sm:px-6">
+      <div className="mx-auto w-full max-w-[1180px] px-5 pb-8 text-[12px] text-[#F5F3EE]/45 sm:px-6 lg:px-8">
         Esta empresa não possui vínculo oficial com a Apple.
       </div>
     </footer>
