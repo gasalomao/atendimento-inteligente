@@ -385,9 +385,15 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   function onStep1Continue() {
     markStarted();
     if (!validateStep1()) return;
+    const dur = questionStartRef.current ? Date.now() - questionStartRef.current : 0;
+    if (dur > 0) {
+      stepTimesRef.current["step1_contact"] = dur;
+      trackEvent("form_step_complete", { question: "step1_contact", index: -1, duration_ms: dur });
+    }
     track("form_step_1_complete");
     setStep(2);
     setQ(0);
+    questionStartRef.current = Date.now();
     setTimeout(() => {
       containerRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -435,9 +441,15 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       });
       return;
     }
+    const dur = questionStartRef.current ? Date.now() - questionStartRef.current : 0;
+    if (dur > 0) {
+      stepTimesRef.current[field] = dur;
+      trackEvent("form_step_complete", { question: field, index: q, duration_ms: dur });
+    }
     if (q < STEP2_QUESTIONS.length - 1) {
       setQ((n) => n + 1);
       setErrors({});
+      questionStartRef.current = Date.now();
       setTimeout(() => {
         containerRef.current?.scrollIntoView({
           behavior: "smooth",
