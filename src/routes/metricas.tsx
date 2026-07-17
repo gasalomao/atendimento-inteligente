@@ -55,7 +55,7 @@ type VisitorJourney = {
   } | null;
 };
 
-const PASS = "metricas2026"; // Senha antiga atualizada visualmente se necessário, mas backend valida o real
+const PASS = "30741852";
 const TOKEN_KEY = "sai_metrics_token";
 const AUTH_KEY = "sai_metrics_auth";
 
@@ -70,7 +70,7 @@ function MetricasPage() {
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (pw.length > 3) {
+    if (pw === PASS) {
       setAuth(true);
       setPwError(false);
       try {
@@ -109,7 +109,7 @@ function PasswordGate({
         </div>
         <h1 className="text-center text-lg font-semibold text-white">Acesso restrito</h1>
         <p className="mt-1 text-center text-sm text-white/50">
-          Digite a senha (METRICS_TOKEN) para ver as métricas
+          Digite a senha para ver as métricas
         </p>
         <div className="mt-6">
           <input
@@ -141,10 +141,10 @@ function PasswordGate({
 
 /* ─── Dashboard ──────────────────────────────────────────────────────── */
 function Dashboard() {
-  const [token, setToken] = useState(() => {
-    if (typeof window === "undefined") return "";
+  const [token] = useState(() => {
+    if (typeof window === "undefined") return PASS;
     const p = new URLSearchParams(window.location.search).get("token");
-    return p || window.localStorage.getItem(TOKEN_KEY) || "";
+    return p || window.localStorage.getItem(TOKEN_KEY) || PASS;
   });
   const [days, setDays] = useState(30);
   const [data, setData] = useState<Metrics | null>(null);
@@ -158,7 +158,7 @@ function Dashboard() {
     setError(null);
     try {
       const res = await fetch(`/api/metrics?token=${encodeURIComponent(token)}&days=${days}`);
-      if (!res.ok) throw new Error(res.status === 401 ? "Token inválido (senha incorreta)" : `Erro ${res.status}`);
+      if (!res.ok) throw new Error(res.status === 401 ? "Senha incorreta" : `Erro ${res.status}`);
       const j = (await res.json()) as Metrics;
       setData(j);
       try { window.localStorage.setItem(TOKEN_KEY, token); } catch {}
@@ -175,10 +175,13 @@ function Dashboard() {
 
   const handleDelete = async () => {
     const pw = prompt("ATENÇÃO: Isso apagará TODOS os eventos e LEADS do banco de dados.\n\nPara confirmar, digite a senha das métricas:");
-    if (!pw) return;
+    if (pw !== PASS) {
+      if (pw !== null) alert("Senha incorreta");
+      return;
+    }
     try {
       const res = await fetch(`/api/metrics?token=${encodeURIComponent(pw)}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(res.status === 401 ? "Senha incorreta" : "Erro ao apagar");
+      if (!res.ok) throw new Error("Erro ao apagar");
       alert("Dados apagados com sucesso!");
       void load();
     } catch (e) {
