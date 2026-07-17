@@ -306,7 +306,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     problema_principal: [],
     faturamento: "",
     investimento: "",
-    consentimento: false,
+    consentimento: true,
   });
   const [errors, setErrors] = useState<Errors>({});
   const containerRef = useRef<HTMLDivElement>(null);
