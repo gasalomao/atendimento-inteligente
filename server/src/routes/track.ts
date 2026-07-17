@@ -279,15 +279,50 @@ export async function metricsDeleteHandler(req: Request, res: Response) {
     return res.status(401).json({ error: "unauthorized" });
   }
 
-  // Deletar todos os eventos
-  const { error: err1 } = await supabaseAdmin.from("site_events").delete().neq("id", "00000000-0000-0000-0000-000000000000"); // hack to delete all
-  
-  // Deletar todos os leads
+  const { visitor_ids } = req.body || {};
+
+  if (Array.isArray(visitor_ids) && visitor_ids.length > 0) {
+    // Delete specific visitors
+    // Delete events
+    const { error: err1 } = await supabaseAdmin
+      .from("site_events")
+      .delete()
+      .in("visitor_id", visitor_ids);
+
+    // To delete leads that belong to these visitors, we need to find them first
+    // because Supabase RPC or direct JSONB filtering for DELETE .in() is tricky.
+    // Let's fetch the lead IDs first.
+    const { data: leadsToDelete } = await supabaseAdmin
+      .from("contatos")
+      .select("id, form_answers");
+    
+    const leadIdsToDelete = (leadsToDelete || [])
+      .filter((l) => {
+        const vid = (l.form_answers as any)?.visitor_id;
+        return vid && visitor_ids.includes(vid);
+      })
+      .map((l) => l.id);
+
+    let err2 = null;
+    if (leadIdsToDelete.length > 0) {
+      const res = await supabaseAdmin.from("contatos").delete().in("id", leadIdsToDelete);
+      err2 = res.error;
+    }
+
+    if (err1 || err2) {
+      logger.error({ err1, err2 }, "metrics_delete_specific_failed");
+      return res.status(500).json({ error: "Erro ao deletar dados específicos" });
+    }
+    return res.json({ success: true, message: `${visitor_ids.length} visitantes apagados.` });
+  }
+
+  // Delete ALL
+  const { error: err1 } = await supabaseAdmin.from("site_events").delete().neq("id", "00000000-0000-0000-0000-000000000000"); 
   const { error: err2 } = await supabaseAdmin.from("contatos").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   
   if (err1 || err2) {
-    logger.error({ err1, err2 }, "metrics_delete_failed");
-    return res.status(500).json({ error: "Erro ao deletar dados" });
+    logger.error({ err1, err2 }, "metrics_delete_all_failed");
+    return res.status(500).json({ error: "Erro ao deletar todos os dados" });
   }
 
   return res.json({ success: true, message: "Todos os dados foram resetados." });

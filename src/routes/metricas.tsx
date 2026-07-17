@@ -151,6 +151,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"geral" | "visitantes">("geral");
+  const [selectedVisitors, setSelectedVisitors] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -161,6 +162,7 @@ function Dashboard() {
       if (!res.ok) throw new Error(res.status === 401 ? "Senha incorreta" : `Erro ${res.status}`);
       const j = (await res.json()) as Metrics;
       setData(j);
+      setSelectedVisitors(new Set()); // Reset selection on load
       try { window.localStorage.setItem(TOKEN_KEY, token); } catch {}
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro");
@@ -174,15 +176,25 @@ function Dashboard() {
   }, [days, load]);
 
   const handleDelete = async () => {
-    const pw = prompt("ATENÇÃO: Isso apagará TODOS os eventos e LEADS do banco de dados.\n\nPara confirmar, digite a senha das métricas:");
+    const isSelective = selectedVisitors.size > 0;
+    const msg = isSelective 
+      ? `ATENÇÃO: Você está prestes a apagar ${selectedVisitors.size} visitante(s) selecionado(s) e seus leads.\n\nPara confirmar, digite a senha das métricas:`
+      : `ATENÇÃO: Isso apagará TODOS os eventos e LEADS do banco de dados.\n\nPara confirmar, digite a senha das métricas:`;
+      
+    const pw = prompt(msg);
     if (pw !== PASS) {
       if (pw !== null) alert("Senha incorreta");
       return;
     }
     try {
-      const res = await fetch(`/api/metrics?token=${encodeURIComponent(pw)}`, { method: "DELETE" });
+      const body = isSelective ? JSON.stringify({ visitor_ids: Array.from(selectedVisitors) }) : undefined;
+      const res = await fetch(`/api/metrics?token=${encodeURIComponent(pw)}`, { 
+        method: "DELETE",
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body,
+      });
       if (!res.ok) throw new Error("Erro ao apagar");
-      alert("Dados apagados com sucesso!");
+      alert(isSelective ? "Visitantes selecionados apagados com sucesso!" : "Todos os dados foram apagados com sucesso!");
       void load();
     } catch (e) {
       alert(e instanceof Error ? e.message : "Erro");
@@ -282,36 +294,87 @@ function Dashboard() {
         )}
 
         {data && activeTab === "geral" && <MetricsDashboard data={data} />}
-        {data && activeTab === "visitantes" && <VisitorsDashboard data={data} />}
+        {data && activeTab === "visitantes" && (
+          <VisitorsDashboard 
+            data={data} 
+            selectedVisitors={selectedVisitors} 
+            setSelectedVisitors={setSelectedVisitors} 
+          />
+        )}
       </main>
     </div>
   );
 }
 
 /* ─── Visitors Dashboard ─────────────────────────────────────────────── */
-function VisitorsDashboard({ data }: { data: Metrics }) {
+function VisitorsDashboard({ 
+  data, 
+  selectedVisitors, 
+  setSelectedVisitors 
+}: { 
+  data: Metrics;
+  selectedVisitors: Set<string>;
+  setSelectedVisitors: React.Dispatch<React.SetStateAction<Set<string>>>;
+}) {
   const [expandedVisitor, setExpandedVisitor] = useState<string | null>(null);
   
   if (!data.visitors || data.visitors.length === 0) {
     return <p className="py-20 text-center text-white/40">Nenhum visitante registrado nesse período.</p>;
   }
 
+  const allSelected = data.visitors.length > 0 && selectedVisitors.size === data.visitors.length;
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelectedVisitors(new Set());
+    } else {
+      setSelectedVisitors(new Set(data.visitors.map(v => v.visitor_id)));
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    const next = new Set(selectedVisitors);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedVisitors(next);
+  };
+
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-white/90">Pessoa por Pessoa (Últimos {data.visitors.length})</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-white/90">Pessoa por Pessoa (Últimos {data.visitors.length})</h2>
+        {selectedVisitors.size > 0 && (
+          <span className="text-xs text-white/50">{selectedVisitors.size} selecionados (use a lixeira no topo para apagar)</span>
+        )}
+      </div>
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-        <div className="grid grid-cols-12 gap-4 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40">
-          <div className="col-span-3">Pessoa / Lead</div>
-          <div className="col-span-2">Último Acesso</div>
-          <div className="col-span-3">Origem (UTM)</div>
-          <div className="col-span-2">Local/Disp.</div>
-          <div className="col-span-2 text-right">Ações</div>
+        <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_auto] gap-4 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/40 items-center">
+          <div>
+            <input 
+              type="checkbox" 
+              checked={allSelected} 
+              onChange={toggleAll}
+              className="rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30"
+            />
+          </div>
+          <div>Pessoa / Lead</div>
+          <div>Último Acesso</div>
+          <div>Origem (UTM)</div>
+          <div>Local/Disp.</div>
+          <div className="text-right">Ações</div>
         </div>
         <div className="divide-y divide-white/[0.04]">
           {data.visitors.map((v) => (
             <div key={v.visitor_id} className="flex flex-col">
-              <div className="grid grid-cols-12 items-center gap-4 px-4 py-3 text-sm transition-colors hover:bg-white/[0.02]">
-                <div className="col-span-3 flex items-center gap-3 truncate">
+              <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_auto] items-center gap-4 px-4 py-3 text-sm transition-colors hover:bg-white/[0.02]">
+                <div>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedVisitors.has(v.visitor_id)}
+                    onChange={() => toggleOne(v.visitor_id)}
+                    className="rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30"
+                  />
+                </div>
+                <div className="flex items-center gap-3 truncate">
                   {v.lead ? (
                     <>
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30">
@@ -337,11 +400,11 @@ function VisitorsDashboard({ data }: { data: Metrics }) {
                   )}
                 </div>
                 
-                <div className="col-span-2 text-xs text-white/60">
+                <div className="text-xs text-white/60">
                   {formatDay(v.last_seen)} às {new Date(v.last_seen).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                 </div>
 
-                <div className="col-span-3 truncate text-xs text-white/50">
+                <div className="truncate text-xs text-white/50">
                   {v.utm_source ? (
                     <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-blue-400 border border-blue-500/20">
                       {v.utm_source} {v.utm_campaign ? `/ ${v.utm_campaign}` : ""}
@@ -353,11 +416,11 @@ function VisitorsDashboard({ data }: { data: Metrics }) {
                   )}
                 </div>
 
-                <div className="col-span-2 text-xs text-white/50 truncate">
+                <div className="text-xs text-white/50 truncate">
                   {v.city}, {v.country} <br/> {v.device}
                 </div>
 
-                <div className="col-span-2 flex justify-end">
+                <div className="flex justify-end">
                   <button 
                     onClick={() => setExpandedVisitor(expandedVisitor === v.visitor_id ? null : v.visitor_id)}
                     className="rounded bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
