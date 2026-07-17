@@ -323,7 +323,10 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
 
   function validateStep1(): boolean {
     const e: Errors = {};
-    if (step1.nome.trim().length < 2) e.nome = "Digite seu nome.";
+    {
+      const parts = step1.nome.trim().split(/\s+/).filter((p) => p.length >= 2);
+      if (parts.length < 2) e.nome = "Digite seu nome completo (nome e sobrenome).";
+    }
     if (!step1.whatsapp.trim()) e.whatsapp = "Digite seu número de WhatsApp.";
     else if (!isValidBRPhone(step1.whatsapp))
       e.whatsapp = "Confira o número e inclua o DDD.";
