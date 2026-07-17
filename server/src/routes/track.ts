@@ -54,14 +54,14 @@ export async function metricsHandler(req: Request, res: Response) {
 
   const { data: events, error } = await supabaseAdmin
     .from("site_events")
-    .select("visitor_id, event_type, utm_source, utm_medium, utm_campaign, created_at")
+    .select("visitor_id, event_type, utm_source, utm_medium, utm_campaign, created_at, meta, user_agent")
     .gte("created_at", since)
     .limit(50000);
   if (error) return res.status(500).json({ error: error.message });
 
   const { data: leads } = await supabaseAdmin
     .from("contatos")
-    .select("id, lead_classification, pontuacao, utm_source, utm_medium, utm_campaign, created_at")
+    .select("id, lead_classification, pontuacao, utm_source, utm_medium, utm_campaign, created_at, form_answers")
     .gte("created_at", since);
 
   const rows = events ?? [];
@@ -102,6 +102,61 @@ export async function metricsHandler(req: Request, res: Response) {
     classification[k] = (classification[k] ?? 0) + 1;
   }
 
+  // Geolocalização (dos eventos)
+  const geoCountry: Record<string, Set<string>> = {};
+  const geoCity: Record<string, Set<string>> = {};
+  for (const r of rows) {
+    const g = (r.meta as any)?.geo;
+    if (!g) continue;
+    if (g.country) {
+      geoCountry[g.country] ??= new Set();
+      geoCountry[g.country].add(r.visitor_id);
+    }
+    const cityKey = g.city ? `${g.city}${g.region ? " / " + g.region : ""}${g.country_code ? " (" + g.country_code + ")" : ""}` : null;
+    if (cityKey) {
+      geoCity[cityKey] ??= new Set();
+      geoCity[cityKey].add(r.visitor_id);
+    }
+  }
+
+  // Dispositivo
+  const deviceType: Record<string, Set<string>> = {};
+  for (const r of rows) {
+    const dt = (r.meta as any)?.device?.type ?? "desconhecido";
+    deviceType[dt] ??= new Set();
+    deviceType[dt].add(r.visitor_id);
+  }
+
+  // Tempo por pergunta (form_step_complete com meta.question e meta.duration_ms)
+  const timeByQuestion: Record<string, { total: number; count: number }> = {};
+  for (const r of rows) {
+    if (r.event_type !== "form_step_complete") continue;
+    const m = r.meta as any;
+    const q = m?.question;
+    const dur = Number(m?.duration_ms);
+    if (!q || !Number.isFinite(dur) || dur <= 0 || dur > 30 * 60_000) continue;
+    timeByQuestion[q] ??= { total: 0, count: 0 };
+    timeByQuestion[q].total += dur;
+    timeByQuestion[q].count += 1;
+  }
+  const avgTimePerQuestionMs = Object.fromEntries(
+    Object.entries(timeByQuestion).map(([q, v]) => [q, Math.round(v.total / v.count)])
+  );
+
+  // Tempo total de preenchimento (dos leads)
+  const totalTimes: number[] = [];
+  for (const l of leads ?? []) {
+    const t = Number((l.form_answers as any)?.total_time_ms);
+    if (Number.isFinite(t) && t > 0 && t < 60 * 60_000) totalTimes.push(t);
+  }
+  totalTimes.sort((a, b) => a - b);
+  const avgTotalMs = totalTimes.length
+    ? Math.round(totalTimes.reduce((s, n) => s + n, 0) / totalTimes.length)
+    : 0;
+  const medianTotalMs = totalTimes.length
+    ? totalTimes[Math.floor(totalTimes.length / 2)]
+    : 0;
+
   return res.json({
     period_days: days,
     generated_at: new Date().toISOString(),
@@ -119,6 +174,11 @@ export async function metricsHandler(req: Request, res: Response) {
       start_to_submit: safeRate(byType["form_submit_success"]?.size, byType["form_start"]?.size),
       visitor_to_lead: safeRate(leads?.length, uniqueVisitors.size),
     },
+    timing: {
+      avg_time_per_question_ms: avgTimePerQuestionMs,
+      avg_total_form_ms: avgTotalMs,
+      median_total_form_ms: medianTotalMs,
+    },
     daily: Object.entries(daily)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([day, v]) => ({
@@ -131,6 +191,17 @@ export async function metricsHandler(req: Request, res: Response) {
       .map(([key, v]) => ({ key, unique_visitors: v.visitors.size, leads: v.leads }))
       .sort((a, b) => b.unique_visitors - a.unique_visitors)
       .slice(0, 20),
+    geo_country: Object.entries(geoCountry)
+      .map(([key, v]) => ({ key, unique_visitors: v.size }))
+      .sort((a, b) => b.unique_visitors - a.unique_visitors)
+      .slice(0, 30),
+    geo_city: Object.entries(geoCity)
+      .map(([key, v]) => ({ key, unique_visitors: v.size }))
+      .sort((a, b) => b.unique_visitors - a.unique_visitors)
+      .slice(0, 30),
+    device_type: Object.fromEntries(
+      Object.entries(deviceType).map(([k, v]) => [k, v.size])
+    ),
     lead_classification: classification,
   });
 }
