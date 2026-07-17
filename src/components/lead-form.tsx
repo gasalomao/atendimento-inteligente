@@ -316,7 +316,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const nomeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (step === 1 && nomeRef.current) {
+    if (step === 2 && nomeRef.current) {
       const prefersReducedMotion =
         typeof window !== "undefined" &&
         window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -359,7 +359,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     }
   }
 
-  function validateStep1(): boolean {
+  function validateContact(): boolean {
     const e: Errors = {};
     {
       const parts = step1.nome.trim().split(/\s+/).filter((p) => p.length >= 2);
@@ -381,26 +381,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       return false;
     }
     return true;
-  }
-
-  function onStep1Continue() {
-    markStarted();
-    if (!validateStep1()) return;
-    const dur = questionStartRef.current ? Date.now() - questionStartRef.current : 0;
-    if (dur > 0) {
-      stepTimesRef.current["step1_contact"] = dur;
-      trackEvent("form_step_complete", { question: "step1_contact", index: -1, duration_ms: dur });
-    }
-    track("form_step_1_complete");
-    setStep(2);
-    setQ(0);
-    questionStartRef.current = Date.now();
-    setTimeout(() => {
-      containerRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 50);
   }
 
   function currentField(): Step2Field {
@@ -459,10 +439,13 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       }, 30);
     } else {
       setErrors({});
+      setStep(2);
+      questionStartRef.current = Date.now();
       setTimeout(() => {
-        document
-          .getElementById("consent-block")
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        containerRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       }, 30);
     }
   }
@@ -474,12 +457,21 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       questionStartRef.current = Date.now();
       return;
     }
+    setStep(0);
+    questionStartRef.current = Date.now();
+  }
+
+  function onContactBack() {
+    setErrors({});
     setStep(1);
+    setQ(STEP2_QUESTIONS.length - 1);
     questionStartRef.current = Date.now();
   }
 
   async function onFinalSubmit() {
     if (loading) return;
+    if (!validateContact()) return;
+
     // Verifica todas as respostas antes de enviar.
     const order: Step2Field[] = [
       "papel",
@@ -490,6 +482,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     ];
     for (let i = 0; i < order.length; i++) {
       if (!isAnswered(order[i])) {
+        setStep(1);
         setQ(i);
         setErrors({
           [order[i]]:
@@ -580,16 +573,16 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const showConsent = isLastQuestion && !!step2[currentField()];
 
   const totalSteps = 1 + STEP2_QUESTIONS.length;
-  const currentStepIndex = step === 0 ? 0 : step === 1 ? 1 : q + 2;
+  const currentStepIndex = step === 0 ? 0 : step === 1 ? q + 1 : totalSteps;
   const progressPct = step === 0 ? 0 : Math.round((currentStepIndex / totalSteps) * 100);
   const stepLabel =
-    step === 0 ? "Introdução" : step === 1 ? "Seus dados" : "Sobre sua loja";
+    step === 0 ? "Introdução" : step === 1 ? "Sobre sua loja" : "Seus dados";
   const stepCounter =
     step === 0
       ? "Comece aqui"
       : step === 1
-        ? "Etapa 1 de 2"
-        : `Etapa 2 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`;
+        ? `Etapa 1 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`
+        : "Etapa 2 de 2";
 
   return (
     <div
@@ -650,8 +643,8 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               <div className="mb-6">
                 <h2 className="text-[20px] font-[650] leading-[1.2] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
                   {step === 1
-                    ? "Primeiro, fale um pouco sobre você"
-                    : "Sobre sua loja"}
+                    ? "Sobre sua loja"
+                    : "Para liberar o acesso, informe seus dados:"}
                 </h2>
               </div>
 
@@ -676,7 +669,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
             </>
           )}
 
-          {step === 0 ? null : step === 1 ? (
+          {step === 0 ? null : step === 2 ? (
             <div className="space-y-5">
               <div>
                 <Label htmlFor="f-nome">Seu nome completo</Label>
@@ -771,27 +764,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                 <ErrorText id="err-email" msg={errors.email} />
               </div>
 
-              <button
-                type="button"
-                onClick={onStep1Continue}
-                className="mt-2 flex min-h-[52px] w-full items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
-              >
-                Continuar
-              </button>
-              <p className="text-[13px] text-[#7B7E78]">
-                Depois, cinco perguntas curtas sobre sua loja.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <QuestionBlock
-                question={STEP2_QUESTIONS[q]}
-                value={currentValue()}
-                error={errors[currentField()]}
-                onSelect={onSelect}
-              />
-
-
               {submitError ? (
                 <div
                   role="alert"
@@ -805,31 +777,51 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
               <div className="flex flex-col-reverse gap-2.5 sm:flex-row">
                 <button
                   type="button"
+                  onClick={onContactBack}
+                  className="inline-flex min-h-[52px] items-center justify-center gap-1 rounded-[10px] border border-[#CFCBC3] bg-transparent px-5 text-[15px] font-[600] text-[#30322E] transition-colors duration-150 hover:bg-[#F0EEE9] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#191A18]/15 active:scale-[0.99]"
+                >
+                  <ChevronLeft className="h-4 w-4" /> Voltar
+                </button>
+                <button
+                  type="button"
+                  onClick={onFinalSubmit}
+                  disabled={loading}
+                  className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
+                >
+                  {loading
+                    ? "Enviando..."
+                    : "Liberar acesso"}
+                </button>
+              </div>
+              <p className="text-center text-[13px] text-[#7B7E78]">
+                Prometemos não enviar spam.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <QuestionBlock
+                question={STEP2_QUESTIONS[q]}
+                value={currentValue()}
+                error={errors[currentField()]}
+                onSelect={onSelect}
+              />
+
+
+              <div className="flex flex-col-reverse gap-2.5 sm:flex-row">
+                <button
+                  type="button"
                   onClick={onQuestionBack}
                   className="inline-flex min-h-[52px] items-center justify-center gap-1 rounded-[10px] border border-[#CFCBC3] bg-transparent px-5 text-[15px] font-[600] text-[#30322E] transition-colors duration-150 hover:bg-[#F0EEE9] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#191A18]/15 active:scale-[0.99]"
                 >
                   <ChevronLeft className="h-4 w-4" /> Voltar
                 </button>
-                {isLastQuestion && showConsent ? (
-                  <button
-                    type="button"
-                    onClick={onFinalSubmit}
-                    disabled={loading}
-                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
-                  >
-                    {loading
-                      ? "Enviando..."
-                      : "Ver como funcionaria na minha loja"}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={onQuestionContinue}
-                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
-                  >
-                    Continuar
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={onQuestionContinue}
+                  className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
+                >
+                  Continuar
+                </button>
               </div>
             </div>
           )}
