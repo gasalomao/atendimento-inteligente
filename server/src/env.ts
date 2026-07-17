@@ -30,5 +30,6 @@ export const env = {
     readOptional("PRIVACY_POLICY_VERSION") ?? "2026-07-01",
   APP_URL: readOptional("APP_URL") ?? "",
   CONTACT_EMAIL: readOptional("CONTACT_EMAIL") ?? "ga.pancione@gmail.com",
+  METRICS_TOKEN: readOptional("METRICS_TOKEN"),
   TZ: process.env.TZ ?? "America/Sao_Paulo",
 };
