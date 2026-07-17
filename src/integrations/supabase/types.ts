@@ -178,6 +178,66 @@ export type Database = {
           },
         ]
       }
+      site_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          fbclid: string | null
+          gclid: string | null
+          id: number
+          ip_hash: string | null
+          meta: Json | null
+          path: string | null
+          referrer: string | null
+          session_id: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          fbclid?: string | null
+          gclid?: string | null
+          id?: number
+          ip_hash?: string | null
+          meta?: Json | null
+          path?: string | null
+          referrer?: string | null
+          session_id: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          fbclid?: string | null
+          gclid?: string | null
+          id?: number
+          ip_hash?: string | null
+          meta?: Json | null
+          path?: string | null
+          referrer?: string | null
+          session_id?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
