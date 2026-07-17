@@ -286,6 +286,19 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   });
   const [errors, setErrors] = useState<Errors>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const nomeRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (step === 1 && nomeRef.current) {
+      const prefersReducedMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      const t = window.setTimeout(() => {
+        nomeRef.current?.focus({ preventScroll: prefersReducedMotion });
+      }, 20);
+      return () => window.clearTimeout(t);
+    }
+  }, [step]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -538,72 +551,70 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
         />
       ) : (
         <>
-          <div className="mb-6">
-            <h2 className="text-[22px] font-[650] leading-[1.2] tracking-[-0.02em] text-[#191A18] sm:text-[26px]">
-              {step === 0
-                ? "Enquanto você demora, o cliente chama outra loja."
-                : "Veja como isso funcionaria na sua loja"}
-            </h2>
-            <p className="mt-3 text-[15px] leading-[1.6] text-[#5F625E]">
-              {step === 0
-                ? "Quando sua equipe está ocupada, o atendimento responde as primeiras perguntas, entende o que o cliente procura e deixa a conversa organizada para o vendedor continuar."
-                : "Responda algumas perguntas rápidas. Leva cerca de um minuto."}
-            </p>
-          </div>
-
-          {step !== 0 ? (
-            <div className="mb-6">
-              <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
-                <span>{stepCounter}</span>
-                <span>{stepLabel}</span>
-              </div>
-              <div
-                className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-[#E8E5DF]"
-                role="progressbar"
-                aria-valuenow={progressPct}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              >
-                <div
-                  className="h-full rounded-full bg-[#207A50] transition-[width] duration-200 ease-out"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-            </div>
-          ) : null}
-
           {step === 0 ? (
-            <div className="space-y-6">
-              <ul className="space-y-3 border-t border-[#E3E0D9] pt-5 text-[15px] leading-[1.55] text-[#191A18] sm:text-[16px]">
-                <IntroPoint>Responde quando o vendedor está ocupado</IntroPoint>
-                <IntroPoint>Volta a falar com quem parou de responder</IntroPoint>
-                <IntroPoint>Organiza as informações para o vendedor</IntroPoint>
-              </ul>
+            <div className="space-y-5">
+              <div>
+                <p className="text-[12px] font-[600] uppercase tracking-[0.12em] text-[#207A50]">
+                  Comece por aqui
+                </p>
+                <h2 className="mt-2 text-[20px] font-[650] leading-[1.25] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
+                  Veja como isso funcionaria na sua loja
+                </h2>
+                <p className="mt-2 text-[15px] leading-[1.55] text-[#5F625E]">
+                  Responda algumas perguntas rápidas e a gente mostra pelo WhatsApp.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => {
                   markStarted();
                   setStep(1);
-                  setTimeout(() => {
-                    containerRef.current?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
-                    });
-                  }, 30);
                 }}
-                className="flex min-h-[52px] w-full items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
+                className="flex min-h-[52px] w-full items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/30 sm:text-[16px]"
               >
-                Continuar
+                Ver como funcionaria na minha loja
               </button>
-              <p className="text-[13px] text-[#7B7E78]">
-                Leva cerca de um minuto. Indicado para lojas que faturam a partir de R$ 50 mil por mês.
+              <p className="text-[13px] leading-[1.5] text-[#5F625E] sm:text-[14px]">
+                Leva cerca de 1 minuto. Indicado para lojas que faturam a partir de R$ 50 mil por mês.
               </p>
             </div>
-          ) : step === 1 ? (
+          ) : (
+            <>
+              <div className="mb-6">
+                <h2 className="text-[20px] font-[650] leading-[1.2] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
+                  {step === 1
+                    ? "Primeiro, fale um pouco sobre você"
+                    : "Sobre sua loja"}
+                </h2>
+              </div>
+
+              <div className="mb-6">
+                <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
+                  <span>{stepCounter}</span>
+                  <span>{stepLabel}</span>
+                </div>
+                <div
+                  className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-[#E8E5DF]"
+                  role="progressbar"
+                  aria-valuenow={progressPct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div
+                    className="h-full rounded-full bg-[#207A50] transition-[width] duration-200 ease-out"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 0 ? null : step === 1 ? (
             <div className="space-y-5">
               <div>
                 <Label htmlFor="f-nome">Seu nome completo</Label>
                 <input
+                  ref={nomeRef}
                   id="f-nome"
                   name="nome"
                   type="text"
@@ -798,14 +809,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   );
 }
 
-function IntroPoint({ children }: { children: React.ReactNode }) {
-  return (
-    <li className="flex items-start gap-3">
-      <span aria-hidden className="mt-[10px] h-px w-6 shrink-0 bg-[#207A50]" />
-      <span>{children}</span>
-    </li>
-  );
-}
 
 
 function QuestionBlock({

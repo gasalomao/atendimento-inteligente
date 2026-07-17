@@ -7,21 +7,22 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "IA que responde e organiza o WhatsApp do seu negócio",
+        title: "Quando a loja enche, o WhatsApp para — atendimento com IA para lojas de iPhone",
       },
       {
         name: "description",
         content:
-          "A inteligência artificial responde as primeiras perguntas, entende o que o cliente procura e deixa a conversa organizada para o vendedor continuar.",
+          "O atendimento com IA responde as primeiras perguntas, entende o aparelho procurado e deixa a conversa organizada para o vendedor continuar.",
       },
       {
         property: "og:title",
-        content: "IA que responde e organiza o WhatsApp do seu negócio",
+        content:
+          "Quando a loja enche, o WhatsApp para — atendimento com IA para lojas de iPhone",
       },
       {
         property: "og:description",
         content:
-          "Atendimento automático no WhatsApp: responde na hora, retoma conversas paradas e organiza as informações para o vendedor.",
+          "Enquanto os vendedores atendem no balcão, a IA responde as primeiras mensagens e organiza tudo para o vendedor continuar.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -97,24 +98,53 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-[#E3E0D9] bg-[#F7F5F1]">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-24 h-[420px] bg-[radial-gradient(60%_60%_at_50%_0%,rgba(32,122,80,0.14),transparent_70%)]"
-      />
-      <div className="relative mx-auto w-full max-w-[720px] px-5 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:pb-24 lg:pt-16">
-        <div className="mb-6 flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#207A50]/20 bg-white/70 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#207A50] shadow-[0_2px_10px_rgba(32,122,80,0.08)] backdrop-blur">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#207A50] opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#207A50]" />
-            </span>
-            Atendimento no WhatsApp com IA
-          </span>
+    <section className="border-b border-[#E3E0D9] bg-[#F7F5F1]">
+      <div className="mx-auto w-full max-w-[1180px] px-[18px] pb-14 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:px-8 lg:pb-20 lg:pt-14">
+        <div className="lg:self-center">
+          <p className="text-[12px] font-[600] uppercase tracking-[0.12em] text-[#207A50] sm:text-[13px]">
+            Para lojas de iPhone
+          </p>
+          <h1 className="mt-3 max-w-[620px] text-[clamp(28px,7.8vw,34px)] font-[650] leading-[1.12] tracking-[-0.028em] text-[#191A18] sm:mt-4 sm:text-[clamp(34px,4.2vw,52px)] sm:leading-[1.08]">
+            Quando a loja enche, o WhatsApp para. O cliente não espera.
+          </h1>
+          <p className="mt-4 max-w-[560px] text-[16px] leading-[1.55] text-[#5F625E] sm:mt-5 sm:text-[17px]">
+            Enquanto seus vendedores atendem no balcão, novas mensagens continuam chegando. Alguns clientes pedem preço, ficam sem resposta e acabam procurando outra loja.
+          </p>
+          <p className="mt-3 max-w-[560px] text-[16px] leading-[1.55] text-[#191A18] sm:text-[17px]">
+            O atendimento com IA responde as primeiras perguntas, entende o aparelho procurado e deixa a conversa organizada para o vendedor continuar.
+          </p>
+          <ul className="mt-5 space-y-2.5 text-[15px] leading-[1.45] text-[#191A18] sm:mt-6 sm:text-[16px]">
+            <HeroPoint>Responde mesmo quando a loja está cheia</HeroPoint>
+            <HeroPoint>Retoma conversas que ficaram paradas</HeroPoint>
+            <HeroPoint>Atende também fora do horário</HeroPoint>
+          </ul>
         </div>
-        <LeadForm />
+
+        <div className="mt-7 lg:mt-0 lg:self-center">
+          <LeadForm />
+        </div>
       </div>
     </section>
+  );
+}
+
+function HeroPoint({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-2.5">
+      <svg
+        aria-hidden
+        viewBox="0 0 20 20"
+        className="mt-[3px] h-4 w-4 shrink-0 text-[#207A50]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M4 10.5l4 4 8-9" />
+      </svg>
+      <span>{children}</span>
+    </li>
   );
 }
 
