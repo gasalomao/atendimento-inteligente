@@ -18,8 +18,10 @@ export function buildFormAnswers(input: LeadInput): Record<string, LabelValue> {
       label: labelize(CONVERSAS_LABELS, input.conversas_dia),
     },
     main_situation: {
-      value: input.problema_principal,
-      label: labelize(SITUACAO_LABELS, input.problema_principal),
+      value: (input.problema_principal ?? []).join(","),
+      label: (input.problema_principal ?? [])
+        .map((p) => labelize(SITUACAO_LABELS, p))
+        .join(" · "),
     },
     monthly_revenue: {
       value: input.faturamento,
