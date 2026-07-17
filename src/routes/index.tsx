@@ -7,22 +7,21 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "IA que responde e organiza o WhatsApp da sua loja de iPhone",
+        title: "IA que responde e organiza o WhatsApp do seu negócio",
       },
       {
         name: "description",
         content:
-          "A inteligência artificial responde as primeiras perguntas, entende qual aparelho a pessoa procura e deixa a conversa organizada para o vendedor continuar.",
+          "A inteligência artificial responde as primeiras perguntas, entende o que o cliente procura e deixa a conversa organizada para o vendedor continuar.",
       },
       {
         property: "og:title",
-        content:
-          "IA que responde e organiza o WhatsApp da sua loja de iPhone",
+        content: "IA que responde e organiza o WhatsApp do seu negócio",
       },
       {
         property: "og:description",
         content:
-          "Atendimento automático para lojas de iPhone: responde na hora, retoma conversas paradas e organiza informações para o vendedor.",
+          "Atendimento automático no WhatsApp: responde na hora, retoma conversas paradas e organiza as informações para o vendedor.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
