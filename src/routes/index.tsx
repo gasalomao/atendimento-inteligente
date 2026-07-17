@@ -206,7 +206,7 @@ function DemoSection() {
       <div className="mx-auto w-full max-w-[1180px] px-5 py-16 sm:px-6 sm:py-24 lg:px-8">
         <h2 className="max-w-[820px] text-[clamp(30px,3vw,44px)] font-[650] leading-[1.1] tracking-[-0.025em] text-[#191A18]">
           O atendimento começa organizado. O vendedor continua com mais
-          contexto.
+          informações.
         </h2>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10">
