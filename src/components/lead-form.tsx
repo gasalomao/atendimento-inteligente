@@ -354,6 +354,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     if (!started) {
       setStarted(true);
       startedAtRef.current = Date.now();
+      questionStartRef.current = Date.now();
       track("form_start");
     }
   }
