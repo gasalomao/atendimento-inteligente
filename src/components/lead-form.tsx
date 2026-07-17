@@ -583,7 +583,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                 type="button"
                 onClick={() => {
                   markStarted();
-                  track("form_step_intro_complete");
                   setStep(1);
                   setTimeout(() => {
                     containerRef.current?.scrollIntoView({
