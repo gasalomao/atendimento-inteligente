@@ -621,19 +621,19 @@ function VisitorsDashboard({
                             </div>
                             <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
                               <span className="text-white/40">Cargo/Papel</span>
-                              <span className="col-span-2 text-white/90">{translateOption(v.lead.form_answers?.papel)}</span>
+                              <span className="col-span-2 text-white/90">{v.lead.form_answers?.role?.label || translateOption(v.lead.form_answers?.papel)}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
                               <span className="text-white/40">Faturamento</span>
-                              <span className="col-span-2 text-white/90">{translateOption(v.lead.form_answers?.faturamento)}</span>
+                              <span className="col-span-2 text-white/90">{v.lead.form_answers?.monthly_revenue?.label || translateOption(v.lead.form_answers?.faturamento)}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
                               <span className="text-white/40">Conversas/dia</span>
-                              <span className="col-span-2 text-white/90">{translateOption(v.lead.form_answers?.conversas_dia)}</span>
+                              <span className="col-span-2 text-white/90">{v.lead.form_answers?.daily_conversations?.label || translateOption(v.lead.form_answers?.conversas_dia)}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2 border-b border-white/5 pb-2">
                               <span className="text-white/40">Investimento</span>
-                              <span className="col-span-2 text-white/90">{translateOption(v.lead.form_answers?.investimento)}</span>
+                              <span className="col-span-2 text-white/90">{v.lead.form_answers?.investment_readiness?.label || translateOption(v.lead.form_answers?.investimento)}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                               <span className="text-white/40">Problemas</span>

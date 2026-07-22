@@ -184,10 +184,10 @@ export const Route = createFileRoute("/api/metrics")({
           totals: {
             unique_visitors: uniqueVisitors.size,
             total_events: rows.length,
-            page_views: byType["page_view"]?.size ?? 0,
-            form_views: byType["form_view"]?.size ?? 0,
-            form_starts: byType["form_start"]?.size ?? 0,
-            form_submit_success: byType["form_submit_success"]?.size ?? 0,
+            page_views: rows.filter(r => r.event_type === "page_view").length,
+            form_views: rows.filter(r => r.event_type === "form_view").length,
+            form_starts: rows.filter(r => r.event_type === "form_start").length,
+            form_submit_success: rows.filter(r => r.event_type === "form_submit_success").length,
             leads_saved: leads?.length ?? 0,
           },
           conversion: {
