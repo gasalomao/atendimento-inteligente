@@ -232,20 +232,43 @@ function Dashboard() {
     if (token) void load();
   }, [days, load]);
 
+  const handleDeleteSingle = async (visitorId: string) => {
+    const currentToken = token || PASS;
+    if (data) {
+      setData({
+        ...data,
+        visitors: data.visitors.filter((v) => v.visitor_id !== visitorId),
+      });
+      setSelectedVisitors((prev) => {
+        const next = new Set(prev);
+        next.delete(visitorId);
+        return next;
+      });
+    }
+    try {
+      await fetch(`/api/metrics?token=${encodeURIComponent(currentToken)}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitor_ids: [visitorId] }),
+      });
+      void load();
+    } catch (e) {
+      console.error(e);
+      void load();
+    }
+  };
+
   const handleDelete = async () => {
     const isSelective = selectedVisitors.size > 0;
     const msg = isSelective 
-      ? `ATENÇÃO: Você está prestes a apagar ${selectedVisitors.size} visitante(s) selecionado(s) e seus leads.\n\nPara confirmar, digite a senha das métricas:`
-      : `ATENÇÃO: Isso apagará TODOS os eventos e LEADS do banco de dados.\n\nPara confirmar, digite a senha das métricas:`;
+      ? `ATENÇÃO: Você está prestes a apagar ${selectedVisitors.size} visitante(s) selecionado(s) e seus leads.`
+      : `ATENÇÃO: Isso apagará TODOS os eventos e LEADS do banco de dados. Deseja continuar?`;
       
-    const pw = prompt(msg);
-    if (pw !== PASS) {
-      if (pw !== null) alert("Senha incorreta");
-      return;
-    }
+    if (!confirm(msg)) return;
+    const currentToken = token || PASS;
     try {
       const body = isSelective ? JSON.stringify({ visitor_ids: Array.from(selectedVisitors) }) : undefined;
-      const res = await fetch(`/api/metrics?token=${encodeURIComponent(pw)}`, { 
+      const res = await fetch(`/api/metrics?token=${encodeURIComponent(currentToken)}`, { 
         method: "DELETE",
         headers: body ? { "Content-Type": "application/json" } : undefined,
         body,
@@ -263,7 +286,7 @@ function Dashboard() {
       alert(isSelective ? "Visitantes selecionados apagados com sucesso!" : "Todos os dados foram apagados com sucesso!");
       void load();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Erro");
+      alert(e instanceof Error ? e.message : "Erro ao apagar");
     }
   };
 
@@ -365,6 +388,7 @@ function Dashboard() {
             data={data} 
             selectedVisitors={selectedVisitors} 
             setSelectedVisitors={setSelectedVisitors} 
+            onDeleteSingle={handleDeleteSingle}
           />
         )}
       </main>
@@ -376,11 +400,13 @@ function Dashboard() {
 function VisitorsDashboard({ 
   data, 
   selectedVisitors, 
-  setSelectedVisitors 
+  setSelectedVisitors,
+  onDeleteSingle,
 }: { 
   data: Metrics;
   selectedVisitors: Set<string>;
   setSelectedVisitors: React.Dispatch<React.SetStateAction<Set<string>>>;
+  onDeleteSingle: (id: string) => void;
 }) {
   const [expandedVisitor, setExpandedVisitor] = useState<string | null>(null);
   
@@ -510,13 +536,20 @@ function VisitorsDashboard({
                   <span className="truncate">{v.city}, {v.country} · {v.device}</span>
                 </div>
 
-                {/* Expand Journey button */}
-                <div className="flex justify-end pl-8 md:pl-0 mt-1 md:mt-0">
+                {/* Expand Journey & Delete buttons */}
+                <div className="flex items-center justify-end gap-2 pl-8 md:pl-0 mt-1 md:mt-0">
                   <button 
                     onClick={() => setExpandedVisitor(expandedVisitor === v.visitor_id ? null : v.visitor_id)}
-                    className="rounded bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 hover:text-white w-full md:w-auto text-center"
+                    className="rounded bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
                   >
                     {expandedVisitor === v.visitor_id ? "Fechar" : "Ver Jornada"}
+                  </button>
+                  <button 
+                    onClick={() => onDeleteSingle(v.visitor_id)}
+                    className="rounded bg-red-500/10 border border-red-500/20 px-2.5 py-1.5 text-xs text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors"
+                    title="Apagar este visitante/cadastro"
+                  >
+                    Apagar
                   </button>
                 </div>
               </div>

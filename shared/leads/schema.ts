@@ -65,6 +65,10 @@ export const leadSchema = z.object({
     "needs_other_decision_maker",
     "above_current_budget",
   ]),
+  gestao_estoque: z
+    .enum(["excel_drive", "erp_system", "pdf_catalog", "whatsapp_head"])
+    .optional()
+    .or(z.literal("")),
   consentimento: z.literal(true, {
     errorMap: () => ({ message: "É necessário autorizar o contato." }),
   }),

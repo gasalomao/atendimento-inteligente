@@ -46,6 +46,13 @@ export const INVESTIMENTO_LABELS: Record<string, string> = {
   above_current_budget: "Esse valor não cabe no orçamento hoje",
 };
 
+export const GESTAO_ESTOQUE_LABELS: Record<string, string> = {
+  excel_drive: "Planilha Excel / Google Drive",
+  erp_system: "Sistema ERP ou Gestão de Loja",
+  pdf_catalog: "Tabela em PDF / Foto no WhatsApp",
+  whatsapp_head: "Pergunto no balcão / Na memória",
+};
+
 export const CLASSIFICATION_LABELS: Record<string, string> = {
   contato_prioritario: "Contato prioritário",
   contato_potencial: "Contato com potencial",

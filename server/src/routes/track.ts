@@ -282,50 +282,76 @@ export async function metricsDeleteHandler(req: Request, res: Response) {
   const { visitor_ids } = req.body || {};
 
   if (Array.isArray(visitor_ids) && visitor_ids.length > 0) {
-    // Delete specific visitors
-    // Delete events
-    const { error: err1 } = await supabaseAdmin
-      .from("site_events")
-      .delete()
-      .in("visitor_id", visitor_ids);
+    const realVisitorIds = visitor_ids.filter((v: string) => !v.startsWith("lead-"));
+    const directLeadIds = visitor_ids
+      .filter((v: string) => v.startsWith("lead-"))
+      .map((v: string) => v.replace("lead-", ""));
 
-    // To delete leads that belong to these visitors, we need to find them first
-    // because Supabase RPC or direct JSONB filtering for DELETE .in() is tricky.
-    // Let's fetch the lead IDs first.
-    const { data: leadsToDelete } = await supabaseAdmin
+    let err1 = null;
+    if (realVisitorIds.length > 0) {
+      const res1 = await supabaseAdmin
+        .from("site_events")
+        .delete()
+        .in("visitor_id", realVisitorIds);
+      err1 = res1.error;
+    }
+
+    const { data: allLeads } = await supabaseAdmin
       .from("contatos")
       .select("id, form_answers");
-    
-    const leadIdsToDelete = (leadsToDelete || [])
-      .filter((l) => {
-        const vid = (l.form_answers as any)?.visitor_id;
-        return vid && visitor_ids.includes(vid);
-      })
-      .map((l) => l.id);
+
+    const matchedLeadIds = new Set<string>(directLeadIds);
+    for (const l of allLeads || []) {
+      const vid = (l.form_answers as any)?.visitor_id;
+      if (vid && realVisitorIds.includes(vid)) {
+        matchedLeadIds.add(l.id);
+      }
+    }
 
     let err2 = null;
-    if (leadIdsToDelete.length > 0) {
-      const res = await supabaseAdmin.from("contatos").delete().in("id", leadIdsToDelete);
-      err2 = res.error;
+    if (matchedLeadIds.size > 0) {
+      const idsToDelete = Array.from(matchedLeadIds);
+      await supabaseAdmin
+        .from("lead_notification_jobs")
+        .delete()
+        .in("lead_id", idsToDelete);
+
+      const res2 = await supabaseAdmin
+        .from("contatos")
+        .delete()
+        .in("id", idsToDelete);
+      err2 = res2.error;
     }
 
     if (err1 || err2) {
       logger.error({ err1, err2 }, "metrics_delete_specific_failed");
       return res.status(500).json({ error: "Erro ao deletar dados específicos" });
     }
-    return res.json({ success: true, message: `${visitor_ids.length} visitantes apagados.` });
+    return res.json({ success: true, message: `${visitor_ids.length} visitantes/leads apagados.` });
   }
 
   // Delete ALL
-  const { error: err1 } = await supabaseAdmin.from("site_events").delete().neq("id", "00000000-0000-0000-0000-000000000000"); 
-  const { error: err2 } = await supabaseAdmin.from("contatos").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  
+  await supabaseAdmin
+    .from("lead_notification_jobs")
+    .delete()
+    .gte("created_at", "1970-01-01T00:00:00Z");
+
+  const { error: err1 } = await supabaseAdmin
+    .from("site_events")
+    .delete()
+    .gte("created_at", "1970-01-01T00:00:00Z");
+
+  const { error: err2 } = await supabaseAdmin
+    .from("contatos")
+    .delete()
+    .gte("created_at", "1970-01-01T00:00:00Z");
+
   if (err1 || err2) {
     logger.error({ err1, err2 }, "metrics_delete_all_failed");
     return res.status(500).json({ error: "Erro ao deletar todos os dados" });
   }
 
-  return res.json({ success: true, message: "Todos os dados foram resetados." });
+  return res.json({ success: true, message: "Todos os dados foram resetados com sucesso." });
 }
 
 function safeRate(num: number | undefined, den: number | undefined): number {

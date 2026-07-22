@@ -3,6 +3,7 @@ import {
   CONVERSAS_LABELS,
   FATURAMENTO_LABELS,
   INVESTIMENTO_LABELS,
+  GESTAO_ESTOQUE_LABELS,
   PAPEL_LABELS,
   SITUACAO_LABELS,
   labelize,
@@ -31,6 +32,14 @@ export function buildFormAnswers(input: LeadInput): Record<string, unknown> {
       value: input.investimento,
       label: labelize(INVESTIMENTO_LABELS, input.investimento),
     },
+    ...(input.gestao_estoque
+      ? {
+          inventory_management: {
+            value: input.gestao_estoque,
+            label: labelize(GESTAO_ESTOQUE_LABELS, input.gestao_estoque),
+          },
+        }
+      : {}),
   };
   if (typeof input.total_time_ms === "number") base.total_time_ms = input.total_time_ms;
   if (input.step_times_ms) base.step_times_ms = input.step_times_ms;

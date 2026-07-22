@@ -14,7 +14,6 @@ type Step1 = {
   nome: string;
   whatsapp: string;
   loja: string;
-  email: string;
 };
 
 type Papel =
@@ -53,9 +52,9 @@ type Investimento =
   | "above_current_budget";
 
 type Step2 = {
-  papel: Papel;
+  problema_principal: Problema | "";
   conversas_dia: Conversas;
-  problema_principal: Problema[];
+  papel: Papel;
   faturamento: Faturamento;
   investimento: Investimento;
   consentimento: boolean;
@@ -73,12 +72,13 @@ type Step2Question = {
   question: string;
   description?: string;
   options: QuestionOption[];
+  errorMessage: string;
 };
 
 type Errors = Partial<Record<string, string>>;
 
 const fieldBase =
-  "block w-full rounded-[10px] bg-white px-4 py-3 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[52px]";
+  "block w-full rounded-[10px] bg-white px-4 py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[52px]";
 const fieldError =
   "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
@@ -102,7 +102,7 @@ function Label({
 function ErrorText({ id, msg }: { id: string; msg?: string }) {
   if (!msg) return null;
   return (
-    <p id={id} role="alert" className="mt-2 text-[13px] text-[#B42318]">
+    <p id={id} role="alert" className="mt-2 text-[13px] font-[500] text-[#B42318]">
       {msg}
     </p>
   );
@@ -111,9 +111,53 @@ function ErrorText({ id, msg }: { id: string; msg?: string }) {
 const cardOptionBase =
   "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-3.5 text-[16px] leading-[1.4] text-[#2B2D29] min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] flex items-center gap-3";
 const cardOptionActive =
-  "border-[#207A50] bg-[#EDF6F0] hover:border-[#207A50] hover:bg-[#EDF6F0]";
+  "border-[#207A50] bg-[#EDF6F0] hover:border-[#207A50] hover:bg-[#EDF6F0] font-[600] text-[#191A18]";
 
 const STEP2_QUESTIONS: Step2Question[] = [
+  {
+    field: "problema_principal",
+    question: "Qual situação mais atrapalha seu atendimento hoje?",
+    options: [
+      {
+        v: "delayed_response_busy_store",
+        t: "Demoramos a responder quando a loja está cheia",
+      },
+      {
+        v: "price_request_then_disappears",
+        t: "Clientes pedem preço e depois somem",
+      },
+      {
+        v: "messages_outside_business_hours",
+        t: "Mensagens ficam para o dia seguinte",
+      },
+      {
+        v: "no_customer_recontact",
+        t: "Ninguém retoma quem não comprou",
+      },
+      {
+        v: "repetitive_questions",
+        t: "Os vendedores repetem as mesmas perguntas",
+      },
+      {
+        v: "wants_to_scale_without_overload",
+        t: "Queremos atender mais sem sobrecarregar a equipe",
+      },
+    ],
+    errorMessage: "Escolha a opção que mais combina com sua realidade.",
+  },
+  {
+    field: "conversas_dia",
+    question: "Quantas novas conversas chegam por dia no WhatsApp?",
+    description: "Pode ser uma estimativa.",
+    options: [
+      { v: "up_to_10", t: "Até 10" },
+      { v: "from_11_to_30", t: "De 11 a 30" },
+      { v: "from_31_to_60", t: "De 31 a 60" },
+      { v: "more_than_60", t: "Mais de 60" },
+      { v: "unknown", t: "Não sei ao certo" },
+    ],
+    errorMessage: "Escolha a opção que mais combina com sua realidade.",
+  },
   {
     field: "papel",
     question: "Qual é o seu papel na loja?",
@@ -129,74 +173,37 @@ const STEP2_QUESTIONS: Step2Question[] = [
       },
       { v: "other", t: "Outro" },
     ],
-  },
-  {
-    field: "conversas_dia",
-    question:
-      "Em média, quantas novas conversas chegam por dia no WhatsApp da loja?",
-    options: [
-      { v: "up_to_10", t: "Até 10" },
-      { v: "from_11_to_30", t: "De 11 a 30" },
-      { v: "from_31_to_60", t: "De 31 a 60" },
-      { v: "more_than_60", t: "Mais de 60" },
-      { v: "unknown", t: "Não sei ao certo" },
-    ],
-  },
-  {
-    field: "problema_principal",
-    question: "Qual dessas situações mais acontece hoje na sua loja?",
-    options: [
-      {
-        v: "delayed_response_busy_store",
-        t: "Demoramos para responder quando a loja está cheia",
-      },
-      {
-        v: "price_request_then_disappears",
-        t: "Muitos clientes pedem preço e depois desaparecem",
-      },
-      {
-        v: "messages_outside_business_hours",
-        t: "Mensagens chegam fora do horário e ficam para o dia seguinte",
-      },
-      {
-        v: "no_customer_recontact",
-        t: "Falta alguém para voltar a falar com quem não comprou",
-      },
-      {
-        v: "repetitive_questions",
-        t: "Os vendedores repetem as mesmas perguntas o dia todo",
-      },
-      {
-        v: "wants_to_scale_without_overload",
-        t: "O atendimento funciona, mas queremos atender mais sem sobrecarregar a equipe",
-      },
-    ],
+    errorMessage: "Escolha a opção que mais combina com sua realidade.",
   },
   {
     field: "faturamento",
     question: "Qual faixa mais se aproxima do faturamento mensal da loja?",
     description:
-      "Não precisa informar o valor exato. Essa resposta ajuda a entender o tamanho do atendimento.",
+      "Não precisa informar o valor exato. Isso nos ajuda a preparar uma demonstração adequada à realidade da loja.",
     options: [
       { v: "up_to_30k", t: "Até R$ 30 mil" },
       { v: "from_30k_to_50k", t: "De R$ 30 mil a R$ 50 mil" },
       { v: "from_50k_to_100k", t: "De R$ 50 mil a R$ 100 mil" },
       { v: "from_100k_to_300k", t: "De R$ 100 mil a R$ 300 mil" },
       { v: "above_300k", t: "Acima de R$ 300 mil" },
+      { v: "prefer_not_to_say", t: "Prefiro falar sobre isso depois" },
     ],
+    errorMessage: "Escolha a opção que mais combina com sua realidade.",
   },
   {
     field: "investimento",
     question:
-      "Se isso fizer sentido para sua loja, qual opção melhor descreve seu momento para investir R$ 1.500 por mês?",
+      "Se a demonstração fizer sentido, como você vê um investimento de R$ 1.500 por mês?",
+    description:
+      "Essa resposta ajuda a conduzir a conversa de acordo com o momento da loja.",
     options: [
       {
         v: "ready_if_value_is_clear",
-        t: "Posso investir esse valor se enxergar benefício para a loja",
+        t: "Consigo investir se enxergar benefício",
       },
       {
         v: "wants_to_see_first",
-        t: "Posso avaliar depois de ver como funciona",
+        t: "Quero entender melhor antes de avaliar",
       },
       {
         v: "needs_other_decision_maker",
@@ -204,9 +211,10 @@ const STEP2_QUESTIONS: Step2Question[] = [
       },
       {
         v: "above_current_budget",
-        t: "Esse valor não cabe no orçamento hoje",
+        t: "Hoje não cabe no orçamento",
       },
     ],
+    errorMessage: "Escolha a opção que mais combina com sua realidade.",
   },
 ];
 
@@ -218,7 +226,6 @@ const HONEYPOT_STYLE: React.CSSProperties = {
   height: "1px",
   overflow: "hidden",
   clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
   whiteSpace: "nowrap",
   border: 0,
   padding: 0,
@@ -227,12 +234,10 @@ const HONEYPOT_STYLE: React.CSSProperties = {
 
 function OptionCard({
   active,
-  multi = false,
   onClick,
   children,
 }: {
   active: boolean;
-  multi?: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
@@ -243,49 +248,31 @@ function OptionCard({
       aria-pressed={active}
       className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
     >
-      {multi ? (
+      <span
+        aria-hidden
+        className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border transition-colors ${
+          active ? "border-[#207A50]" : "border-[#C8C4BB]"
+        }`}
+      >
         <span
-          aria-hidden
-          className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] border transition-colors ${
-            active ? "border-[#207A50] bg-[#207A50]" : "border-[#C8C4BB] bg-white"
+          className={`h-[8px] w-[8px] rounded-full transition-opacity ${
+            active ? "bg-[#207A50] opacity-100" : "opacity-0"
           }`}
-        >
-          <svg
-            viewBox="0 0 16 16"
-            className={`h-[12px] w-[12px] text-white transition-opacity ${
-              active ? "opacity-100" : "opacity-0"
-            }`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M3 8.5l3.2 3.2L13 4.8" />
-          </svg>
-        </span>
-      ) : (
-        <span
-          aria-hidden
-          className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border transition-colors ${
-            active ? "border-[#207A50]" : "border-[#C8C4BB]"
-          }`}
-        >
-          <span
-            className={`h-[8px] w-[8px] rounded-full transition-opacity ${
-              active ? "bg-[#207A50] opacity-100" : "opacity-0"
-            }`}
-          />
-        </span>
-      )}
+        />
+      </span>
       <span className="flex-1">{children}</span>
     </button>
   );
 }
 
-
-export function LeadForm({ id = "formulario" }: { id?: string }) {
-  const [step, setStep] = useState<0 | 1 | 2>(0);
+export function LeadForm({
+  id = "formulario",
+  onStepChange,
+}: {
+  id?: string;
+  onStepChange?: (step: 1 | 2) => void;
+}) {
+  const [step, setStep] = useState<1 | 2>(1);
   const [q, setQ] = useState(0);
   const [started, setStarted] = useState(false);
   const startedAtRef = useRef<number>(0);
@@ -296,17 +283,17 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const [success, setSuccess] = useState(false);
   const successFiredRef = useRef(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
   const [step1, setStep1] = useState<Step1>({
     nome: "",
     whatsapp: "",
     loja: "",
-    email: "",
   });
   const [step2, setStep2] = useState<Step2>({
-    papel: "",
+    problema_principal: "",
     conversas_dia: "",
-    problema_principal: [],
+    papel: "",
     faturamento: "",
     investimento: "",
     consentimento: true,
@@ -314,18 +301,6 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   const [errors, setErrors] = useState<Errors>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const nomeRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (step === 2 && nomeRef.current) {
-      const prefersReducedMotion =
-        typeof window !== "undefined" &&
-        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      const t = window.setTimeout(() => {
-        nomeRef.current?.focus({ preventScroll: prefersReducedMotion });
-      }, 20);
-      return () => window.clearTimeout(t);
-    }
-  }, [step]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -340,7 +315,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           }
         }
       },
-      { threshold: 0.3 },
+      { threshold: 0.3 }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -359,20 +334,27 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     }
   }
 
+  function scrollToContainer() {
+    if (!containerRef.current) return;
+    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    containerRef.current.scrollIntoView({
+      behavior: isReduced ? "auto" : "smooth",
+      block: "start",
+    });
+  }
+
   function validateContact(): boolean {
     const e: Errors = {};
-    {
-      const parts = step1.nome.trim().split(/\s+/).filter((p) => p.length >= 2);
-      if (parts.length < 2) e.nome = "Digite seu nome completo (nome e sobrenome).";
+    if (!step1.nome.trim()) {
+      e.nome = "Digite seu nome.";
     }
-    if (!step1.whatsapp.trim()) e.whatsapp = "Digite seu número de WhatsApp.";
-    else if (!isValidBRPhone(step1.whatsapp))
+    if (!step1.whatsapp.trim()) {
+      e.whatsapp = "Digite seu WhatsApp.";
+    } else if (!isValidBRPhone(step1.whatsapp)) {
       e.whatsapp = "Confira o número e inclua o DDD.";
-    if (step1.loja.trim().length > 0 && step1.loja.trim().length < 2)
+    }
+    if (!step1.loja.trim()) {
       e.loja = "Digite o nome ou Instagram da loja.";
-    if (step1.email.trim() !== "") {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!re.test(step1.email.trim())) e.email = "Confira o e-mail.";
     }
     setErrors(e);
     if (Object.keys(e).length > 0) {
@@ -392,61 +374,46 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
   }
 
   function onSelect(field: Step2Field, value: Step2Value) {
-    if (field === "problema_principal") {
-      setStep2((s) => {
-        const list = s.problema_principal;
-        const v = value as Problema;
-        const next = list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
-        return { ...s, problema_principal: next };
-      });
-      setErrors((e) => ({ ...e, problema_principal: undefined }));
-      return;
-    }
     setStep2((s) => ({ ...s, [field]: value }));
     setErrors((e) => ({ ...e, [field]: undefined }));
   }
 
   function isAnswered(field: Step2Field): boolean {
-    if (field === "problema_principal") return step2.problema_principal.length > 0;
     return Boolean(step2[field]);
   }
 
+  function onStep1Continue() {
+    markStarted();
+    if (!validateContact()) return;
+    setStep(2);
+    onStepChange?.(2);
+    setQ(0);
+    questionStartRef.current = Date.now();
+    setTimeout(scrollToContainer, 30);
+  }
+
   function onQuestionContinue() {
-    const field = currentField();
+    const questionObj = STEP2_QUESTIONS[q];
+    const field = questionObj.field;
+
     if (!isAnswered(field)) {
       setErrors({
-        [field]:
-          field === "problema_principal"
-            ? "Escolha ao menos uma opção."
-            : "Escolha uma opção para continuar.",
+        [field]: questionObj.errorMessage,
       });
       return;
     }
+
     const dur = questionStartRef.current ? Date.now() - questionStartRef.current : 0;
     if (dur > 0) {
       stepTimesRef.current[field] = dur;
       trackEvent("form_step_complete", { question: field, index: q, duration_ms: dur });
     }
+
     if (q < STEP2_QUESTIONS.length - 1) {
       setQ((n) => n + 1);
       setErrors({});
       questionStartRef.current = Date.now();
-      setTimeout(() => {
-        containerRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 30);
-    } else {
-      setErrors({});
-      setStep(2);
-      questionStartRef.current = Date.now();
-      setTimeout(() => {
-        containerRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 30);
+      setTimeout(scrollToContainer, 30);
     }
   }
 
@@ -455,44 +422,34 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
     if (q > 0) {
       setQ((n) => n - 1);
       questionStartRef.current = Date.now();
+      setTimeout(scrollToContainer, 30);
       return;
     }
-    setStep(0);
-    questionStartRef.current = Date.now();
-  }
-
-  function onContactBack() {
-    setErrors({});
     setStep(1);
-    setQ(STEP2_QUESTIONS.length - 1);
+    onStepChange?.(1);
     questionStartRef.current = Date.now();
+    setTimeout(scrollToContainer, 30);
   }
 
   async function onFinalSubmit() {
     if (loading) return;
-    if (!validateContact()) return;
 
-    // Verifica todas as respostas antes de enviar.
-    const order: Step2Field[] = [
-      "papel",
-      "conversas_dia",
-      "problema_principal",
-      "faturamento",
-      "investimento",
-    ];
-    for (let i = 0; i < order.length; i++) {
-      if (!isAnswered(order[i])) {
-        setStep(1);
-        setQ(i);
-        setErrors({
-          [order[i]]:
-            order[i] === "problema_principal"
-              ? "Escolha ao menos uma opção."
-              : "Escolha uma opção para continuar.",
-        });
-        return;
-      }
+    const questionObj = STEP2_QUESTIONS[q];
+    const field = questionObj.field;
+    if (!isAnswered(field)) {
+      setErrors({
+        [field]: questionObj.errorMessage,
+      });
+      return;
     }
+
+    if (!step2.consentimento) {
+      setErrors({
+        consentimento: "Confirme a autorização para receber o contato sobre sua solicitação.",
+      });
+      return;
+    }
+
     setSubmitError(null);
     setLoading(true);
     track("form_submit_attempt");
@@ -506,10 +463,10 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           nome: step1.nome.trim(),
           whatsapp: onlyDigits(step1.whatsapp),
           loja: step1.loja.trim(),
-          email: step1.email.trim(),
+          email: "",
           papel: step2.papel,
           conversas_dia: step2.conversas_dia,
-          problema_principal: step2.problema_principal,
+          problema_principal: step2.problema_principal ? [step2.problema_principal] : [],
           faturamento: step2.faturamento,
           investimento: step2.investimento,
           consentimento: true,
@@ -537,20 +494,11 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
           track("generate_lead");
         }
         setSuccess(true);
-        setTimeout(() => {
-          containerRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }, 50);
+        setTimeout(scrollToContainer, 30);
       } else if (res.status === 429) {
-        setSubmitError(
-          body?.message ?? "Aguarde alguns minutos antes de tentar novamente.",
-        );
+        setSubmitError(body?.message ?? "Aguarde alguns minutos antes de tentar novamente.");
       } else if (res.status === 422) {
-        setSubmitError(
-          body?.message ?? "Confira as informações preenchidas.",
-        );
+        setSubmitError(body?.message ?? "Confira as informações preenchidas.");
       } else {
         throw new Error("erro");
       }
@@ -558,134 +506,100 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
       console.error(err);
       track("form_submit_error");
       setSubmitError(
-        "Não foi possível enviar agora. Suas respostas foram mantidas. Tente novamente.",
+        "Não foi possível enviar agora. Suas respostas foram mantidas. Tente novamente."
       );
     } finally {
       setLoading(false);
     }
   }
 
-  function onWhatsappClick() {
-    track("whatsapp_click");
+  function handleResetForm() {
+    setSuccess(false);
+    setStep(1);
+    onStepChange?.(1);
+    setQ(0);
+    setStep1({ nome: "", whatsapp: "", loja: "" });
+    setStep2({
+      problema_principal: "",
+      conversas_dia: "",
+      papel: "",
+      faturamento: "",
+      investimento: "",
+      consentimento: true,
+    });
+    setErrors({});
   }
 
   const isLastQuestion = q === STEP2_QUESTIONS.length - 1;
-  const showConsent = isLastQuestion && !!step2[currentField()];
-
-  const totalSteps = 1 + STEP2_QUESTIONS.length;
-  const currentStepIndex = step === 0 ? 0 : step === 1 ? q + 1 : totalSteps;
-  const progressPct = step === 0 ? 0 : Math.round((currentStepIndex / totalSteps) * 100);
-  const stepLabel =
-    step === 0 ? "Introdução" : step === 1 ? "Sobre sua loja" : "Seus dados";
-  const stepCounter =
-    step === 0
-      ? "Comece aqui"
-      : step === 1
-        ? `Etapa 1 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`
-        : "Etapa 2 de 2";
 
   return (
     <div
       id={id}
       ref={containerRef}
-      className="relative mx-auto w-full rounded-[14px] border border-[#DDDAD3] bg-white p-5 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:p-8"
+      className="relative mx-auto w-full scroll-mt-[76px] rounded-[14px] border border-[#DDDAD3] bg-white p-5 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:p-8"
     >
-      {/* Honeypot invisível para bots. */}
+      {/* Honeypot invisível para bots */}
       <div aria-hidden="true" style={HONEYPOT_STYLE}>
-        <input
-          ref={hpRef}
-          id="hp_field"
-          name="website"
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-          aria-hidden="true"
-        />
+        <input ref={hpRef} id="hp_field" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
       {success ? (
-        <SuccessState
-          whatsapp={step1.whatsapp}
-          onWhatsappClick={onWhatsappClick}
-        />
+        <SuccessState whatsapp={step1.whatsapp} onReset={handleResetForm} />
       ) : (
         <>
-          {step === 0 ? (
-            <div className="space-y-4">
-              <div>
-                <p className="text-[11px] font-[600] uppercase tracking-[0.14em] text-[#207A50]">
-                  Comece por aqui
-                </p>
-                <h2 className="mt-1.5 text-[18px] font-[650] leading-[1.25] tracking-[-0.015em] text-[#191A18] sm:mt-2 sm:text-[22px]">
-                  Veja como ficaria na sua loja
-                </h2>
-                <p className="mt-1.5 text-[14px] leading-[1.5] text-[#5F625E] sm:mt-2 sm:text-[15px] sm:leading-[1.55]">
-                  1 minuto de perguntas. A gente mostra pelo WhatsApp.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  markStarted();
-                  setStep(1);
-                }}
-                className="flex min-h-[52px] w-full items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/30 sm:text-[16px]"
-              >
-                Ver como funcionaria na minha loja
-              </button>
-              <p className="text-[12px] leading-[1.5] text-[#5F625E] sm:text-[14px]">
-                Indicado para lojas que faturam a partir de R$ 50 mil/mês.
-              </p>
+          {/* Form Header */}
+          <div className="mb-5">
+            <h2 className="text-[20px] font-[650] leading-[1.2] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
+              {step === 1 ? "Veja como funcionaria na sua loja" : "Agora, sobre sua loja"}
+            </h2>
+            <p className="mt-1.5 text-[14px] leading-[1.5] text-[#5F625E]">
+              {step === 1
+                ? "Leva cerca de 1 minuto. Depois, mostramos pelo WhatsApp como esse atendimento poderia funcionar na sua loja."
+                : "Escolha a opção que mais combina com sua realidade."}
+            </p>
+          </div>
+
+          {/* Progress Indicator */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
+              <span>
+                {step === 1
+                  ? "Etapa 1 de 2 · Seus dados"
+                  : `Etapa 2 de 2 · Pergunta ${q + 1} de ${STEP2_QUESTIONS.length}`}
+              </span>
             </div>
+            <div
+              className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-[#E8E5DF]"
+              role="progressbar"
+              aria-valuenow={step === 1 ? 20 : Math.round(20 + ((q + 1) / STEP2_QUESTIONS.length) * 80)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="h-full rounded-full bg-[#207A50] transition-[width] duration-200 ease-out"
+                style={{
+                  width: `${step === 1 ? 20 : Math.round(20 + ((q + 1) / STEP2_QUESTIONS.length) * 80)}%`,
+                }}
+              />
+            </div>
+          </div>
 
-          ) : (
-            <>
-              <div className="mb-6">
-                <h2 className="text-[20px] font-[650] leading-[1.2] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
-                  {step === 1
-                    ? "Sobre sua loja"
-                    : "Para liberar o acesso, informe seus dados:"}
-                </h2>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
-                  <span>{stepCounter}</span>
-                  <span>{stepLabel}</span>
-                </div>
-                <div
-                  className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-[#E8E5DF]"
-                  role="progressbar"
-                  aria-valuenow={progressPct}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                >
-                  <div
-                    className="h-full rounded-full bg-[#207A50] transition-[width] duration-200 ease-out"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {step === 0 ? null : step === 2 ? (
+          {step === 1 ? (
             <div className="space-y-5">
               <div>
-                <Label htmlFor="f-nome">Seu nome completo</Label>
+                <Label htmlFor="f-nome">Seu nome</Label>
                 <input
                   ref={nomeRef}
                   id="f-nome"
                   name="nome"
                   type="text"
                   autoComplete="name"
-                  placeholder="Nome e sobrenome"
+                  placeholder="Como podemos chamar você?"
                   value={step1.nome}
                   onFocus={markStarted}
                   onChange={(e) => {
                     setStep1((s) => ({ ...s, nome: e.target.value }));
-                    if (errors.nome)
-                      setErrors((x) => ({ ...x, nome: undefined }));
+                    if (errors.nome) setErrors((x) => ({ ...x, nome: undefined }));
                   }}
                   aria-invalid={!!errors.nome}
                   aria-describedby={errors.nome ? "err-nome" : undefined}
@@ -708,20 +622,17 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                   onChange={(e) => {
                     const formatted = formatBRPhone(e.target.value);
                     setStep1((s) => ({ ...s, whatsapp: formatted }));
-                    if (errors.whatsapp)
-                      setErrors((x) => ({ ...x, whatsapp: undefined }));
+                    if (errors.whatsapp) setErrors((x) => ({ ...x, whatsapp: undefined }));
                   }}
                   aria-invalid={!!errors.whatsapp}
-                  aria-describedby={
-                    errors.whatsapp ? "err-whatsapp" : undefined
-                  }
+                  aria-describedby={errors.whatsapp ? "err-whatsapp" : undefined}
                   className={`${fieldBase} ${errors.whatsapp ? fieldError : ""}`}
                 />
                 <ErrorText id="err-whatsapp" msg={errors.whatsapp} />
               </div>
 
               <div>
-                <Label htmlFor="f-loja">Nome ou Instagram da loja — opcional</Label>
+                <Label htmlFor="f-loja">Nome ou Instagram da loja</Label>
                 <input
                   id="f-loja"
                   name="loja"
@@ -732,8 +643,7 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                   onFocus={markStarted}
                   onChange={(e) => {
                     setStep1((s) => ({ ...s, loja: e.target.value }));
-                    if (errors.loja)
-                      setErrors((x) => ({ ...x, loja: undefined }));
+                    if (errors.loja) setErrors((x) => ({ ...x, loja: undefined }));
                   }}
                   aria-invalid={!!errors.loja}
                   aria-describedby={errors.loja ? "err-loja" : undefined}
@@ -742,59 +652,20 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                 <ErrorText id="err-loja" msg={errors.loja} />
               </div>
 
-              <div>
-                <Label htmlFor="f-email">Seu e-mail — opcional</Label>
-                <input
-                  id="f-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="voce@empresa.com.br"
-                  value={step1.email}
-                  onFocus={markStarted}
-                  onChange={(e) => {
-                    setStep1((s) => ({ ...s, email: e.target.value }));
-                    if (errors.email)
-                      setErrors((x) => ({ ...x, email: undefined }));
-                  }}
-                  aria-invalid={!!errors.email}
-                  aria-describedby={errors.email ? "err-email" : undefined}
-                  className={`${fieldBase} ${errors.email ? fieldError : ""}`}
-                />
-                <ErrorText id="err-email" msg={errors.email} />
-              </div>
+              <button
+                type="button"
+                onClick={onStep1Continue}
+                className="flex min-h-[52px] w-full items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/30 sm:text-[16px] active:scale-[0.99]"
+              >
+                Continuar
+              </button>
 
-              {submitError ? (
-                <div
-                  role="alert"
-                  aria-live="polite"
-                  className="rounded-[10px] border border-[#B42318]/30 bg-[#FEF8F7] p-3 text-[14px] text-[#B42318]"
-                >
-                  {submitError}
-                </div>
-              ) : null}
+              <p className="text-center text-[13px] text-[#5F625E]">
+                Depois, são apenas 5 escolhas rápidas.
+              </p>
 
-              <div className="flex flex-col-reverse gap-2.5 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={onContactBack}
-                  className="inline-flex min-h-[52px] items-center justify-center gap-1 rounded-[10px] border border-[#CFCBC3] bg-transparent px-5 text-[15px] font-[600] text-[#30322E] transition-colors duration-150 hover:bg-[#F0EEE9] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#191A18]/15 active:scale-[0.99]"
-                >
-                  <ChevronLeft className="h-4 w-4" /> Voltar
-                </button>
-                <button
-                  type="button"
-                  onClick={onFinalSubmit}
-                  disabled={loading}
-                  className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
-                >
-                  {loading
-                    ? "Enviando..."
-                    : "Liberar acesso"}
-                </button>
-              </div>
-              <p className="text-center text-[13px] text-[#7B7E78]">
-                Prometemos não enviar spam.
+              <p className="text-center text-[12px] text-[#777A75] leading-relaxed">
+                Usaremos suas respostas somente para preparar a demonstração e falar com você sobre esta solicitação.
               </p>
             </div>
           ) : (
@@ -806,6 +677,45 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                 onSelect={onSelect}
               />
 
+              {isLastQuestion && (
+                <div className="mt-4 pt-2 border-t border-[#E8E5DF]">
+                  <label className="flex items-start gap-2.5 cursor-pointer text-[13px] leading-[1.5] text-[#30322E]">
+                    <input
+                      type="checkbox"
+                      checked={step2.consentimento}
+                      onChange={(e) => {
+                        setStep2((s) => ({ ...s, consentimento: e.target.checked }));
+                        if (errors.consentimento) setErrors((x) => ({ ...x, consentimento: undefined }));
+                      }}
+                      className="mt-0.5 h-4 w-4 rounded border-[#CFCBC3] text-[#207A50] focus:ring-[#207A50]"
+                    />
+                    <span>
+                      Autorizo o contato da Salomão AI pelo WhatsApp sobre esta demonstração e li a{" "}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setPrivacyOpen(true);
+                        }}
+                        className="font-[600] text-[#207A50] underline hover:text-[#17613E]"
+                      >
+                        Política de Privacidade
+                      </button>
+                      .
+                    </span>
+                  </label>
+                  <ErrorText id="err-consentimento" msg={errors.consentimento} />
+                </div>
+              )}
+
+              {submitError && (
+                <div
+                  role="alert"
+                  className="rounded-[10px] border border-[#B42318]/30 bg-[#FEF8F7] p-3 text-[14px] text-[#B42318]"
+                >
+                  {submitError}
+                </div>
+              )}
 
               <div className="flex flex-col-reverse gap-2.5 sm:flex-row">
                 <button
@@ -815,23 +725,34 @@ export function LeadForm({ id = "formulario" }: { id?: string }) {
                 >
                   <ChevronLeft className="h-4 w-4" /> Voltar
                 </button>
-                <button
-                  type="button"
-                  onClick={onQuestionContinue}
-                  className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
-                >
-                  Continuar
-                </button>
+                {isLastQuestion ? (
+                  <button
+                    type="button"
+                    onClick={onFinalSubmit}
+                    disabled={loading}
+                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
+                  >
+                    {loading ? "Enviando suas respostas…" : "Solicitar minha demonstração"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onQuestionContinue}
+                    className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 active:scale-[0.99]"
+                  >
+                    Continuar
+                  </button>
+                )}
               </div>
             </div>
           )}
         </>
       )}
+
+      <PrivacyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
     </div>
   );
 }
-
-
 
 function QuestionBlock({
   question,
@@ -844,35 +765,23 @@ function QuestionBlock({
   error?: string;
   onSelect: (field: Step2Field, value: Step2Value) => void;
 }) {
-  const multi = Array.isArray(value);
   return (
     <fieldset id={`q-${question.field}`} className="border-0 p-0">
       <legend className="block text-[17px] font-[600] leading-[1.35] text-[#191A18]">
         {question.question}
       </legend>
-      {multi ? (
-        <p className="mt-1.5 text-[13px] leading-[1.5] text-[#5F625E]">
-          Pode marcar mais de uma.
-        </p>
-      ) : null}
       {question.description ? (
-        <p className="mt-2 text-[14px] leading-[1.55] text-[#5F625E]">
+        <p className="mt-1.5 text-[13px] leading-[1.5] text-[#5F625E]">
           {question.description}
         </p>
       ) : null}
-      <div
-        className="mt-4 grid gap-2.5"
-        role={multi ? "group" : "radiogroup"}
-      >
+      <div className="mt-4 grid gap-2.5" role="radiogroup">
         {question.options.map((opt) => {
-          const active = multi
-            ? (value as string[]).includes(opt.v)
-            : value === opt.v;
+          const active = value === opt.v;
           return (
             <OptionCard
               key={opt.v}
               active={active}
-              multi={multi}
               onClick={() => onSelect(question.field, opt.v)}
             >
               {opt.t}
@@ -887,26 +796,56 @@ function QuestionBlock({
 
 function SuccessState({
   whatsapp,
-  onWhatsappClick,
+  onReset,
 }: {
   whatsapp: string;
-  onWhatsappClick: () => void;
+  onReset: () => void;
 }) {
   const digits = onlyDigits(whatsapp);
-  const waHref = digits ? `https://wa.me/55${digits}` : "https://wa.me/";
+  const defaultText = encodeURIComponent(
+    "Olá! Acabei de solicitar uma demonstração do atendimento com IA para minha loja de iPhone."
+  );
+  const waHref = digits ? `https://wa.me/55${digits}?text=${defaultText}` : `https://wa.me/?text=${defaultText}`;
+
+  function onWhatsappClick() {
+    track("whatsapp_click");
+  }
+
   return (
-    <div className="text-center" aria-live="polite">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F3EC] text-[#207A50]">
-        <CheckCircle2 className="h-6 w-6" strokeWidth={2.25} />
+    <div className="py-2 text-center" aria-live="polite">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#EDF6F0] text-[#207A50]">
+        <CheckCircle2 className="h-8 w-8" strokeWidth={2.25} />
       </div>
-      <h2 className="mt-5 text-[22px] font-[650] leading-[1.25] tracking-[-0.02em] text-[#191A18] sm:text-[24px]">
+      <h3 className="mt-4 text-[22px] font-[650] leading-[1.25] tracking-[-0.02em] text-[#191A18] sm:text-[24px]">
         Recebemos suas respostas.
-      </h2>
-      <p className="mx-auto mt-3 max-w-[380px] text-[15px] leading-[1.6] text-[#5F625E]">
-        Agora vamos entender como esse atendimento poderia funcionar na sua
-        loja. Entraremos em contato pelo WhatsApp informado.
+      </h3>
+      <p className="mx-auto mt-2 max-w-[420px] text-[15px] leading-[1.6] text-[#5F625E]">
+        Vamos preparar um exemplo com base na rotina da sua loja e falar com você pelo WhatsApp informado.
       </p>
+
+      <div className="mt-6 pt-4 border-t border-[#E8E5DF] max-w-[420px] mx-auto">
+        <p className="text-[14px] font-[600] text-[#191A18]">Quer adiantar a conversa?</p>
+        <a
+          href={waHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onWhatsappClick}
+          className="mt-3 flex min-h-[50px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#25D366] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#1EBE5A] active:scale-[0.99]"
+        >
+          <MessageCircle className="h-5 w-5" />
+          Falar com a Salomão AI agora
+        </a>
+      </div>
+
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={onReset}
+          className="text-[13px] text-[#5F625E] underline hover:text-[#191A18]"
+        >
+          Voltar ao início
+        </button>
+      </div>
     </div>
   );
 }
-
