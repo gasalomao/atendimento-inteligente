@@ -106,6 +106,7 @@
     "vite": "^6.2.0"
   },
   "overrides": {
-    "@tailwindcss/oxide": "4.0.9"
+    "@tailwindcss/oxide": "4.0.9",
+    "nitro": "npm:nitropack@^2.10.0"
   }
 }
