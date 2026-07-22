@@ -97,16 +97,15 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
-    "nitropack": "^2.10.0",
-    "nitro": "npm:nitropack@^2.10.0",
+    "nitro": "3.0.260603-beta",
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^6.2.0"
+    "vite": "^8.1.5"
   },
   "overrides": {
     "@tailwindcss/oxide": "4.0.9",
-    "nitro": "npm:nitropack@^2.10.0"
+    "unenv": "2.0.0-rc.23"
   },
   "optionalDependencies": {
     "@rolldown/binding-win32-x64-msvc": "^1.2.0"
