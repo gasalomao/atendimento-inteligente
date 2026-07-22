@@ -7,7 +7,7 @@ FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock* package-lock.json* ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm install --no-audit --no-fund --loglevel=error
+    npm install --legacy-peer-deps --no-audit --no-fund --loglevel=error
 
 # =========================
 # Stage 2: build (frontend + backend)
