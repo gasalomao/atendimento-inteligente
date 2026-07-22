@@ -78,7 +78,7 @@ type Step2Question = {
 type Errors = Partial<Record<string, string>>;
 
 const fieldBase =
-  "block w-full rounded-[10px] bg-white px-4 py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[52px]";
+  "block w-full rounded-[10px] bg-white px-4 py-2.5 sm:py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[46px] sm:min-h-[52px]";
 const fieldError =
   "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
@@ -109,7 +109,7 @@ function ErrorText({ id, msg }: { id: string; msg?: string }) {
 }
 
 const cardOptionBase =
-  "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-3.5 text-[16px] leading-[1.4] text-[#2B2D29] min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] flex items-center gap-3";
+  "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-2.5 sm:py-3.5 text-[15px] sm:text-[16px] leading-[1.3] sm:leading-[1.4] text-[#2B2D29] min-h-[46px] sm:min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] flex items-center gap-3";
 const cardOptionActive =
   "border-[#207A50] bg-[#EDF6F0] hover:border-[#207A50] hover:bg-[#EDF6F0] font-[600] text-[#191A18]";
 
@@ -536,7 +536,7 @@ export function LeadForm({
     <div
       id={id}
       ref={containerRef}
-      className="relative mx-auto w-full scroll-mt-[76px] rounded-[14px] border border-[#DDDAD3] bg-white p-5 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:p-8"
+      className="relative mx-auto w-full scroll-mt-[76px] rounded-[14px] border border-[#DDDAD3] bg-white p-4 sm:p-8 shadow-[0_8px_30px_rgba(25,26,24,0.06)]"
     >
       {/* Honeypot invisível para bots */}
       <div aria-hidden="true" style={HONEYPOT_STYLE}>
@@ -548,11 +548,11 @@ export function LeadForm({
       ) : (
         <>
           {/* Form Header */}
-          <div className="mb-5">
-            <h2 className="text-[20px] font-[650] leading-[1.2] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
+          <div className="mb-4 sm:mb-5">
+            <h2 className="text-[18px] sm:text-[22px] font-[650] leading-[1.2] tracking-[-0.015em] text-[#191A18]">
               {step === 1 ? "Veja como funcionaria na sua loja" : "Agora, sobre sua loja"}
             </h2>
-            <p className="mt-1.5 text-[14px] leading-[1.5] text-[#5F625E]">
+            <p className="mt-1.5 text-[13px] sm:text-[14px] leading-[1.4] sm:leading-[1.5] text-[#5F625E]">
               {step === 1
                 ? "Leva cerca de 1 minuto. Depois, mostramos pelo WhatsApp como esse atendimento poderia funcionar na sua loja."
                 : "Escolha a opção que mais combina com sua realidade."}
@@ -560,7 +560,7 @@ export function LeadForm({
           </div>
 
           {/* Progress Indicator */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
               <span>
                 {step === 1
@@ -585,7 +585,7 @@ export function LeadForm({
           </div>
 
           {step === 1 ? (
-            <div className="space-y-5">
+            <div className="space-y-3.5 sm:space-y-5">
               <div>
                 <Label htmlFor="f-nome">Seu nome</Label>
                 <input
@@ -669,7 +669,7 @@ export function LeadForm({
               </p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <QuestionBlock
                 question={STEP2_QUESTIONS[q]}
                 value={currentValue()}
@@ -767,15 +767,15 @@ function QuestionBlock({
 }) {
   return (
     <fieldset id={`q-${question.field}`} className="border-0 p-0">
-      <legend className="block text-[17px] font-[600] leading-[1.35] text-[#191A18]">
+      <legend className="block text-[16px] sm:text-[17px] font-[600] leading-[1.3] sm:leading-[1.35] text-[#191A18]">
         {question.question}
       </legend>
       {question.description ? (
-        <p className="mt-1.5 text-[13px] leading-[1.5] text-[#5F625E]">
+        <p className="mt-1 sm:mt-1.5 text-[12.5px] sm:text-[13px] leading-[1.45] sm:leading-[1.5] text-[#5F625E]">
           {question.description}
         </p>
       ) : null}
-      <div className="mt-4 grid gap-2.5" role="radiogroup">
+      <div className="mt-3 sm:mt-4 grid gap-2 sm:gap-2.5" role="radiogroup">
         {question.options.map((opt) => {
           const active = value === opt.v;
           return (

@@ -113,7 +113,7 @@ function Header({ onOpenPrivacy }: { onOpenPrivacy: () => void }) {
           : "border-transparent bg-[#F7F5F1]"
       }`}
     >
-      <div className="mx-auto flex h-[56px] w-full max-w-[1180px] items-center justify-between px-5 sm:h-16 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-[48px] sm:h-16 w-full max-w-[1180px] items-center justify-between px-5 sm:px-6 lg:px-8">
         <a
           href="/"
           className="flex items-center gap-2.5"
@@ -151,18 +151,18 @@ function HeroSection({
 }) {
   return (
     <section className="border-b border-[#E3E0D9] bg-[#F7F5F1]">
-      <div className="mx-auto w-full max-w-[1180px] px-[18px] pb-8 pt-4 sm:px-6 sm:pb-14 sm:pt-8 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:px-8 lg:pb-20 lg:pt-12">
+      <div className="mx-auto w-full max-w-[1180px] px-4 pb-6 pt-2 sm:px-6 sm:pb-14 sm:pt-8 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:px-8 lg:pb-20 lg:pt-12">
         {/* Esquerda: Copy Principal */}
         <div className={`hero-copy lg:self-center ${formStep === 2 ? "hidden lg:block" : "block"}`}>
           <p className="text-[11px] font-[600] uppercase tracking-[0.14em] text-[#207A50] sm:text-[13px]">
             ATENDIMENTO NO WHATSAPP PARA LOJAS DE IPHONE
           </p>
 
-          <h1 className="mt-2 max-w-[620px] text-[clamp(26px,7.4vw,34px)] font-[650] leading-[1.12] tracking-[-0.028em] text-[#191A18] sm:mt-3.5 sm:text-[clamp(34px,4.2vw,48px)] sm:leading-[1.08]">
+          <h1 className="mt-1.5 max-w-[620px] text-[clamp(26px,7.4vw,34px)] font-[650] leading-[1.12] tracking-[-0.028em] text-[#191A18] sm:mt-3.5 sm:text-[clamp(34px,4.2vw,48px)] sm:leading-[1.08]">
             Enquanto você demora, o cliente chama outra loja.
           </h1>
 
-          <p className="mt-3 max-w-[560px] text-[15px] leading-[1.55] text-[#5F625E] sm:mt-4 sm:text-[17px]">
+          <p className="hidden lg:block mt-3 max-w-[560px] text-[15px] leading-[1.55] text-[#5F625E] sm:mt-4 sm:text-[17px]">
             Enquanto sua equipe atende no balcão, continuam chegando mensagens sobre preço, estoque, troca e parcelamento. A IA responde as primeiras perguntas e deixa a conversa pronta para o vendedor continuar.
           </p>
 
@@ -178,12 +178,19 @@ function HeroSection({
         </div>
 
         {/* Direita: Formulário Imediato */}
-        <div className="mt-4 lg:mt-0 lg:self-center">
+        <div className="mt-3 lg:mt-0 lg:self-center">
           <LeadForm id="formulario" onStepChange={onStepChange} />
+
+          {/* Subheadline no Mobile (exibido abaixo do formulário na Etapa 1) */}
+          {formStep === 1 && (
+            <p className="block lg:hidden mt-5 text-[14.5px] leading-[1.5] text-[#5F625E]">
+              Enquanto sua equipe atende no balcão, continuam chegando mensagens sobre preço, estoque, troca e parcelamento. A IA responde as primeiras perguntas e deixa a conversa pronta para o vendedor continuar.
+            </p>
+          )}
 
           {/* Pontos de Benefício no Mobile (exibidos abaixo do formulário na Etapa 1) */}
           {formStep === 1 && (
-            <div className="block lg:hidden mt-6 pt-2">
+            <div className="block lg:hidden mt-5 pt-1">
               <HeroPointsAndQualify />
             </div>
           )}
