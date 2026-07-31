@@ -27,7 +27,7 @@ export const leadSchema = z.object({
     .refine((v) => v.replace(/\D/g, "").length >= 10, "Informe seu WhatsApp com DDD."),
 
   // ---- Etapa 1: contexto leve ----
-  canal_venda: z.enum(["physical", "online", "both"]),
+  canal_venda: z.enum(["physical", "online", "both"]).optional(),
   canais_oportunidade: z
     .preprocess(
       (v) => (Array.isArray(v) ? v : typeof v === "string" && v.length > 0 ? v.split(",") : v),
@@ -37,6 +37,7 @@ export const leadSchema = z.object({
         )
         .min(1, "Escolha ao menos um canal.")
         .max(6)
+        .optional()
     ),
   problema_principal: z
     .preprocess(
@@ -64,8 +65,8 @@ export const leadSchema = z.object({
     "more_than_80",
     "nao_acompanho",
   ]),
-  respondentes: z.enum(["one", "two_three", "four_eight", "more_than_eight"]),
-  registro_contatos: z.enum(["none", "sheet", "crm", "own_system"]),
+  respondentes: z.enum(["one", "two_three", "four_eight", "more_than_eight"]).optional(),
+  registro_contatos: z.enum(["none", "sheet", "crm", "own_system"]).optional(),
   automatizar_primeiro: z.enum([
     "triagem",
     "orcamento",
@@ -73,10 +74,11 @@ export const leadSchema = z.object({
     "agendamento",
     "posvenda",
     "integracao",
-  ]),
+  ]).optional(),
 
   // ---- Etapa 3: intenção ----
   faturamento: z.enum([
+    "up_to_40k",
     "from_40k_to_60k",
     "from_60k_to_100k",
     "from_100k_to_300k",
