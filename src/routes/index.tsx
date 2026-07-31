@@ -113,7 +113,7 @@ function Header({ onOpenPrivacy }: { onOpenPrivacy: () => void }) {
           : "border-transparent bg-[#F7F5F1]"
       }`}
     >
-      <div className="mx-auto flex h-[48px] sm:h-16 w-full max-w-[1180px] items-center justify-between px-5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-[52px] w-full max-w-[1180px] items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
         <a
           href="/"
           className="flex items-center gap-2.5"
