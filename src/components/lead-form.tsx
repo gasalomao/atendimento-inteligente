@@ -222,14 +222,15 @@ const EMPTY_CONSENTS: Consents = {
 };
 
 const fieldBase =
-  "block w-full rounded-[10px] bg-white px-4 py-2.5 sm:py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[46px] sm:min-h-[52px]";
+  "block w-full rounded-[10px] bg-white px-4 py-3 sm:py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[48px] sm:min-h-[52px]";
 const fieldError =
   "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
 const cardOptionBase =
-  "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-2.5 sm:py-3.5 text-[15px] sm:text-[16px] leading-[1.3] sm:leading-[1.4] text-[#2B2D29] min-h-[46px] sm:min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] flex items-center gap-3";
+  "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-3 sm:py-3.5 text-[15px] sm:text-[16px] leading-[1.3] sm:leading-[1.4] text-[#2B2D29] min-h-[48px] sm:min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] active:bg-[#F0EEE9] flex items-center gap-3";
 const cardOptionActive =
   "border-[#207A50] bg-[#EDF6F0] hover:border-[#207A50] hover:bg-[#EDF6F0] font-[600] text-[#191A18]";
+
 
 const primaryBtn =
   "inline-flex min-h-[52px] flex-1 items-center justify-center rounded-[10px] bg-[#207A50] px-5 text-[15px] font-[600] text-white transition-colors duration-150 hover:bg-[#17613E] focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[#207A50]/25 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99] sm:text-[16px]";
@@ -376,11 +377,14 @@ export function LeadForm({
   function scrollToContainer() {
     if (!containerRef.current) return;
     const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    containerRef.current.scrollIntoView({
+    const headerOffset = window.innerWidth < 640 ? 56 : 76;
+    const top = containerRef.current.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({
+      top: Math.max(top, 0),
       behavior: isReduced ? "auto" : "smooth",
-      block: "start",
     });
   }
+
 
   function isAnswered(q: Question): boolean {
     const v = answers[q.field];
@@ -454,7 +458,12 @@ export function LeadForm({
     setErrors(e);
     if (Object.keys(e).length > 0) {
       const first = Object.keys(e)[0];
-      document.getElementById(`f-${first}`)?.focus();
+      const el = document.getElementById(`f-${first}`);
+      if (el) {
+        const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        el.scrollIntoView({ behavior: isReduced ? "auto" : "smooth", block: "center" });
+        el.focus({ preventScroll: true });
+      }
       return false;
     }
     return true;
@@ -558,7 +567,7 @@ export function LeadForm({
     <div
       id={id}
       ref={containerRef}
-      className="relative mx-auto w-full scroll-mt-[76px] rounded-[14px] border border-[#DDDAD3] bg-white p-4 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:p-8"
+      className="relative mx-auto w-full max-w-full scroll-mt-[56px] overflow-hidden rounded-[14px] border border-[#DDDAD3] bg-white p-4 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:scroll-mt-[76px] sm:p-8"
     >
       {/* Honeypot invisível para bots */}
       <div aria-hidden="true" style={HONEYPOT_STYLE}>
@@ -823,16 +832,16 @@ function ConsentRow({
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-2.5 text-[13px] leading-[1.5] text-[#30322E]"
+      className="-mx-1 flex min-h-[40px] cursor-pointer items-start gap-3 rounded-[8px] px-1 py-1.5 text-[13.5px] leading-[1.5] text-[#30322E] active:bg-[#F5F3EF] sm:text-[13px]"
     >
       <input
         id={id}
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 h-4 w-4 rounded border-[#CFCBC3] text-[#207A50] focus:ring-[#207A50]"
+        className="mt-[2px] h-5 w-5 shrink-0 rounded border-[#CFCBC3] accent-[#207A50] text-[#207A50] focus:ring-[#207A50]"
       />
-      <span>{children}</span>
+      <span className="min-w-0">{children}</span>
     </label>
   );
 }
