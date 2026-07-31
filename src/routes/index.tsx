@@ -4,6 +4,8 @@ import { LeadForm } from "@/components/lead-form";
 import { PrivacyDialog } from "@/components/privacy-dialog";
 import { captureAndPersistTracking, trackOnce } from "@/lib/tracking";
 import { Check, ChevronDown, CheckCircle2 } from "lucide-react";
+import heroPhone from "@/assets/hero-phone.png";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -218,12 +220,28 @@ function HeroPointsAndQualify() {
         <HeroPoint>Atende fora do horário, seguindo as regras da loja</HeroPoint>
       </ul>
 
+      <div className="mt-5 flex flex-wrap gap-2">
+        {[
+          "Usa o WhatsApp da própria loja",
+          "Sem aplicativo novo",
+          "Regras definidas por você",
+        ].map((t) => (
+          <span
+            key={t}
+            className="rounded-full border border-[#E0DCD4] bg-white px-3 py-1.5 text-[12px] font-[600] text-[#4B4E49]"
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+
       <p className="mt-4 text-[13px] leading-[1.5] text-[#777A75]">
         Para lojas com operação ativa e faturamento a partir de R$ 50 mil por mês.
       </p>
     </>
   );
 }
+
 
 function HeroPoint({ children }: { children: React.ReactNode }) {
   return (
@@ -236,35 +254,50 @@ function HeroPoint({ children }: { children: React.ReactNode }) {
 
 function HeroPhoneVisual({ loading }: { loading?: "lazy" | "eager" }) {
   return (
-    <div className="hero-phone-visual" aria-hidden="true">
-      <picture className="phone-back">
-        <source srcSet="/images/iphone-back-green.avif" type="image/avif" />
-        <source srcSet="/images/iphone-back-green.webp" type="image/webp" />
+    <div className="hero-device">
+      <div className="hero-device__stage">
         <img
-          src="/images/iphone-back-green.png"
-          alt=""
-          width="520"
-          height="680"
+          className="hero-device__img"
+          src={heroPhone}
+          alt="Atendimento da loja no WhatsApp respondendo um cliente em segundos"
+          width={1024}
+          height={1280}
           decoding="async"
           loading={loading}
         />
-      </picture>
 
-      <picture className="phone-front">
-        <source srcSet="/images/iphone-chat-front.avif" type="image/avif" />
-        <source srcSet="/images/iphone-chat-front.webp" type="image/webp" />
-        <img
-          src="/images/iphone-chat-front.png"
-          alt=""
-          width="520"
-          height="680"
-          decoding="async"
-          loading={loading}
-        />
-      </picture>
+        <div className="hero-device__chat" aria-hidden="true">
+          <div className="flex items-center gap-2 border-b border-[#EFEDE8] pb-2.5">
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-[#207A50] text-[10px] font-semibold text-white">
+              S
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-[11.5px] font-[650] leading-tight text-[#191A18]">
+                Atendimento • Sua Loja
+              </p>
+              <p className="text-[10px] leading-tight text-[#207A50]">online agora</p>
+            </div>
+          </div>
+
+          <div className="mt-2.5 space-y-2">
+            <p className="ml-auto w-fit max-w-[85%] rounded-[10px] rounded-tr-[3px] bg-[#EDF6F0] px-2.5 py-1.5 text-[11.5px] leading-[1.35] text-[#191A18]">
+              Tem iPhone 15 Pro 256 GB?
+            </p>
+            <p className="w-fit max-w-[90%] rounded-[10px] rounded-tl-[3px] bg-[#F4F2ED] px-2.5 py-1.5 text-[11.5px] leading-[1.35] text-[#191A18]">
+              Novo ou seminovo? Tem aparelho para dar na troca?
+            </p>
+          </div>
+
+          <div className="mt-2.5 flex items-center gap-1.5 border-t border-[#EFEDE8] pt-2 text-[10.5px] font-[600] text-[#207A50]">
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+            <span>Respondido em 9 segundos</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+
 
 function DemoSection() {
   return (
