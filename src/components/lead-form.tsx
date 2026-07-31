@@ -772,33 +772,6 @@ export function LeadForm({
   );
 }
 
-function ConsentRow({
-  id,
-  checked,
-  onChange,
-  children,
-}: {
-  id: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <label
-      htmlFor={id}
-      className="-mx-1 flex min-h-[40px] cursor-pointer items-start gap-3 rounded-[8px] px-1 py-1.5 text-[13.5px] leading-[1.5] text-[#30322E] active:bg-[#F5F3EF] sm:text-[13px]"
-    >
-      <input
-        id={id}
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="mt-[2px] h-5 w-5 shrink-0 rounded border-[#CFCBC3] accent-[#207A50] text-[#207A50] focus:ring-[#207A50]"
-      />
-      <span className="min-w-0">{children}</span>
-    </label>
-  );
-}
 
 function QuestionBlock({
   question,
