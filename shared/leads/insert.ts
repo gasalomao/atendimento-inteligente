@@ -51,6 +51,7 @@ export function buildLeadInsert(
       respondentes: data.respondentes,
       registro_contatos: data.registro_contatos,
       automatizar_primeiro: data.automatizar_primeiro,
+      faturamento: data.faturamento,
       prazo_implantacao: data.prazo,
       decisao: data.decisao,
 

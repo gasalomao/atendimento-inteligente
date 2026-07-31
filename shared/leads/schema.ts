@@ -19,7 +19,12 @@ export const leadSchema = z.object({
   email: z.string().trim().min(5).max(160).email("Confira o e-mail informado."),
   loja: z.string().trim().min(2).max(120),
   cidade_uf: z.string().trim().min(2).max(120),
-  whatsapp: z.string().trim().max(20).optional().or(z.literal("")),
+  whatsapp: z
+    .string()
+    .trim()
+    .min(10, "Informe seu WhatsApp com DDD.")
+    .max(20)
+    .refine((v) => v.replace(/\D/g, "").length >= 10, "Informe seu WhatsApp com DDD."),
 
   // ---- Etapa 1: contexto leve ----
   canal_venda: z.enum(["physical", "online", "both"]),
@@ -71,6 +76,12 @@ export const leadSchema = z.object({
   ]),
 
   // ---- Etapa 3: intenção ----
+  faturamento: z.enum([
+    "from_40k_to_60k",
+    "from_60k_to_100k",
+    "from_100k_to_300k",
+    "above_300k",
+  ]),
   prazo: z.enum(["now", "until_30d", "from_1_to_3m", "researching"]),
   decisao: z.enum(["me", "me_partner", "manager", "team"]),
 

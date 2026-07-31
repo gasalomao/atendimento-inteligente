@@ -8,9 +8,15 @@ export function calcLeadScore(input: LeadInput): number {
   else if (input.contatos_dia === "from_31_to_80") score += 15;
   else if (input.contatos_dia === "from_11_to_30") score += 8;
 
+  if (input.faturamento === "above_300k") score += 10;
+  else if (input.faturamento === "from_100k_to_300k") score += 8;
+  else if (input.faturamento === "from_60k_to_100k") score += 5;
+  else if (input.faturamento === "from_40k_to_60k") score += 3;
+
   if (input.prazo === "now") score += 15;
   else if (input.prazo === "until_30d") score += 10;
   else if (input.prazo === "from_1_to_3m") score += 5;
+
 
   if (input.respondentes && input.respondentes !== "one") score += 10;
   if (input.registro_contatos === "crm" || input.registro_contatos === "own_system") score += 10;
@@ -67,6 +73,9 @@ export function buildCrmTags(input: LeadInput): string[] {
   } else if (input.contatos_dia === "up_to_10") {
     tags.add("volume_low");
   }
+
+  if (input.faturamento) tags.add(`revenue_${input.faturamento}`);
+
 
   if (input.registro_contatos === "none") tags.add("crm_none");
   if (input.registro_contatos === "sheet") tags.add("crm_sheet");

@@ -6,6 +6,7 @@ import {
   CANAL_VENDA_LABELS,
   CONTATOS_DIA_LABELS,
   DECISAO_LABELS,
+  FATURAMENTO_LABELS,
   PRAZO_LABELS,
   REGISTRO_LABELS,
   RESPONDENTES_LABELS,
@@ -29,6 +30,7 @@ export function buildFormAnswers(input: LeadInput): Record<string, unknown> {
     responders: lv(RESPONDENTES_LABELS, input.respondentes),
     contact_registry: lv(REGISTRO_LABELS, input.registro_contatos),
     first_automation: lv(AUTOMATIZAR_LABELS, input.automatizar_primeiro),
+    monthly_revenue: lv(FATURAMENTO_LABELS, input.faturamento),
     timeline: lv(PRAZO_LABELS, input.prazo),
     decision_makers: lv(DECISAO_LABELS, input.decisao),
     city_state: input.cidade_uf ?? null,
@@ -47,6 +49,7 @@ export const FORM_ANSWER_ORDER: Array<{ key: string; label: string }> = [
   { key: "responders", label: "Quem responde" },
   { key: "contact_registry", label: "Registro dos contatos" },
   { key: "first_automation", label: "Automatizar primeiro" },
+  { key: "monthly_revenue", label: "Faturamento mensal" },
   { key: "timeline", label: "Prazo para implantar" },
   { key: "decision_makers", label: "Participa da decisão" },
 ];

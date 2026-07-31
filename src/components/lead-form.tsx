@@ -23,6 +23,7 @@ type QuestionField =
   | "respondentes"
   | "registro_contatos"
   | "automatizar_primeiro"
+  | "faturamento"
   | "prazo"
   | "decisao";
 
@@ -125,6 +126,18 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
+    field: "faturamento",
+    block: 3,
+    question: "Quanto a loja fatura por mês hoje?",
+    description: "Isso ajuda a ajustar o resultado para o seu porte.",
+    options: [
+      { v: "from_40k_to_60k", t: "De R$ 40 mil a R$ 60 mil" },
+      { v: "from_60k_to_100k", t: "De R$ 60 mil a R$ 100 mil" },
+      { v: "from_100k_to_300k", t: "De R$ 100 mil a R$ 300 mil" },
+      { v: "above_300k", t: "Acima de R$ 300 mil" },
+    ],
+  },
+  {
     field: "prazo",
     block: 3,
     question: "Quando você gostaria de colocar isso em prática?",
@@ -173,6 +186,7 @@ type Answers = {
   respondentes: string;
   registro_contatos: string;
   automatizar_primeiro: string;
+  faturamento: string;
   prazo: string;
   decisao: string;
 };
@@ -202,6 +216,7 @@ const EMPTY_ANSWERS: Answers = {
   respondentes: "",
   registro_contatos: "",
   automatizar_primeiro: "",
+  faturamento: "",
   prazo: "",
   decisao: "",
 };
@@ -449,7 +464,9 @@ export function LeadForm({
     if (contact.cidade_uf.trim().length < 2) {
       e.cidade_uf = "Digite a cidade e o estado.";
     }
-    if (contact.whatsapp.trim() && !isValidBRPhone(contact.whatsapp)) {
+    if (!contact.whatsapp.trim()) {
+      e.whatsapp = "Informe seu WhatsApp com DDD.";
+    } else if (!isValidBRPhone(contact.whatsapp)) {
       e.whatsapp = "Confira o número e inclua o DDD.";
     }
     setErrors(e);
@@ -485,7 +502,7 @@ export function LeadForm({
           email: contact.email.trim(),
           loja: contact.loja.trim(),
           cidade_uf: contact.cidade_uf.trim(),
-          whatsapp: contact.whatsapp.trim() ? onlyDigits(contact.whatsapp) : "",
+          whatsapp: onlyDigits(contact.whatsapp),
           canal_venda: answers.canal_venda,
           canais_oportunidade: answers.canais_oportunidade,
           problema_principal: answers.problema_principal,
@@ -493,6 +510,7 @@ export function LeadForm({
           respondentes: answers.respondentes,
           registro_contatos: answers.registro_contatos,
           automatizar_primeiro: answers.automatizar_primeiro,
+          faturamento: answers.faturamento,
           prazo: answers.prazo,
           decisao: answers.decisao,
           consent_email: true,
@@ -717,7 +735,7 @@ export function LeadForm({
               </div>
 
               <div>
-                <Label htmlFor="f-whatsapp">WhatsApp (opcional)</Label>
+                <Label htmlFor="f-whatsapp">WhatsApp</Label>
                 <input
                   id="f-whatsapp"
                   name="whatsapp"
