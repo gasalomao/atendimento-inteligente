@@ -216,6 +216,7 @@ const EMPTY_ANSWERS: Answers = {
   respondentes: "",
   registro_contatos: "",
   automatizar_primeiro: "",
+  faturamento: "",
   prazo: "",
   decisao: "",
 };
