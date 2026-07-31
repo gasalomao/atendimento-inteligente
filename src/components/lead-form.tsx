@@ -495,7 +495,9 @@ export function LeadForm({
           consent_marketing: consents.consent_marketing,
           consent_text_version: CONSENT_TEXT_VERSION_DEFAULT,
           consentimento: true,
-          landing_variant: utms.landing_variant,
+          landing_variant:
+            new URLSearchParams(window.location.search).get("v") || "balanced",
+
           utm_source: utms.utm_source,
           utm_medium: utms.utm_medium,
           utm_campaign: utms.utm_campaign,
