@@ -458,7 +458,12 @@ export function LeadForm({
     setErrors(e);
     if (Object.keys(e).length > 0) {
       const first = Object.keys(e)[0];
-      document.getElementById(`f-${first}`)?.focus();
+      const el = document.getElementById(`f-${first}`);
+      if (el) {
+        const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        el.scrollIntoView({ behavior: isReduced ? "auto" : "smooth", block: "center" });
+        el.focus({ preventScroll: true });
+      }
       return false;
     }
     return true;
