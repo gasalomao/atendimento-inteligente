@@ -377,11 +377,14 @@ export function LeadForm({
   function scrollToContainer() {
     if (!containerRef.current) return;
     const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    containerRef.current.scrollIntoView({
+    const headerOffset = window.innerWidth < 640 ? 56 : 76;
+    const top = containerRef.current.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({
+      top: Math.max(top, 0),
       behavior: isReduced ? "auto" : "smooth",
-      block: "start",
     });
   }
+
 
   function isAnswered(q: Question): boolean {
     const v = answers[q.field];
