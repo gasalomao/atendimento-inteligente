@@ -452,9 +452,6 @@ export function LeadForm({
     if (contact.whatsapp.trim() && !isValidBRPhone(contact.whatsapp)) {
       e.whatsapp = "Confira o número e inclua o DDD.";
     }
-    if (!consents.consent_email) {
-      e.consent_email = "Precisamos dessa autorização para enviar o resultado por e-mail.";
-    }
     setErrors(e);
     if (Object.keys(e).length > 0) {
       const first = Object.keys(e)[0];
@@ -741,51 +738,8 @@ export function LeadForm({
                 <ErrorText id="err-whatsapp" msg={errors.whatsapp} />
               </div>
 
-              <div className="space-y-2.5 border-t border-[#E8E5DF] pt-4">
-                <ConsentRow
-                  id="f-consent_email"
-                  checked={consents.consent_email}
-                  onChange={(v) => {
-                    setConsents((s) => ({ ...s, consent_email: v }));
-                    if (errors.consent_email) setErrors((x) => ({ ...x, consent_email: undefined }));
-                  }}
-                >
-                  Autorizo receber o resultado da análise por e-mail e li a{" "}
-                  <button
-                    type="button"
-                    onClick={() => setPrivacyOpen(true)}
-                    className="font-[600] text-[#207A50] underline hover:text-[#17613E]"
-                  >
-                    Política de Privacidade
-                  </button>
-                  .
-                </ConsentRow>
-                <ErrorText id="err-consent_email" msg={errors.consent_email} />
 
-                <ConsentRow
-                  id="f-consent_whatsapp"
-                  checked={consents.consent_whatsapp}
-                  onChange={(v) => setConsents((s) => ({ ...s, consent_whatsapp: v }))}
-                >
-                  Também podem falar comigo pelo WhatsApp.
-                </ConsentRow>
 
-                <ConsentRow
-                  id="f-consent_sms"
-                  checked={consents.consent_sms}
-                  onChange={(v) => setConsents((s) => ({ ...s, consent_sms: v }))}
-                >
-                  Também podem me enviar SMS.
-                </ConsentRow>
-
-                <ConsentRow
-                  id="f-consent_marketing"
-                  checked={consents.consent_marketing}
-                  onChange={(v) => setConsents((s) => ({ ...s, consent_marketing: v }))}
-                >
-                  Quero receber conteúdos e novidades sobre atendimento.
-                </ConsentRow>
-              </div>
 
               {submitError && (
                 <div
