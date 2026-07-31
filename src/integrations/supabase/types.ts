@@ -16,10 +16,21 @@ export type Database = {
     Tables: {
       contatos: {
         Row: {
+          automatizar_primeiro: string | null
+          canais_oportunidade: string | null
+          canal_venda: string | null
+          cidade_uf: string | null
+          consent_email: boolean
+          consent_marketing: boolean
+          consent_sms: boolean
+          consent_text_version: string | null
           consent_timestamp: string | null
+          consent_whatsapp: boolean
           consentimento: boolean
+          contatos_dia: string | null
           conversas_dia: string | null
           created_at: string
+          decisao: string | null
           email: string | null
           email_status: string
           event_id: string | null
@@ -31,14 +42,20 @@ export type Database = {
           investimento: string | null
           ip: string | null
           landing_path: string | null
+          landing_variant: string | null
           lead_classification: string | null
+          lead_score: number
+          lead_tags: string[]
           loja: string
           nome: string
           papel: string | null
           pontuacao: number
+          prazo_implantacao: string | null
           privacy_policy_version: string | null
           problema_principal: string | null
           referrer: string | null
+          registro_contatos: string | null
+          respondentes: string | null
           status: string
           user_agent: string | null
           utm_campaign: string | null
@@ -47,13 +64,24 @@ export type Database = {
           utm_source: string | null
           utm_term: string | null
           webhook_status: string
-          whatsapp: string
+          whatsapp: string | null
         }
         Insert: {
+          automatizar_primeiro?: string | null
+          canais_oportunidade?: string | null
+          canal_venda?: string | null
+          cidade_uf?: string | null
+          consent_email?: boolean
+          consent_marketing?: boolean
+          consent_sms?: boolean
+          consent_text_version?: string | null
           consent_timestamp?: string | null
+          consent_whatsapp?: boolean
           consentimento?: boolean
+          contatos_dia?: string | null
           conversas_dia?: string | null
           created_at?: string
+          decisao?: string | null
           email?: string | null
           email_status?: string
           event_id?: string | null
@@ -65,14 +93,20 @@ export type Database = {
           investimento?: string | null
           ip?: string | null
           landing_path?: string | null
+          landing_variant?: string | null
           lead_classification?: string | null
+          lead_score?: number
+          lead_tags?: string[]
           loja: string
           nome: string
           papel?: string | null
           pontuacao?: number
+          prazo_implantacao?: string | null
           privacy_policy_version?: string | null
           problema_principal?: string | null
           referrer?: string | null
+          registro_contatos?: string | null
+          respondentes?: string | null
           status?: string
           user_agent?: string | null
           utm_campaign?: string | null
@@ -81,13 +115,24 @@ export type Database = {
           utm_source?: string | null
           utm_term?: string | null
           webhook_status?: string
-          whatsapp: string
+          whatsapp?: string | null
         }
         Update: {
+          automatizar_primeiro?: string | null
+          canais_oportunidade?: string | null
+          canal_venda?: string | null
+          cidade_uf?: string | null
+          consent_email?: boolean
+          consent_marketing?: boolean
+          consent_sms?: boolean
+          consent_text_version?: string | null
           consent_timestamp?: string | null
+          consent_whatsapp?: boolean
           consentimento?: boolean
+          contatos_dia?: string | null
           conversas_dia?: string | null
           created_at?: string
+          decisao?: string | null
           email?: string | null
           email_status?: string
           event_id?: string | null
@@ -99,14 +144,20 @@ export type Database = {
           investimento?: string | null
           ip?: string | null
           landing_path?: string | null
+          landing_variant?: string | null
           lead_classification?: string | null
+          lead_score?: number
+          lead_tags?: string[]
           loja?: string
           nome?: string
           papel?: string | null
           pontuacao?: number
+          prazo_implantacao?: string | null
           privacy_policy_version?: string | null
           problema_principal?: string | null
           referrer?: string | null
+          registro_contatos?: string | null
+          respondentes?: string | null
           status?: string
           user_agent?: string | null
           utm_campaign?: string | null
@@ -115,7 +166,7 @@ export type Database = {
           utm_source?: string | null
           utm_term?: string | null
           webhook_status?: string
-          whatsapp?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }

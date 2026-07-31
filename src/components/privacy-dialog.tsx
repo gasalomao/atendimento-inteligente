@@ -1,17 +1,34 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 
-export function PrivacyDialog() {
-  const [open, setOpen] = useState(false);
+export function PrivacyDialog({
+  open: openProp,
+  onOpenChange,
+  hideTrigger,
+}: {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+} = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const controlled = typeof openProp === "boolean";
+  const open = controlled ? openProp : internalOpen;
+  const setOpen = (next: boolean) => {
+    if (!controlled) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="font-medium text-[#101828] underline underline-offset-2 hover:text-[#16A34A]"
-      >
-        Política de Privacidade
-      </button>
+      {controlled || hideTrigger ? null : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="font-medium text-[#101828] underline underline-offset-2 hover:text-[#16A34A]"
+        >
+          Política de Privacidade
+        </button>
+      )}
+
       {open ? (
         <div
           role="dialog"
