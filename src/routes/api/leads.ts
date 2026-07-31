@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import crypto from "node:crypto";
 import { leadSchema } from "../../../shared/leads/schema";
-import { calcScore, classify } from "../../../shared/leads/scoring";
-import { buildFormAnswers } from "../../../shared/leads/payload";
-import { normalizeBRPhone } from "../../../shared/leads/phone";
+import { buildLeadInsert } from "../../../shared/leads/insert";
 
 /**
  * Espelho do endpoint POST /api/leads que roda no Express de produção.
@@ -42,9 +40,6 @@ export const Route = createFileRoute("/api/leads")({
 
         const eventId = data.event_id ?? crypto.randomUUID();
         const nowIso = new Date().toISOString();
-        const score = calcScore(data);
-        const classification = classify(score);
-        const answers = buildFormAnswers(data);
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -57,42 +52,18 @@ export const Route = createFileRoute("/api/leads")({
           return json({ success: true, lead_id: existing.id, event_id: eventId, message: "Recebemos suas respostas." }, 201);
         }
 
-        const privacyVersion = data.privacy_policy_version ?? "2026-07-01";
         const webhookConfigured = Boolean(process.env.LEAD_WEBHOOK_URL);
+        const { row, score, classification } = buildLeadInsert(data, {
+          eventId,
+          nowIso,
+          privacyPolicyVersion: "2026-07-01",
+          webhookConfigured,
+          userAgent: request.headers.get("user-agent"),
+        });
 
         const { data: inserted, error } = await supabaseAdmin
           .from("contatos")
-          .insert({
-            event_id: eventId,
-            nome: data.nome,
-            whatsapp: normalizeBRPhone(data.whatsapp),
-            loja: data.loja || "",
-            email: data.email && data.email !== "" ? data.email : null,
-            papel: data.papel,
-            conversas_dia: data.conversas_dia,
-            problema_principal: (data.problema_principal ?? []).join(","),
-            faturamento: data.faturamento,
-            investimento: data.investimento,
-            consentimento: true,
-            consent_timestamp: nowIso,
-            privacy_policy_version: privacyVersion,
-            pontuacao: score,
-            lead_classification: classification,
-            form_answers: answers as any,
-            utm_source: data.utm_source ?? null,
-            utm_medium: data.utm_medium ?? null,
-            utm_campaign: data.utm_campaign ?? null,
-            utm_content: data.utm_content ?? null,
-            utm_term: data.utm_term ?? null,
-            fbclid: data.fbclid ?? null,
-            gclid: data.gclid ?? null,
-            referrer: data.referrer ?? null,
-            landing_path: data.landing_path ?? null,
-            user_agent: request.headers.get("user-agent") ?? null,
-            status: "new",
-            email_status: "pending",
-            webhook_status: webhookConfigured ? "pending" : "skipped",
-          })
+          .insert(row as never)
           .select("id")
           .single();
 
@@ -118,7 +89,17 @@ export const Route = createFileRoute("/api/leads")({
             { onConflict: "lead_id,channel", ignoreDuplicates: true }
           );
 
-        return json({ success: true, lead_id: inserted.id, event_id: eventId, message: "Recebemos suas respostas." }, 201);
+        return json(
+          {
+            success: true,
+            lead_id: inserted.id,
+            event_id: eventId,
+            lead_score: score,
+            classification,
+            message: "Recebemos suas respostas.",
+          },
+          201
+        );
       },
     },
   },

@@ -16,44 +16,62 @@ export async function sendLeadWebhook(leadId: string): Promise<{ status: number;
   if (error || !row) throw new Error("Lead não encontrado para webhook");
 
   const occurredAt = new Date().toISOString();
-  const input: LeadInput = {
-    nome: row.nome,
-    whatsapp: row.whatsapp,
-    loja: row.loja || "",
-    email: row.email ?? "",
-    papel: row.papel,
-    conversas_dia: row.conversas_dia,
-    problema_principal: row.problema_principal,
-    faturamento: row.faturamento,
-    investimento: row.investimento,
-    consentimento: true,
-    utm_source: row.utm_source,
-    utm_medium: row.utm_medium,
-    utm_campaign: row.utm_campaign,
-    utm_content: row.utm_content,
-    utm_term: row.utm_term,
-    fbclid: row.fbclid,
-    gclid: row.gclid,
-    referrer: row.referrer,
-    landing_path: row.landing_path,
-  };
+  const r = row as Record<string, any>;
+  const input = {
+    nome: r.nome,
+    email: r.email ?? "",
+    whatsapp: r.whatsapp ?? "",
+    loja: r.loja || "",
+    cidade_uf: r.cidade_uf ?? "",
+    canal_venda: r.canal_venda,
+    canais_oportunidade: typeof r.canais_oportunidade === "string" && r.canais_oportunidade
+      ? r.canais_oportunidade.split(",")
+      : [],
+    problema_principal: typeof r.problema_principal === "string" && r.problema_principal
+      ? r.problema_principal.split(",")
+      : [],
+    contatos_dia: r.contatos_dia ?? r.conversas_dia,
+    respondentes: r.respondentes,
+    registro_contatos: r.registro_contatos,
+    automatizar_primeiro: r.automatizar_primeiro,
+    prazo: r.prazo_implantacao,
+    decisao: r.decisao,
+    consent_email: Boolean(r.consent_email),
+    consent_whatsapp: Boolean(r.consent_whatsapp),
+    consent_sms: Boolean(r.consent_sms),
+    consent_marketing: Boolean(r.consent_marketing),
+    consent_text_version: r.consent_text_version ?? undefined,
+    landing_variant: r.landing_variant ?? undefined,
+    utm_source: r.utm_source,
+    utm_medium: r.utm_medium,
+    utm_campaign: r.utm_campaign,
+    utm_content: r.utm_content,
+    utm_term: r.utm_term,
+    fbclid: r.fbclid,
+    gclid: r.gclid,
+    referrer: r.referrer,
+    landing_path: r.landing_path,
+  } as unknown as LeadInput;
   const payload = buildWebhookPayload({
     lead: {
-      id: row.id,
-      created_at: row.created_at,
-      name: row.nome,
-      whatsapp: row.whatsapp,
-      email: row.email,
-      store_name: row.loja || "",
-      score: row.pontuacao ?? 0,
-      classification: row.lead_classification || "contato_acompanhamento",
+      id: r.id,
+      created_at: r.created_at,
+      name: r.nome,
+      whatsapp: r.whatsapp ?? null,
+      email: r.email,
+      store_name: r.loja || "",
+      city_state: r.cidade_uf ?? null,
+      score: r.lead_score ?? r.pontuacao ?? 0,
+      classification: r.lead_classification || "exploratorio",
+      tags: Array.isArray(r.lead_tags) ? r.lead_tags : [],
     },
     input,
-    event_id: row.event_id ?? row.id,
+    event_id: r.event_id ?? r.id,
     occurred_at: occurredAt,
-    privacy_policy_version: row.privacy_policy_version ?? env.PRIVACY_POLICY_VERSION,
-    consent_timestamp: row.consent_timestamp ?? row.created_at,
+    privacy_policy_version: r.privacy_policy_version ?? env.PRIVACY_POLICY_VERSION,
+    consent_timestamp: r.consent_timestamp ?? r.created_at,
   });
+
 
   const body = JSON.stringify(payload);
   const timestamp = Math.floor(Date.now() / 1000).toString();

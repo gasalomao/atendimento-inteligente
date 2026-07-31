@@ -1,9 +1,7 @@
 import type { Request, Response } from "express";
 import crypto from "node:crypto";
 import { leadSchema } from "../../../shared/leads/schema";
-import { buildFormAnswers } from "../../../shared/leads/payload";
-import { calcScore, classify } from "../../../shared/leads/scoring";
-import { normalizeBRPhone } from "../../../shared/leads/phone";
+import { buildLeadInsert } from "../../../shared/leads/insert";
 import { supabaseAdmin } from "../db/supabase";
 import { enqueue } from "../notifications/queue";
 import { env } from "../env";
@@ -53,56 +51,24 @@ export async function leadsHandler(req: Request, res: Response) {
     });
   }
 
-  const score = calcScore(data);
-  const classification = classify(score);
-  const baseFormAnswers = buildFormAnswers(data);
   const ipHash = req.ip
     ? crypto.createHash("sha256").update(String(req.ip)).digest("hex").slice(0, 16)
     : null;
   const geo = await lookupGeo(req.ip ?? null);
-  const formAnswers = {
-    ...baseFormAnswers,
-    ...(geo ? { geo } : {}),
-    visitor_id: data.visitor_id ?? null,
-    session_id: data.session_id ?? null,
-  };
 
-  const insert = {
-    event_id: eventId,
-    nome: data.nome,
-    whatsapp: normalizeBRPhone(data.whatsapp),
-    loja: data.loja || "",
-    email: data.email && data.email !== "" ? data.email : null,
-    papel: data.papel,
-    conversas_dia: data.conversas_dia,
-    problema_principal: (data.problema_principal ?? []).join(","),
-    faturamento: data.faturamento,
-    investimento: data.investimento,
-    consentimento: true,
-    consent_timestamp: nowIso,
-    privacy_policy_version: data.privacy_policy_version ?? env.PRIVACY_POLICY_VERSION,
-    pontuacao: score,
-    lead_classification: classification,
-    form_answers: formAnswers,
-    utm_source: data.utm_source ?? null,
-    utm_medium: data.utm_medium ?? null,
-    utm_campaign: data.utm_campaign ?? null,
-    utm_content: data.utm_content ?? null,
-    utm_term: data.utm_term ?? null,
-    fbclid: data.fbclid ?? null,
-    gclid: data.gclid ?? null,
-    referrer: data.referrer ?? null,
-    landing_path: data.landing_path ?? null,
-    user_agent: (req.headers["user-agent"] as string) ?? null,
-    ip: ipHash,
-    status: "new",
-    email_status: "pending",
-    webhook_status: env.LEAD_WEBHOOK_URL ? "pending" : "skipped",
-  };
+  const { row, score, classification } = buildLeadInsert(data, {
+    eventId,
+    nowIso,
+    privacyPolicyVersion: env.PRIVACY_POLICY_VERSION,
+    webhookConfigured: Boolean(env.LEAD_WEBHOOK_URL),
+    userAgent: (req.headers["user-agent"] as string) ?? null,
+    ipHash,
+    geo,
+  });
 
   const { data: inserted, error } = await supabaseAdmin
     .from("contatos")
-    .insert(insert)
+    .insert(row)
     .select("id")
     .single();
 
@@ -133,6 +99,9 @@ export async function leadsHandler(req: Request, res: Response) {
     success: true,
     lead_id: inserted.id,
     event_id: eventId,
+    lead_score: score,
+    classification,
     message: "Recebemos suas respostas.",
   });
 }
+

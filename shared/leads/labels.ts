@@ -14,21 +14,6 @@ export const CONVERSAS_LABELS: Record<string, string> = {
   unknown: "Não sei ao certo",
 };
 
-export const SITUACAO_LABELS: Record<string, string> = {
-  delayed_response_busy_store:
-    "Demoramos para responder quando a loja está cheia",
-  price_request_then_disappears:
-    "Muitos clientes pedem preço e depois desaparecem",
-  messages_outside_business_hours:
-    "Mensagens chegam fora do horário e ficam para o dia seguinte",
-  no_customer_recontact:
-    "Falta alguém para voltar a falar com quem não comprou",
-  repetitive_questions:
-    "Os vendedores repetem as mesmas perguntas o dia todo",
-  wants_to_scale_without_overload:
-    "O atendimento funciona, mas queremos atender mais sem sobrecarregar a equipe",
-};
-
 export const FATURAMENTO_LABELS: Record<string, string> = {
   up_to_30k: "Até R$ 30 mil por mês",
   from_30k_to_50k: "De R$ 30 mil a R$ 50 mil por mês",
@@ -46,19 +31,111 @@ export const INVESTIMENTO_LABELS: Record<string, string> = {
   above_current_budget: "Esse valor não cabe no orçamento hoje",
 };
 
-export const GESTAO_ESTOQUE_LABELS: Record<string, string> = {
-  excel_drive: "Planilha Excel / Google Drive",
-  erp_system: "Sistema ERP ou Gestão de Loja",
-  pdf_catalog: "Tabela em PDF / Foto no WhatsApp",
-  whatsapp_head: "Pergunto no balcão / Na memória",
+// ---------- Diagnóstico em 3 etapas ----------
+
+export const CANAL_VENDA_LABELS: Record<string, string> = {
+  physical: "Loja física",
+  online: "Online",
+  both: "Loja física e online",
 };
 
+export const CANAIS_OPORTUNIDADE_LABELS: Record<string, string> = {
+  whatsapp: "WhatsApp",
+  instagram: "Instagram",
+  site: "Site",
+  telefone: "Telefone",
+  marketplace: "Marketplace",
+  outros: "Outros canais",
+};
+
+export const ATRAPALHO_LABELS: Record<string, string> = {
+  demora: "Demora para responder",
+  sem_followup: "Falta de follow-up",
+  contatos_desorganizados: "Contatos desorganizados",
+  leads_baixa_qualidade: "Leads de baixa qualidade",
+  dificuldade_medir: "Dificuldade de medir os resultados",
+  outro: "Outro",
+};
+
+export const CONTATOS_DIA_LABELS: Record<string, string> = {
+  up_to_10: "Até 10 novos contatos por dia",
+  from_11_to_30: "De 11 a 30 novos contatos por dia",
+  from_31_to_80: "De 31 a 80 novos contatos por dia",
+  more_than_80: "Mais de 80 novos contatos por dia",
+  nao_acompanho: "Não acompanho esse número",
+};
+
+export const RESPONDENTES_LABELS: Record<string, string> = {
+  one: "1 pessoa responde",
+  two_three: "2 a 3 pessoas respondem",
+  four_eight: "4 a 8 pessoas respondem",
+  more_than_eight: "Mais de 8 pessoas respondem",
+};
+
+export const REGISTRO_LABELS: Record<string, string> = {
+  none: "Não registramos",
+  sheet: "Planilha",
+  crm: "CRM",
+  own_system: "Sistema próprio",
+};
+
+export const AUTOMATIZAR_LABELS: Record<string, string> = {
+  triagem: "Triagem inicial",
+  orcamento: "Orçamento",
+  followup: "Follow-up",
+  agendamento: "Agendamento",
+  posvenda: "Pós-venda",
+  integracao: "Integração completa",
+};
+
+export const PRAZO_LABELS: Record<string, string> = {
+  now: "Agora",
+  until_30d: "Até 30 dias",
+  from_1_to_3m: "De 1 a 3 meses",
+  researching: "Está pesquisando",
+};
+
+export const DECISAO_LABELS: Record<string, string> = {
+  me: "Eu decido",
+  me_partner: "Eu e um sócio",
+  manager: "Gerente",
+  team: "Equipe",
+};
+
+// Classificação antiga (registros já salvos)
 export const CLASSIFICATION_LABELS: Record<string, string> = {
   contato_prioritario: "Contato prioritário",
   contato_potencial: "Contato com potencial",
   contato_acompanhamento: "Contato de acompanhamento",
+  // Nova escala 0–100
+  exploratorio: "Exploratório",
+  em_avaliacao: "Em avaliação",
+  qualificado: "Qualificado",
+  prioridade_alta: "Prioridade alta",
 };
 
-export function labelize(map: Record<string, string>, value: string): string {
-  return map[value] ?? value;
+export const SITUACAO_LABELS: Record<string, string> = {
+  delayed_response_busy_store:
+    "Demoramos para responder quando a loja está cheia",
+  price_request_then_disappears:
+    "Muitos clientes pedem preço e depois desaparecem",
+  messages_outside_business_hours:
+    "Mensagens chegam fora do horário e ficam para o dia seguinte",
+  no_customer_recontact:
+    "Falta alguém para voltar a falar com quem não comprou",
+  repetitive_questions:
+    "Os vendedores repetem as mesmas perguntas o dia todo",
+  wants_to_scale_without_overload:
+    "O atendimento funciona, mas queremos atender mais sem sobrecarregar a equipe",
+  ...ATRAPALHO_LABELS,
+};
+
+export function labelize(map: Record<string, string>, value: unknown): string {
+  const key = typeof value === "string" ? value : "";
+  if (!key) return "—";
+  return key
+    .split(",")
+    .map((part) => map[part.trim()] ?? part.trim())
+    .filter(Boolean)
+    .join(" · ");
 }
