@@ -186,16 +186,18 @@
 .hero-device__stage {
   position: relative;
   width: min(420px, 100%);
+  margin: 0 auto;
   padding: 8px 0 4px;
 }
 
 .hero-device__stage::before {
   content: "";
   position: absolute;
-  left: -6%;
+  left: 50%;
   top: 4%;
-  width: 62%;
+  width: 68%;
   aspect-ratio: 1 / 1;
+  transform: translateX(-50%);
   border-radius: 999px;
   background: radial-gradient(
     circle at 50% 50%,
@@ -211,17 +213,18 @@
   display: block;
   width: 58%;
   height: auto;
-  margin-left: 2%;
+  margin: 0 auto;
   filter: drop-shadow(0 26px 40px rgba(25, 26, 24, 0.22));
 }
 
 .hero-device__chat {
   position: absolute;
   z-index: 2;
-  right: 0;
-  bottom: 12%;
-  width: 62%;
-  max-width: 250px;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 8%;
+  width: 74%;
+  max-width: 260px;
   padding: 10px 12px 8px;
   border-radius: 12px;
   border: 1px solid #e5e2db;
