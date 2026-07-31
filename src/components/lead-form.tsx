@@ -832,16 +832,16 @@ function ConsentRow({
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-2.5 text-[13px] leading-[1.5] text-[#30322E]"
+      className="-mx-1 flex min-h-[40px] cursor-pointer items-start gap-3 rounded-[8px] px-1 py-1.5 text-[13.5px] leading-[1.5] text-[#30322E] active:bg-[#F5F3EF] sm:text-[13px]"
     >
       <input
         id={id}
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 h-4 w-4 rounded border-[#CFCBC3] text-[#207A50] focus:ring-[#207A50]"
+        className="mt-[2px] h-5 w-5 shrink-0 rounded border-[#CFCBC3] accent-[#207A50] text-[#207A50] focus:ring-[#207A50]"
       />
-      <span>{children}</span>
+      <span className="min-w-0">{children}</span>
     </label>
   );
 }
