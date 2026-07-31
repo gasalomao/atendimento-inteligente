@@ -332,33 +332,33 @@ function DemoSection() {
             </h3>
 
             <dl className="mt-4 space-y-2.5 text-[14px] text-[#30322E]">
-              <div className="flex justify-between border-b border-[#F0EEE9] pb-1.5">
-                <dt className="text-[#777A75]">Aparelho procurado:</dt>
-                <dd className="font-[600]">iPhone 15 Pro</dd>
+              <div className="flex items-start justify-between gap-3 border-b border-[#F0EEE9] pb-1.5">
+                <dt className="min-w-0 text-[#777A75]">Aparelho procurado:</dt>
+                <dd className="text-right font-[600]">iPhone 15 Pro</dd>
               </div>
-              <div className="flex justify-between border-b border-[#F0EEE9] pb-1.5">
-                <dt className="text-[#777A75]">Capacidade:</dt>
-                <dd className="font-[600]">256 GB</dd>
+              <div className="flex items-start justify-between gap-3 border-b border-[#F0EEE9] pb-1.5">
+                <dt className="min-w-0 text-[#777A75]">Capacidade:</dt>
+                <dd className="text-right font-[600]">256 GB</dd>
               </div>
-              <div className="flex justify-between border-b border-[#F0EEE9] pb-1.5">
-                <dt className="text-[#777A75]">Condição:</dt>
-                <dd className="font-[600]">seminovo</dd>
+              <div className="flex items-start justify-between gap-3 border-b border-[#F0EEE9] pb-1.5">
+                <dt className="min-w-0 text-[#777A75]">Condição:</dt>
+                <dd className="text-right font-[600]">seminovo</dd>
               </div>
-              <div className="flex justify-between border-b border-[#F0EEE9] pb-1.5">
-                <dt className="text-[#777A75]">Possui troca:</dt>
-                <dd className="font-[600]">sim</dd>
+              <div className="flex items-start justify-between gap-3 border-b border-[#F0EEE9] pb-1.5">
+                <dt className="min-w-0 text-[#777A75]">Possui troca:</dt>
+                <dd className="text-right font-[600]">sim</dd>
               </div>
-              <div className="flex justify-between border-b border-[#F0EEE9] pb-1.5">
-                <dt className="text-[#777A75]">Aparelho da troca:</dt>
-                <dd className="font-[600]">iPhone 13</dd>
+              <div className="flex items-start justify-between gap-3 border-b border-[#F0EEE9] pb-1.5">
+                <dt className="min-w-0 text-[#777A75]">Aparelho da troca:</dt>
+                <dd className="text-right font-[600]">iPhone 13</dd>
               </div>
-              <div className="flex justify-between border-b border-[#F0EEE9] pb-1.5">
-                <dt className="text-[#777A75]">Saúde da bateria:</dt>
-                <dd className="font-[600]">87%</dd>
+              <div className="flex items-start justify-between gap-3 border-b border-[#F0EEE9] pb-1.5">
+                <dt className="min-w-0 text-[#777A75]">Saúde da bateria:</dt>
+                <dd className="text-right font-[600]">87%</dd>
               </div>
-              <div className="flex justify-between pb-1.5">
-                <dt className="text-[#777A75]">Forma de pagamento:</dt>
-                <dd className="font-[600]">parcelado</dd>
+              <div className="flex items-start justify-between gap-3 pb-1.5">
+                <dt className="min-w-0 text-[#777A75]">Forma de pagamento:</dt>
+                <dd className="text-right font-[600]">parcelado</dd>
               </div>
             </dl>
 
@@ -472,9 +472,9 @@ function FaqSection() {
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="flex w-full items-center justify-between p-4 text-left font-[600] text-[#191A18] sm:p-5"
+                  className="flex min-h-[52px] w-full items-center justify-between gap-3 p-4 text-left font-[600] text-[#191A18] active:bg-[#F0EEE9] sm:p-5"
                 >
-                  <span className="text-[15px] sm:text-[16px]">{faq.q}</span>
+                  <span className="min-w-0 text-[15px] leading-[1.35] sm:text-[16px]">{faq.q}</span>
                   <ChevronDown
                     className={`h-5 w-5 shrink-0 text-[#777A75] transition-transform duration-200 ${
                       isOpen ? "rotate-180 text-[#207A50]" : ""
