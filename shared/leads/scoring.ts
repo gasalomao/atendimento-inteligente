@@ -74,6 +74,9 @@ export function buildCrmTags(input: LeadInput): string[] {
     tags.add("volume_low");
   }
 
+  if (input.faturamento) tags.add(`revenue_${input.faturamento}`);
+
+
   if (input.registro_contatos === "none") tags.add("crm_none");
   if (input.registro_contatos === "sheet") tags.add("crm_sheet");
   if (input.registro_contatos === "crm" || input.registro_contatos === "own_system") {

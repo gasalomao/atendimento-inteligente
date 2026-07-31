@@ -23,6 +23,7 @@ type QuestionField =
   | "respondentes"
   | "registro_contatos"
   | "automatizar_primeiro"
+  | "faturamento"
   | "prazo"
   | "decisao";
 
