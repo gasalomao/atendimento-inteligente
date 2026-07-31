@@ -126,6 +126,18 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
+    field: "faturamento",
+    block: 3,
+    question: "Quanto a loja fatura por mês hoje?",
+    description: "Isso ajuda a ajustar o resultado para o seu porte.",
+    options: [
+      { v: "from_40k_to_60k", t: "De R$ 40 mil a R$ 60 mil" },
+      { v: "from_60k_to_100k", t: "De R$ 60 mil a R$ 100 mil" },
+      { v: "from_100k_to_300k", t: "De R$ 100 mil a R$ 300 mil" },
+      { v: "above_300k", t: "Acima de R$ 300 mil" },
+    ],
+  },
+  {
     field: "prazo",
     block: 3,
     question: "Quando você gostaria de colocar isso em prática?",
@@ -174,6 +186,7 @@ type Answers = {
   respondentes: string;
   registro_contatos: string;
   automatizar_primeiro: string;
+  faturamento: string;
   prazo: string;
   decisao: string;
 };
