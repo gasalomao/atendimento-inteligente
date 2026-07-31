@@ -4,6 +4,8 @@ import { LeadForm } from "@/components/lead-form";
 import { PrivacyDialog } from "@/components/privacy-dialog";
 import { captureAndPersistTracking, trackOnce } from "@/lib/tracking";
 import { Check, ChevronDown, CheckCircle2 } from "lucide-react";
+import heroPhone from "@/assets/hero-phone.png";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
