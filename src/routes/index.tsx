@@ -133,10 +133,11 @@ function Header({ onOpenPrivacy }: { onOpenPrivacy: () => void }) {
         <button
           type="button"
           onClick={onOpenPrivacy}
-          className="text-[13px] text-[#5F625E] hover:text-[#191A18] transition-colors"
+          className="-mr-2 flex min-h-[40px] shrink-0 items-center px-2 text-[12.5px] text-[#5F625E] transition-colors hover:text-[#191A18] sm:text-[13px]"
         >
           Política de Privacidade
         </button>
+
       </div>
     </header>
   );
