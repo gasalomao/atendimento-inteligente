@@ -220,12 +220,28 @@ function HeroPointsAndQualify() {
         <HeroPoint>Atende fora do horário, seguindo as regras da loja</HeroPoint>
       </ul>
 
+      <div className="mt-5 flex flex-wrap gap-2">
+        {[
+          "Usa o WhatsApp da própria loja",
+          "Sem aplicativo novo",
+          "Regras definidas por você",
+        ].map((t) => (
+          <span
+            key={t}
+            className="rounded-full border border-[#E0DCD4] bg-white px-3 py-1.5 text-[12px] font-[600] text-[#4B4E49]"
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+
       <p className="mt-4 text-[13px] leading-[1.5] text-[#777A75]">
         Para lojas com operação ativa e faturamento a partir de R$ 50 mil por mês.
       </p>
     </>
   );
 }
+
 
 function HeroPoint({ children }: { children: React.ReactNode }) {
   return (
