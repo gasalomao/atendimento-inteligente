@@ -1,0 +1,1 @@
+DELETE FROM public.lead_notification_jobs WHERE lead_id = '6bb4ab0c-9950-471f-9ec1-fc2c5a938852'; DELETE FROM public.contatos WHERE id = '6bb4ab0c-9950-471f-9ec1-fc2c5a938852';
