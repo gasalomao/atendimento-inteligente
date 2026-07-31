@@ -12,17 +12,12 @@ import { PrivacyDialog } from "./privacy-dialog";
 import { CONSENT_TEXT_VERSION_DEFAULT } from "../../shared/leads/schema";
 
 /* ------------------------------------------------------------------ */
-/* Perguntas do diagnóstico (9 no total, em 3 blocos)                  */
+/* Perguntas do diagnóstico (5 no total, em 2 blocos)                  */
 /* ------------------------------------------------------------------ */
 
 type QuestionField =
-  | "canal_venda"
-  | "canais_oportunidade"
   | "problema_principal"
   | "contatos_dia"
-  | "respondentes"
-  | "registro_contatos"
-  | "automatizar_primeiro"
   | "faturamento"
   | "prazo"
   | "decisao";
@@ -37,31 +32,6 @@ type Question = {
 };
 
 const QUESTIONS: Question[] = [
-  {
-    field: "canal_venda",
-    block: 1,
-    question: "Como sua loja vende hoje?",
-    options: [
-      { v: "physical", t: "Só loja física" },
-      { v: "online", t: "Só online" },
-      { v: "both", t: "Loja física e online" },
-    ],
-  },
-  {
-    field: "canais_oportunidade",
-    block: 1,
-    question: "Por onde chegam os contatos de clientes?",
-    description: "Pode marcar mais de um.",
-    multiple: true,
-    options: [
-      { v: "whatsapp", t: "WhatsApp" },
-      { v: "instagram", t: "Instagram" },
-      { v: "site", t: "Site" },
-      { v: "telefone", t: "Telefone" },
-      { v: "marketplace", t: "Marketplace" },
-      { v: "outros", t: "Outros" },
-    ],
-  },
   {
     field: "problema_principal",
     block: 1,
@@ -79,7 +49,7 @@ const QUESTIONS: Question[] = [
   },
   {
     field: "contatos_dia",
-    block: 2,
+    block: 1,
     question: "Quantos novos contatos chegam por dia?",
     description: "Uma estimativa já ajuda.",
     options: [
@@ -91,46 +61,12 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
-    field: "respondentes",
-    block: 2,
-    question: "Quantas pessoas respondem esses contatos?",
-    options: [
-      { v: "one", t: "Uma pessoa" },
-      { v: "two_three", t: "Duas ou três" },
-      { v: "four_eight", t: "De quatro a oito" },
-      { v: "more_than_eight", t: "Mais de oito" },
-    ],
-  },
-  {
-    field: "registro_contatos",
-    block: 2,
-    question: "Como os contatos ficam registrados?",
-    options: [
-      { v: "none", t: "Não ficam registrados" },
-      { v: "sheet", t: "Planilha" },
-      { v: "crm", t: "Um CRM" },
-      { v: "own_system", t: "Sistema próprio da loja" },
-    ],
-  },
-  {
-    field: "automatizar_primeiro",
-    block: 2,
-    question: "O que você gostaria de resolver primeiro?",
-    options: [
-      { v: "triagem", t: "Responder e organizar os primeiros contatos" },
-      { v: "orcamento", t: "Passar preços e condições" },
-      { v: "followup", t: "Retomar quem não respondeu" },
-      { v: "agendamento", t: "Agendar visitas ou retiradas" },
-      { v: "posvenda", t: "Pós-venda e recompra" },
-      { v: "integracao", t: "Ligar tudo isso ao sistema da loja" },
-    ],
-  },
-  {
     field: "faturamento",
-    block: 3,
+    block: 2,
     question: "Quanto a loja fatura por mês hoje?",
     description: "Isso ajuda a ajustar o resultado para o seu porte.",
     options: [
+      { v: "up_to_40k", t: "Até R$ 40 mil" },
       { v: "from_40k_to_60k", t: "De R$ 40 mil a R$ 60 mil" },
       { v: "from_60k_to_100k", t: "De R$ 60 mil a R$ 100 mil" },
       { v: "from_100k_to_300k", t: "De R$ 100 mil a R$ 300 mil" },
@@ -139,7 +75,7 @@ const QUESTIONS: Question[] = [
   },
   {
     field: "prazo",
-    block: 3,
+    block: 2,
     question: "Quando você gostaria de colocar isso em prática?",
     options: [
       { v: "now", t: "Agora" },
@@ -150,7 +86,7 @@ const QUESTIONS: Question[] = [
   },
   {
     field: "decisao",
-    block: 3,
+    block: 2,
     question: "Quem participa dessa decisão?",
     options: [
       { v: "me", t: "Eu decido" },
@@ -164,11 +100,11 @@ const QUESTIONS: Question[] = [
 const BLOCK_TITLES: Record<1 | 2 | 3, { title: string; subtitle: string }> = {
   1: {
     title: "Vamos entender sua loja",
-    subtitle: "Três perguntas rápidas sobre como vocês vendem hoje.",
+    subtitle: "Duas perguntas rápidas sobre o atendimento de hoje.",
   },
   2: {
-    title: "Como funciona o atendimento",
-    subtitle: "Quatro perguntas sobre o dia a dia da equipe.",
+    title: "Momento da loja",
+    subtitle: "Só falta entender o momento e como te enviamos o resultado.",
   },
   3: {
     title: "Momento da loja",
@@ -179,13 +115,8 @@ const BLOCK_TITLES: Record<1 | 2 | 3, { title: string; subtitle: string }> = {
 /* ------------------------------------------------------------------ */
 
 type Answers = {
-  canal_venda: string;
-  canais_oportunidade: string[];
   problema_principal: string[];
   contatos_dia: string;
-  respondentes: string;
-  registro_contatos: string;
-  automatizar_primeiro: string;
   faturamento: string;
   prazo: string;
   decisao: string;
@@ -209,17 +140,13 @@ type Consents = {
 type Errors = Partial<Record<string, string>>;
 
 const EMPTY_ANSWERS: Answers = {
-  canal_venda: "",
-  canais_oportunidade: [],
   problema_principal: [],
   contatos_dia: "",
-  respondentes: "",
-  registro_contatos: "",
-  automatizar_primeiro: "",
   faturamento: "",
   prazo: "",
   decisao: "",
 };
+
 
 const EMPTY_CONTACT: Contact = {
   nome: "",
