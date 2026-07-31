@@ -15,7 +15,8 @@ export const CONVERSAS_LABELS: Record<string, string> = {
 };
 
 export const FATURAMENTO_LABELS: Record<string, string> = {
-  // Escala atual (começa em R$ 40 mil)
+  // Escala atual
+  up_to_40k: "Até R$ 40 mil por mês",
   from_40k_to_60k: "De R$ 40 mil a R$ 60 mil por mês",
   from_60k_to_100k: "De R$ 60 mil a R$ 100 mil por mês",
   // Escala antiga (registros já salvos)

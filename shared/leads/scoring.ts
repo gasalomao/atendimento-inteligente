@@ -4,25 +4,29 @@ import type { LeadInput } from "./schema";
 export function calcLeadScore(input: LeadInput): number {
   let score = 0;
 
-  if (input.contatos_dia === "more_than_80") score += 20;
-  else if (input.contatos_dia === "from_31_to_80") score += 15;
-  else if (input.contatos_dia === "from_11_to_30") score += 8;
+  if (input.contatos_dia === "more_than_80") score += 25;
+  else if (input.contatos_dia === "from_31_to_80") score += 20;
+  else if (input.contatos_dia === "from_11_to_30") score += 10;
 
-  if (input.faturamento === "above_300k") score += 10;
-  else if (input.faturamento === "from_100k_to_300k") score += 8;
-  else if (input.faturamento === "from_60k_to_100k") score += 5;
-  else if (input.faturamento === "from_40k_to_60k") score += 3;
+  if (input.faturamento === "above_300k") score += 25;
+  else if (input.faturamento === "from_100k_to_300k") score += 20;
+  else if (input.faturamento === "from_60k_to_100k") score += 14;
+  else if (input.faturamento === "from_40k_to_60k") score += 8;
+  else if (input.faturamento === "up_to_40k") score += 3;
 
-  if (input.prazo === "now") score += 15;
-  else if (input.prazo === "until_30d") score += 10;
-  else if (input.prazo === "from_1_to_3m") score += 5;
+  if (input.prazo === "now") score += 25;
+  else if (input.prazo === "until_30d") score += 18;
+  else if (input.prazo === "from_1_to_3m") score += 8;
 
+  if (input.decisao === "me" || input.decisao === "me_partner") score += 15;
+  else if (input.decisao === "manager") score += 8;
+  else if (input.decisao === "team") score += 4;
 
-  if (input.respondentes && input.respondentes !== "one") score += 10;
-  if (input.registro_contatos === "crm" || input.registro_contatos === "own_system") score += 10;
-  if (input.canal_venda === "both") score += 10;
-  if (input.automatizar_primeiro === "integracao") score += 10;
-  if (input.decisao === "me" || input.decisao === "me_partner") score += 5;
+  const dores = input.problema_principal ?? [];
+  if (dores.length >= 3) score += 10;
+  else if (dores.length === 2) score += 7;
+  else if (dores.length === 1) score += 4;
+
   if (hasPaidMedia(input)) score += 5;
 
   return Math.max(0, Math.min(100, score));
