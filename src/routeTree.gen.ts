@@ -9,22 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as MetricasRouteImport } from './routes/metricas'
-import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
-import { Route as ApiLeadsRouteImport } from './routes/api/leads'
-import { Route as ApiMetricsRouteImport } from './routes/api/metrics'
+import { Route as ObrigadoRouteImport } from './routes/obrigado'
+import { Route as MetricasRouteImport } from './routes/metricas'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTrackRouteImport } from './routes/api/track'
+import { Route as ApiMetricsRouteImport } from './routes/api/metrics'
+import { Route as ApiLeadsRouteImport } from './routes/api/leads'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MetricasRoute = MetricasRouteImport.update({
-  id: '/metricas',
-  path: '/metricas',
+const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
+  id: '/politica-de-privacidade',
+  path: '/politica-de-privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ObrigadoRoute = ObrigadoRouteImport.update({
@@ -32,14 +27,19 @@ const ObrigadoRoute = ObrigadoRouteImport.update({
   path: '/obrigado',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
-  id: '/politica-de-privacidade',
-  path: '/politica-de-privacidade',
+const MetricasRoute = MetricasRouteImport.update({
+  id: '/metricas',
+  path: '/metricas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiLeadsRoute = ApiLeadsRouteImport.update({
-  id: '/api/leads',
-  path: '/api/leads',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTrackRoute = ApiTrackRouteImport.update({
+  id: '/api/track',
+  path: '/api/track',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMetricsRoute = ApiMetricsRouteImport.update({
@@ -47,9 +47,9 @@ const ApiMetricsRoute = ApiMetricsRouteImport.update({
   path: '/api/metrics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTrackRoute = ApiTrackRouteImport.update({
-  id: '/api/track',
-  path: '/api/track',
+const ApiLeadsRoute = ApiLeadsRouteImport.update({
+  id: '/api/leads',
+  path: '/api/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -123,18 +123,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/metricas': {
-      id: '/metricas'
-      path: '/metricas'
-      fullPath: '/metricas'
-      preLoaderRoute: typeof MetricasRouteImport
+    '/politica-de-privacidade': {
+      id: '/politica-de-privacidade'
+      path: '/politica-de-privacidade'
+      fullPath: '/politica-de-privacidade'
+      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/obrigado': {
@@ -144,18 +137,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObrigadoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/politica-de-privacidade': {
-      id: '/politica-de-privacidade'
-      path: '/politica-de-privacidade'
-      fullPath: '/politica-de-privacidade'
-      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
+    '/metricas': {
+      id: '/metricas'
+      path: '/metricas'
+      fullPath: '/metricas'
+      preLoaderRoute: typeof MetricasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/leads': {
-      id: '/api/leads'
-      path: '/api/leads'
-      fullPath: '/api/leads'
-      preLoaderRoute: typeof ApiLeadsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/track': {
+      id: '/api/track'
+      path: '/api/track'
+      fullPath: '/api/track'
+      preLoaderRoute: typeof ApiTrackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/metrics': {
@@ -165,11 +165,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMetricsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/track': {
-      id: '/api/track'
-      path: '/api/track'
-      fullPath: '/api/track'
-      preLoaderRoute: typeof ApiTrackRouteImport
+    '/api/leads': {
+      id: '/api/leads'
+      path: '/api/leads'
+      fullPath: '/api/leads'
+      preLoaderRoute: typeof ApiLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
