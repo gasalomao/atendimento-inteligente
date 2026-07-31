@@ -116,19 +116,20 @@ function Header({ onOpenPrivacy }: { onOpenPrivacy: () => void }) {
       <div className="mx-auto flex h-[52px] w-full max-w-[1180px] items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
         <a
           href="/"
-          className="flex items-center gap-2.5"
+          className="flex min-w-0 items-center gap-2.5"
           aria-label="Salomão AI — Página inicial"
         >
           <span
             aria-hidden
-            className="grid h-7 w-7 place-items-center rounded-md bg-[#191A18] text-[13px] font-semibold text-[#F7F5F1]"
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-[#191A18] text-[13px] font-semibold text-[#F7F5F1]"
           >
             S
           </span>
-          <span className="text-[15px] font-semibold tracking-tight text-[#191A18]">
+          <span className="truncate text-[15px] font-semibold tracking-tight text-[#191A18]">
             Salomão AI
           </span>
         </a>
+
 
         <button
           type="button"
