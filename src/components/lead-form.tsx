@@ -196,11 +196,12 @@ const HONEYPOT_STYLE: React.CSSProperties = {
 
 function Label({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
   return (
-    <label htmlFor={htmlFor} className="mb-2 block text-[14px] font-[600] text-[#191A18]">
+    <label htmlFor={htmlFor} className="mb-1 block text-[13px] font-[600] text-[#191A18] sm:mb-2 sm:text-[14px]">
       {children}
     </label>
   );
 }
+
 
 function ErrorText({ id, msg }: { id: string; msg?: string }) {
   if (!msg) return null;
