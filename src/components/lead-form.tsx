@@ -722,8 +722,12 @@ export function LeadForm({
                 </div>
               )}
 
-              <div className="flex flex-col-reverse gap-2.5 sm:flex-row">
-                <button type="button" onClick={onBack} className={secondaryBtn}>
+              <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:gap-2.5">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className={`${secondaryBtn} min-h-[44px] sm:min-h-[52px]`}
+                >
                   <ChevronLeft className="h-4 w-4" /> Voltar
                 </button>
                 <button type="button" onClick={onSubmit} disabled={loading} className={primaryBtn}>
@@ -731,9 +735,10 @@ export function LeadForm({
                 </button>
               </div>
 
-              <p className="text-center text-[12px] leading-relaxed text-[#777A75]">
+              <p className="hidden text-center text-[12px] leading-relaxed text-[#777A75] sm:block">
                 Usamos suas respostas apenas para preparar a análise e falar com você sobre esta solicitação.
               </p>
+
             </div>
           )}
         </>
