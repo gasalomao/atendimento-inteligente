@@ -525,7 +525,7 @@ export function LeadForm({
     <div
       id={id}
       ref={containerRef}
-      className="relative mx-auto w-full max-w-full scroll-mt-[56px] overflow-hidden rounded-[14px] border border-[#DDDAD3] bg-white p-4 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:scroll-mt-[76px] sm:p-8"
+      className="lead-form-shell relative mx-auto w-full max-w-full scroll-mt-[56px] overflow-hidden rounded-[14px] border border-[#DDDAD3] bg-white p-4 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:scroll-mt-[76px] sm:p-8"
     >
       {/* Honeypot invisível para bots */}
       <div aria-hidden="true" style={HONEYPOT_STYLE}>
