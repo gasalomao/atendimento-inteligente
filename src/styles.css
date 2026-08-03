@@ -256,7 +256,10 @@
     padding: 0.75rem;
   }
   .lead-form-shell h2 {
-    font-size: 16px;
+    display: none;
+  }
+  .lead-form-shell h2 ~ * {
+    margin-top: 0;
   }
   .lead-form-shell legend {
     font-size: 16px;
@@ -290,5 +293,11 @@
   }
   .lead-form-shell label {
     margin-bottom: 0.125rem;
+  }
+  .lead-form-shell [role="progressbar"] {
+    margin-top: 0.375rem;
+  }
+  .lead-form-shell > div > div:first-of-type {
+    margin-bottom: 0.5rem;
   }
 }
