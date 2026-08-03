@@ -215,36 +215,48 @@ function OptionCard({
   active,
   multiple,
   onClick,
+  delay = 0,
   children,
 }: {
   active: boolean;
   multiple?: boolean;
   onClick: () => void;
+  delay?: number;
   children: React.ReactNode;
 }) {
+  const [popping, setPopping] = React.useState(false);
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => {
+        setPopping(true);
+        window.setTimeout(() => setPopping(false), 240);
+        onClick();
+      }}
       aria-pressed={active}
-      className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
+      style={{ animationDelay: `${delay}ms` }}
+      className={`${cardOptionBase} option-enter ${popping ? "option-pop" : ""} ${
+        active ? cardOptionActive : ""
+      }`}
     >
       <span
         aria-hidden
-        className={`grid h-[18px] w-[18px] shrink-0 place-items-center border transition-colors ${
-          multiple ? "rounded-[5px]" : "rounded-full"
-        } ${active ? "border-[#207A50]" : "border-[#C8C4BB]"}`}
+        className={`mt-[3px] grid h-[20px] w-[20px] shrink-0 place-items-center border transition-colors ${
+          multiple ? "rounded-[6px]" : "rounded-full"
+        } ${active ? "border-[#207A50] bg-white" : "border-[#C8C4BB]"}`}
       >
         <span
-          className={`h-[8px] w-[8px] transition-opacity ${multiple ? "rounded-[2px]" : "rounded-full"} ${
-            active ? "bg-[#207A50] opacity-100" : "opacity-0"
+          className={`transition-all duration-150 ${multiple ? "rounded-[3px]" : "rounded-full"} ${
+            active ? "h-[10px] w-[10px] bg-[#207A50] opacity-100" : "h-[8px] w-[8px] opacity-0"
           }`}
         />
       </span>
-      <span className="flex-1">{children}</span>
+      <span className="min-w-0 flex-1">{children}</span>
     </button>
   );
 }
+
 
 export function LeadForm({
   id = "formulario",
