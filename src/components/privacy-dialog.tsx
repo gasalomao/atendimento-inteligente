@@ -63,7 +63,7 @@ export function PrivacyDialog({
               </p>
               <p>
                 Coletamos apenas as informações necessárias para entender o
-                atendimento da sua loja e preparar um exemplo do que a IA
+                atendimento da sua loja e preparar um exemplo do que o serviço
                 poderia fazer no seu cenário. Esses dados são armazenados de
                 forma segura e não são compartilhados com terceiros para fins de
                 venda ou publicidade.
