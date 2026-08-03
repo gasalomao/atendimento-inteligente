@@ -759,11 +759,6 @@ function QuestionBlock({
           {question.description}
         </p>
       ) : null}
-      {question.multiple ? (
-        <p className="mt-1.5 text-[12.5px] font-[600] uppercase tracking-[0.08em] text-[#8A8D87]">
-          Pode marcar mais de uma
-        </p>
-      ) : null}
       <div
         className="mt-3.5 grid gap-2.5 sm:mt-4"
         role={question.multiple ? "group" : "radiogroup"}
