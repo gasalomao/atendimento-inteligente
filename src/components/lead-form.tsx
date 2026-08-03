@@ -364,6 +364,7 @@ export function LeadForm({
     }
     recordTime(current.field);
     setErrors({});
+    setDirection("forward");
     setIndex((n) => n + 1);
     setTimeout(scrollToContainer, 30);
   }
@@ -373,9 +374,11 @@ export function LeadForm({
     setErrors({});
     setSubmitError(null);
     questionStartRef.current = Date.now();
+    setDirection("back");
     setIndex((n) => n - 1);
     setTimeout(scrollToContainer, 30);
   }
+
 
   function validateContact(): boolean {
     const e: Errors = {};
