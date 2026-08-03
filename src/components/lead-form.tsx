@@ -169,9 +169,10 @@ const fieldError =
   "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
 const cardOptionBase =
-  "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-3 sm:py-3.5 text-[15px] sm:text-[16px] leading-[1.3] sm:leading-[1.4] text-[#2B2D29] min-h-[48px] sm:min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] active:bg-[#F0EEE9] flex items-center gap-3";
+  "w-full text-left rounded-[12px] border border-[#D6D2CA] bg-white px-4 py-3.5 sm:py-3.5 text-[15.5px] sm:text-[16px] leading-[1.35] sm:leading-[1.4] text-[#2B2D29] min-h-[54px] sm:min-h-[52px] transition-[border-color,background-color,box-shadow,transform] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] active:bg-[#F0EEE9] active:scale-[0.995] flex items-start gap-3";
 const cardOptionActive =
-  "border-[#207A50] bg-[#EDF6F0] hover:border-[#207A50] hover:bg-[#EDF6F0] font-[600] text-[#191A18]";
+  "border-[#207A50] bg-[#EDF6F0] shadow-[0_0_0_1px_#207A50] hover:border-[#207A50] hover:bg-[#EDF6F0] font-[600] text-[#191A18]";
+
 
 
 const primaryBtn =
