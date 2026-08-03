@@ -552,7 +552,7 @@ export function LeadForm({
           </div>
 
 
-          <div className="mb-4 sm:mb-6">
+          <div className={isContactStep ? "mb-3 sm:mb-6" : "mb-4 sm:mb-6"}>
             <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
               <span>
                 {isContactStep
