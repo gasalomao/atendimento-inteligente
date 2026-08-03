@@ -255,6 +255,8 @@ export function LeadForm({
   // índice 0..8 = perguntas; 9 = tela de contato
   const CONTACT_INDEX = QUESTIONS.length;
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+
   const [started, setStarted] = useState(false);
   const startedAtRef = useRef<number>(0);
   const questionStartRef = useRef<number>(0);
