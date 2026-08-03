@@ -164,7 +164,8 @@ const EMPTY_CONSENTS: Consents = {
 };
 
 const fieldBase =
-  "block w-full rounded-[10px] bg-white px-4 py-3 sm:py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[48px] sm:min-h-[52px]";
+  "block w-full rounded-[10px] bg-white px-4 py-2.5 sm:py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[46px] sm:min-h-[52px]";
+
 const fieldError =
   "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
@@ -196,11 +197,12 @@ const HONEYPOT_STYLE: React.CSSProperties = {
 
 function Label({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
   return (
-    <label htmlFor={htmlFor} className="mb-2 block text-[14px] font-[600] text-[#191A18]">
+    <label htmlFor={htmlFor} className="mb-1 block text-[13px] font-[600] text-[#191A18] sm:mb-2 sm:text-[14px]">
       {children}
     </label>
   );
 }
+
 
 function ErrorText({ id, msg }: { id: string; msg?: string }) {
   if (!msg) return null;
@@ -523,7 +525,7 @@ export function LeadForm({
     <div
       id={id}
       ref={containerRef}
-      className="relative mx-auto w-full max-w-full scroll-mt-[56px] overflow-hidden rounded-[14px] border border-[#DDDAD3] bg-white p-4 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:scroll-mt-[76px] sm:p-8"
+      className="lead-form-shell relative mx-auto w-full max-w-full scroll-mt-[56px] overflow-hidden rounded-[14px] border border-[#DDDAD3] bg-white p-4 shadow-[0_8px_30px_rgba(25,26,24,0.06)] sm:scroll-mt-[76px] sm:p-8"
     >
       {/* Honeypot invisível para bots */}
       <div aria-hidden="true" style={HONEYPOT_STYLE}>
@@ -534,18 +536,23 @@ export function LeadForm({
         <SuccessState email={contact.email} onReset={handleResetForm} />
       ) : (
         <>
-          <div className="mb-4 sm:mb-5">
+          <div className={isContactStep ? "mb-3 sm:mb-5" : "mb-4 sm:mb-5"}>
             <h2 className="text-[18px] font-[650] leading-[1.2] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
               {isContactStep ? "Para onde enviamos o resultado?" : header.title}
             </h2>
-            <p className="mt-1.5 text-[13px] leading-[1.4] text-[#5F625E] sm:text-[14px] sm:leading-[1.5]">
+            <p
+              className={`mt-1.5 text-[13px] leading-[1.4] text-[#5F625E] sm:text-[14px] sm:leading-[1.5] ${
+                isContactStep ? "hidden sm:block" : ""
+              }`}
+            >
               {isContactStep
                 ? "Preparamos a análise com base nas suas respostas e enviamos por e-mail."
                 : header.subtitle}
             </p>
           </div>
 
-          <div className="mb-4 sm:mb-6">
+
+          <div className={isContactStep ? "mb-3 sm:mb-6" : "mb-4 sm:mb-6"}>
             <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
               <span>
                 {isContactStep
@@ -594,7 +601,7 @@ export function LeadForm({
               </div>
             </div>
           ) : (
-            <div key="contato" className="step-enter space-y-3.5 sm:space-y-5">
+            <div key="contato" className="step-enter space-y-2 sm:space-y-5">
 
               <div>
                 <Label htmlFor="f-nome">Nome completo</Label>
@@ -715,8 +722,12 @@ export function LeadForm({
                 </div>
               )}
 
-              <div className="flex flex-col-reverse gap-2.5 sm:flex-row">
-                <button type="button" onClick={onBack} className={secondaryBtn}>
+              <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:gap-2.5">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className={`${secondaryBtn} min-h-[44px] sm:min-h-[52px]`}
+                >
                   <ChevronLeft className="h-4 w-4" /> Voltar
                 </button>
                 <button type="button" onClick={onSubmit} disabled={loading} className={primaryBtn}>
@@ -724,9 +735,10 @@ export function LeadForm({
                 </button>
               </div>
 
-              <p className="text-center text-[12px] leading-relaxed text-[#777A75]">
+              <p className="hidden text-center text-[12px] leading-relaxed text-[#777A75] sm:block">
                 Usamos suas respostas apenas para preparar a análise e falar com você sobre esta solicitação.
               </p>
+
             </div>
           )}
         </>
