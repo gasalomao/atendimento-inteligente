@@ -224,7 +224,7 @@ function OptionCard({
   delay?: number;
   children: React.ReactNode;
 }) {
-  const [popping, setPopping] = React.useState(false);
+  const [popping, setPopping] = useState(false);
 
   return (
     <button
