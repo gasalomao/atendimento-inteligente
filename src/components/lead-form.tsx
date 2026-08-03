@@ -536,16 +536,21 @@ export function LeadForm({
         <SuccessState email={contact.email} onReset={handleResetForm} />
       ) : (
         <>
-          <div className="mb-4 sm:mb-5">
+          <div className={isContactStep ? "mb-3 sm:mb-5" : "mb-4 sm:mb-5"}>
             <h2 className="text-[18px] font-[650] leading-[1.2] tracking-[-0.015em] text-[#191A18] sm:text-[22px]">
               {isContactStep ? "Para onde enviamos o resultado?" : header.title}
             </h2>
-            <p className="mt-1.5 text-[13px] leading-[1.4] text-[#5F625E] sm:text-[14px] sm:leading-[1.5]">
+            <p
+              className={`mt-1.5 text-[13px] leading-[1.4] text-[#5F625E] sm:text-[14px] sm:leading-[1.5] ${
+                isContactStep ? "hidden sm:block" : ""
+              }`}
+            >
               {isContactStep
                 ? "Preparamos a análise com base nas suas respostas e enviamos por e-mail."
                 : header.subtitle}
             </p>
           </div>
+
 
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center justify-between text-[12px] font-[600] uppercase tracking-[0.1em] text-[#7B7E78]">
