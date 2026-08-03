@@ -132,7 +132,7 @@ function HeroSection({
 }) {
   return (
     <section className="border-b border-[#E3E0D9] bg-[#F7F5F1]">
-      <div className="mx-auto w-full max-w-[1140px] px-5 pb-8 pt-5 sm:px-6 sm:pb-16 sm:pt-12 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16 lg:px-8 lg:pb-24 lg:pt-16">
+      <div className="hero-shell mx-auto w-full max-w-[1140px] px-5 pb-8 pt-5 sm:px-6 sm:pb-16 sm:pt-12 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16 lg:px-8 lg:pb-24 lg:pt-16">
         {/* Coluna editorial */}
         <div className={`lg:self-start ${formStep === 2 ? "hidden lg:block" : "block"}`}>
           <p className="text-[11px] font-[600] uppercase tracking-[0.18em] text-[#6B6E69]">
