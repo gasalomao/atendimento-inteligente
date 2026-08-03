@@ -169,9 +169,10 @@ const fieldError =
   "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
 const cardOptionBase =
-  "w-full text-left rounded-[10px] border border-[#D6D2CA] bg-white px-4 py-3 sm:py-3.5 text-[15px] sm:text-[16px] leading-[1.3] sm:leading-[1.4] text-[#2B2D29] min-h-[48px] sm:min-h-[52px] transition-[border-color,background-color] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] active:bg-[#F0EEE9] flex items-center gap-3";
+  "w-full text-left rounded-[12px] border border-[#D6D2CA] bg-white px-4 py-3.5 sm:py-3.5 text-[15.5px] sm:text-[16px] leading-[1.35] sm:leading-[1.4] text-[#2B2D29] min-h-[54px] sm:min-h-[52px] transition-[border-color,background-color,box-shadow,transform] duration-150 hover:border-[#9E9A92] hover:bg-[#FAF9F7] focus:outline-none focus-visible:border-[#207A50] focus-visible:ring-[3px] focus-visible:ring-[#207A50]/[0.14] active:bg-[#F0EEE9] active:scale-[0.995] flex items-start gap-3";
 const cardOptionActive =
-  "border-[#207A50] bg-[#EDF6F0] hover:border-[#207A50] hover:bg-[#EDF6F0] font-[600] text-[#191A18]";
+  "border-[#207A50] bg-[#EDF6F0] shadow-[0_0_0_1px_#207A50] hover:border-[#207A50] hover:bg-[#EDF6F0] font-[600] text-[#191A18]";
+
 
 
 const primaryBtn =
@@ -214,36 +215,48 @@ function OptionCard({
   active,
   multiple,
   onClick,
+  delay = 0,
   children,
 }: {
   active: boolean;
   multiple?: boolean;
   onClick: () => void;
+  delay?: number;
   children: React.ReactNode;
 }) {
+  const [popping, setPopping] = useState(false);
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => {
+        setPopping(true);
+        window.setTimeout(() => setPopping(false), 240);
+        onClick();
+      }}
       aria-pressed={active}
-      className={`${cardOptionBase} ${active ? cardOptionActive : ""}`}
+      style={{ animationDelay: `${delay}ms` }}
+      className={`${cardOptionBase} option-enter ${popping ? "option-pop" : ""} ${
+        active ? cardOptionActive : ""
+      }`}
     >
       <span
         aria-hidden
-        className={`grid h-[18px] w-[18px] shrink-0 place-items-center border transition-colors ${
-          multiple ? "rounded-[5px]" : "rounded-full"
-        } ${active ? "border-[#207A50]" : "border-[#C8C4BB]"}`}
+        className={`mt-[3px] grid h-[20px] w-[20px] shrink-0 place-items-center border transition-colors ${
+          multiple ? "rounded-[6px]" : "rounded-full"
+        } ${active ? "border-[#207A50] bg-white" : "border-[#C8C4BB]"}`}
       >
         <span
-          className={`h-[8px] w-[8px] transition-opacity ${multiple ? "rounded-[2px]" : "rounded-full"} ${
-            active ? "bg-[#207A50] opacity-100" : "opacity-0"
+          className={`transition-all duration-150 ${multiple ? "rounded-[3px]" : "rounded-full"} ${
+            active ? "h-[10px] w-[10px] bg-[#207A50] opacity-100" : "h-[8px] w-[8px] opacity-0"
           }`}
         />
       </span>
-      <span className="flex-1">{children}</span>
+      <span className="min-w-0 flex-1">{children}</span>
     </button>
   );
 }
+
 
 export function LeadForm({
   id = "formulario",
@@ -255,6 +268,8 @@ export function LeadForm({
   // índice 0..8 = perguntas; 9 = tela de contato
   const CONTACT_INDEX = QUESTIONS.length;
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+
   const [started, setStarted] = useState(false);
   const startedAtRef = useRef<number>(0);
   const questionStartRef = useRef<number>(0);
@@ -364,6 +379,7 @@ export function LeadForm({
     }
     recordTime(current.field);
     setErrors({});
+    setDirection("forward");
     setIndex((n) => n + 1);
     setTimeout(scrollToContainer, 30);
   }
@@ -373,9 +389,11 @@ export function LeadForm({
     setErrors({});
     setSubmitError(null);
     questionStartRef.current = Date.now();
+    setDirection("back");
     setIndex((n) => n - 1);
     setTimeout(scrollToContainer, 30);
   }
+
 
   function validateContact(): boolean {
     const e: Errors = {};
@@ -551,7 +569,12 @@ export function LeadForm({
           </div>
 
           {current ? (
-            <div className="space-y-4 sm:space-y-6">
+            <div
+              key={`q-${index}`}
+              className={`space-y-4 sm:space-y-6 ${
+                direction === "back" ? "step-enter-back" : "step-enter"
+              }`}
+            >
               <QuestionBlock
                 question={current}
                 value={answers[current.field]}
@@ -571,7 +594,8 @@ export function LeadForm({
               </div>
             </div>
           ) : (
-            <div className="space-y-3.5 sm:space-y-5">
+            <div key="contato" className="step-enter space-y-3.5 sm:space-y-5">
+
               <div>
                 <Label htmlFor="f-nome">Nome completo</Label>
                 <input
@@ -727,28 +751,30 @@ function QuestionBlock({
 }) {
   return (
     <fieldset id={`q-${question.field}`} className="border-0 p-0">
-      <legend className="block text-[16px] font-[600] leading-[1.3] text-[#191A18] sm:text-[17px] sm:leading-[1.35]">
+      <legend className="block text-[17.5px] font-[650] leading-[1.3] tracking-[-0.01em] text-[#191A18] sm:text-[18px] sm:leading-[1.35]">
         {question.question}
       </legend>
       {question.description ? (
-        <p className="mt-1 text-[12.5px] leading-[1.45] text-[#5F625E] sm:mt-1.5 sm:text-[13px] sm:leading-[1.5]">
+        <p className="mt-1.5 text-[13.5px] leading-[1.5] text-[#5F625E] sm:text-[13px]">
           {question.description}
         </p>
       ) : null}
       <div
-        className="mt-3 grid gap-2 sm:mt-4 sm:gap-2.5"
+        className="mt-3.5 grid gap-2.5 sm:mt-4"
         role={question.multiple ? "group" : "radiogroup"}
       >
-        {question.options.map((opt) => {
+        {question.options.map((opt, i) => {
           const active = Array.isArray(value) ? value.includes(opt.v) : value === opt.v;
           return (
             <OptionCard
               key={opt.v}
               active={active}
               multiple={question.multiple}
+              delay={40 + i * 45}
               onClick={() => onSelect(question, opt.v)}
             >
               {opt.t}
+
             </OptionCard>
           );
         })}

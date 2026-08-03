@@ -169,11 +169,81 @@
   }
 }
 
+/* ---- Animações do formulário (etapa por etapa) ---- */
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translate3d(14px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes step-in-back {
+  from {
+    opacity: 0;
+    transform: translate3d(-14px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes option-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes option-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(0.975);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.step-enter {
+  animation: step-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.step-enter-back {
+  animation: step-in-back 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.option-enter {
+  animation: option-in 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.option-pop {
+  animation: option-pop 0.22s ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+
+  .step-enter,
+  .step-enter-back,
+  .option-enter,
+  .option-pop {
+    animation: none !important;
+  }
 }
+
 
 
 
