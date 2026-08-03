@@ -164,7 +164,8 @@ const EMPTY_CONSENTS: Consents = {
 };
 
 const fieldBase =
-  "block w-full rounded-[10px] bg-white px-4 py-3 sm:py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[48px] sm:min-h-[52px]";
+  "block w-full rounded-[10px] bg-white px-4 py-2.5 sm:py-3.5 text-[16px] leading-6 text-[#191A18] placeholder:text-[#777A75] border border-[#CFCBC3] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[#A9A59D] focus:border-[#207A50] focus:ring-[3px] focus:ring-[#207A50]/[0.14] disabled:opacity-60 min-h-[46px] sm:min-h-[52px]";
+
 const fieldError =
   "border-[#B42318] bg-[#FEF8F7] focus:border-[#B42318] focus:ring-[#B42318]/20";
 
