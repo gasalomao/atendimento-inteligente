@@ -252,14 +252,16 @@
 
 /* Telas mobile baixas: comprime o formulário para caber sem rolagem */
 @media (max-width: 640px) and (max-height: 760px) {
+  .hero-shell {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
   .lead-form-shell {
     padding: 0.75rem;
   }
   .lead-form-shell h2 {
-    display: none;
-  }
-  .lead-form-shell h2 ~ * {
-    margin-top: 0;
+    font-size: 16px;
+    line-height: 1.2;
   }
   .lead-form-shell legend {
     font-size: 16px;
