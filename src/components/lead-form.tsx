@@ -601,7 +601,7 @@ export function LeadForm({
               </div>
             </div>
           ) : (
-            <div key="contato" className="step-enter space-y-3.5 sm:space-y-5">
+            <div key="contato" className="step-enter space-y-2 sm:space-y-5">
 
               <div>
                 <Label htmlFor="f-nome">Nome completo</Label>
