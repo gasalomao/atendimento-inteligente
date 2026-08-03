@@ -751,28 +751,35 @@ function QuestionBlock({
 }) {
   return (
     <fieldset id={`q-${question.field}`} className="border-0 p-0">
-      <legend className="block text-[16px] font-[600] leading-[1.3] text-[#191A18] sm:text-[17px] sm:leading-[1.35]">
+      <legend className="block text-[17.5px] font-[650] leading-[1.3] tracking-[-0.01em] text-[#191A18] sm:text-[18px] sm:leading-[1.35]">
         {question.question}
       </legend>
       {question.description ? (
-        <p className="mt-1 text-[12.5px] leading-[1.45] text-[#5F625E] sm:mt-1.5 sm:text-[13px] sm:leading-[1.5]">
+        <p className="mt-1.5 text-[13.5px] leading-[1.5] text-[#5F625E] sm:text-[13px]">
           {question.description}
         </p>
       ) : null}
+      {question.multiple ? (
+        <p className="mt-1.5 text-[12.5px] font-[600] uppercase tracking-[0.08em] text-[#8A8D87]">
+          Pode marcar mais de uma
+        </p>
+      ) : null}
       <div
-        className="mt-3 grid gap-2 sm:mt-4 sm:gap-2.5"
+        className="mt-3.5 grid gap-2.5 sm:mt-4"
         role={question.multiple ? "group" : "radiogroup"}
       >
-        {question.options.map((opt) => {
+        {question.options.map((opt, i) => {
           const active = Array.isArray(value) ? value.includes(opt.v) : value === opt.v;
           return (
             <OptionCard
               key={opt.v}
               active={active}
               multiple={question.multiple}
+              delay={40 + i * 45}
               onClick={() => onSelect(question, opt.v)}
             >
               {opt.t}
+
             </OptionCard>
           );
         })}
