@@ -556,7 +556,12 @@ export function LeadForm({
           </div>
 
           {current ? (
-            <div className="space-y-4 sm:space-y-6">
+            <div
+              key={`q-${index}`}
+              className={`space-y-4 sm:space-y-6 ${
+                direction === "back" ? "step-enter-back" : "step-enter"
+              }`}
+            >
               <QuestionBlock
                 question={current}
                 value={answers[current.field]}
@@ -576,7 +581,8 @@ export function LeadForm({
               </div>
             </div>
           ) : (
-            <div className="space-y-3.5 sm:space-y-5">
+            <div key="contato" className="step-enter space-y-3.5 sm:space-y-5">
+
               <div>
                 <Label htmlFor="f-nome">Nome completo</Label>
                 <input
