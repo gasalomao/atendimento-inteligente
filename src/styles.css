@@ -270,7 +270,18 @@
   }
   .lead-form-shell fieldset > div {
     gap: 0.375rem;
-    margin-top: 0.625rem;
+    margin-top: 0.5rem;
+  }
+  .lead-form-shell fieldset button {
+    min-height: 42px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 15px;
+    line-height: 1.25;
+    border-radius: 10px;
+  }
+  .lead-form-shell fieldset button > span:first-child {
+    margin-top: 1px;
   }
   .lead-form-shell input {
     min-height: 42px;
